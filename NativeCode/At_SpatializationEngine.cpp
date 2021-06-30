@@ -23,10 +23,9 @@ namespace Spatializer
 		for (int i = 0; i < m_pWfsSpatializerList.size(); i++) {
 			delete &m_pWfsSpatializerList[i];
 		}
-		m_pWfsSpatializerList.clear();
-
+		m_pWfsSpatializerList.clear(); 
 	}
-
+	 
 	void At_SpatializationEngine::WFS_destroyAllSpatializer() {
 #ifdef DEBUGLOG
 		std::cout << "Clear all Spatializer !\n";
@@ -34,16 +33,19 @@ namespace Spatializer
 		m_pWfsSpatializerList.clear();
 	}
 
-	void At_SpatializationEngine::CreateWfsSpatializer(int* id) {
+	void At_SpatializationEngine::CreateWfsSpatializer(int* id, bool is3D, bool isDirective) { //modif mathias 06-17-2021
 
-		At_WfsSpatializer *s = new At_WfsSpatializer();
+		At_WfsSpatializer *s = new At_WfsSpatializer();	
+		s->m_is3D = is3D; //modif mathias 06-17-2021
+		s->m_isDirective = isDirective; //modif mathias 06-17-2021
 		m_pWfsSpatializerList.push_back(*s);
 		*id = m_pWfsSpatializerList.size() - 1;
+
+
 
 #ifdef DEBUGLOG
 		std::cout << "adding spatializer with index "<< (m_pWfsSpatializerList.size() - 1) <<"\n";
 #endif
-
 
 	}
 
@@ -67,9 +69,9 @@ namespace Spatializer
 	}
 
 	// One for each Spatializer ---------------------------------------------------------------------------------------
-	void At_SpatializationEngine::WFS_setSourcePosition(int id, float* position) {
+	void At_SpatializationEngine::WFS_setSourcePosition(int id, float* position, float* rotation, float* forward) { //modif mathias 06-14-2021
 		if (id < m_pWfsSpatializerList.size()) {
-			m_pWfsSpatializerList[id].setSourcePosition(position);
+			m_pWfsSpatializerList[id].setSourcePosition(position, rotation, forward); //modif mathias 06-14-2021
 		}
 	}
 
@@ -89,11 +91,8 @@ namespace Spatializer
 		if (id < m_pWfsSpatializerList.size()) {
 			m_pWfsSpatializerList[id].setTimeReversal(timeReversal);
 		}
-	}
-
-
-
-
+	}	
+	
 	void At_SpatializationEngine::WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount) {
 		if (id < m_pWfsSpatializerList.size()) {
 			m_pWfsSpatializerList[id].process(inBuffer, outBuffer, bufferLength, inChannelCount, outChannelCount);

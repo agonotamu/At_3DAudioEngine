@@ -9,30 +9,45 @@
 namespace Spatializer
 {
 
-    void At_WfsSpatializer::applyWfsGainDelay(int virtualMicIndex, int bufferLength) {
+    void At_WfsSpatializer::applyWfsGainDelay(int virtualMicIdx, int bufferLength, bool isDirective) { //modif mathias 06-17-2021
 
 
-        float reverse_delay = m_maxDelay + m_minDelay - m_pWfsDelay[virtualMicIndex];
-        float delay = m_timeReversal * reverse_delay + (1 - m_timeReversal) * m_pWfsDelay[virtualMicIndex];
+        float reverse_delay = m_maxDelay + m_minDelay - m_pWfsDelay[virtualMicIdx];
+        float delay = m_timeReversal * reverse_delay + (1 - m_timeReversal) * m_pWfsDelay[virtualMicIdx];
 
         float delaySample = m_sampleRate * delay / 1000.0f;
 
         int delayBufferSize = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
+       
+        if (virtualMicIdx == 0) {
+
+            //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << m_ChannelWeight[virtualMicIdx][0][0] << " - Weight1 : " << m_ChannelWeight[virtualMicIdx][0][1] << " - Channel2 : " << (int)m_ChannelWeight[virtualMicIdx][1][0] << " - Weight2 : " << m_ChannelWeight[virtualMicIdx][1][1] << " \n";
+            //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << indexChannel1 << " - Weight1 : " << weight1 << " - Channel2 : " << indexChannel1 << " - Weight2 : " << weight1 << " \n";
+
+        }
+
         for (int i = 0; i < bufferLength; i++)
         {
             int idx = delayBufferSize - bufferLength - (int)delaySample + i;
 
             if (idx >= 0 && idx < delayBufferSize) {
-                
-                m_pTmpMonoBuffer_in[i] = m_pWfsVolume[virtualMicIndex] * m_pDelayBuffer[idx];
+                //modif mathias 06-17-2021
+                if (isDirective == true) {
+                    // on copie dans m_pTmpMonoBuffer_in la somme des deux canaux pondérés et retardés et atténué
+                    m_pTmpMonoBuffer_in[i] = m_pWfsVolume[virtualMicIdx] *
+                        (m_ChannelWeight[virtualMicIdx][0][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][0][0]][idx]
+                            + m_ChannelWeight[virtualMicIdx][1][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][1][0]][idx]);
+                }
+                else {
+                    m_pTmpMonoBuffer_in[i] = m_pWfsVolume[virtualMicIdx] * m_pDelayBuffer[idx];
+                }         
             }
-            else {
-                
-                m_pTmpMonoBuffer_in[i] = 0;
+            else {    
+                    m_pTmpMonoBuffer_in[i] = 0;
             }
         }
-
     }
+
     /*
     // 11/03/2021 - BUG CORRECTION- we do not use azimuth and elevation any more, but forward vector only.
     void At_WfsSpatializer::getWfsVolumeAndDelay(int virtualMicIndex, float virtualMicDistance, float* wfsVolume, float* wfsDelay) {
@@ -126,6 +141,11 @@ namespace Spatializer
         return elevation;
     }
 */
+    //modif mathias 06-17-2021
+    void At_WfsSpatializer::setIs3DIsDirective(bool is3D, bool isDirective) {
+        m_is3D = is3D;
+        m_isDirective = isDirective;
+    }
 
     void At_WfsSpatializer::forceMonoInput(float* inBuffer, int bufferLength, int inchannels) {
 
@@ -137,7 +157,98 @@ namespace Spatializer
 
     }
 
+    // modif Mathias 06-14-2021
+    void At_WfsSpatializer::updateMixedDirectiveChannel(int virtualMicCount, int inChannelCount) {
 
+        float sourcedirection[3];
+        float sourceforward[3];
+        float upVector[3];
+        float crossProduct[3];
+
+        int tmp;
+
+        float theta;
+        double indexChannels;
+
+        int indexChannel1, indexChannel2;
+        float weight1, weight2;
+
+        // TODO ---------------------------
+        // a partir de la position de la source, de son vectore forward (ou sa rotation/vector forward) et de la position des Virtual Mic
+        // donner l'index des deux canaux à sommer ainsi que la pondération....
+        // NB : modfier AT_SPAT_WFS_setSourcePosition(int id, float* position) pour avoir le vecteur forward
+
+            upVector[0] = 0;
+            upVector[1] = 1;
+            upVector[2] = 0;
+
+            sourceforward[0] = m_sourceForward[0];
+            sourceforward[1] = m_sourceForward[1];
+            sourceforward[2] = m_sourceForward[2];
+            float virtualSourceDistance = sqrtf(pow(sourceforward[0], 2) + pow(sourceforward[1], 2) + pow(sourceforward[2], 2));
+
+            for (int virtualMicIdx = 0; virtualMicIdx < virtualMicCount; virtualMicIdx++) {
+
+                sourcedirection[0] = m_sourcePosition[0] - At_WfsSpatializer::m_pVirtualMicPositions[virtualMicIdx][0];
+                sourcedirection[1] = m_sourcePosition[1] - At_WfsSpatializer::m_pVirtualMicPositions[virtualMicIdx][1];
+                sourcedirection[2] = m_sourcePosition[2] - At_WfsSpatializer::m_pVirtualMicPositions[virtualMicIdx][2];
+                float virtualMicDistance = sqrtf(pow(sourcedirection[0], 2) + pow(sourcedirection[1], 2) + pow(sourcedirection[2], 2));
+
+                float dotproduct = sourceforward[0] * sourcedirection[0] + sourceforward[1] * sourcedirection[1] + sourceforward[2] * sourcedirection[2];
+
+                crossProduct[0] = sourcedirection[1] * upVector[2] - sourcedirection[2] * upVector[1];
+                crossProduct[1] = -sourcedirection[0] * upVector[2] + sourcedirection[2] * upVector[0];
+                crossProduct[2] = sourcedirection[0] * upVector[1] - sourcedirection[1] * upVector[0];
+
+                float dotproductbis = sourceforward[0] * crossProduct[0] + sourceforward[1] * crossProduct[1] + sourceforward[2] * crossProduct[2];
+
+                if (dotproductbis <= 0) {
+                    theta = acosf((dotproduct) / (virtualSourceDistance * virtualMicDistance));
+                }
+                else {
+                    theta = -acosf(dotproduct / (virtualSourceDistance * virtualMicDistance)) + 2 * kPI;
+                }
+
+                indexChannels = theta / ((2 * kPI) / inChannelCount);
+                indexChannel1 = indexChannels;
+
+                if (indexChannel1 < 0) {
+                    indexChannel1 = 0;
+                }
+
+                indexChannel2 = indexChannel1 + 1;
+
+                tmp = (int)indexChannels;
+                if (tmp == indexChannels) {
+                    weight1 = 1;
+                }
+                else { 
+                    weight1 = 1 - (indexChannels - indexChannel1);
+                }
+
+                weight2 = 1 - weight1;
+
+                if (indexChannel2 >= inChannelCount) {
+                    indexChannel2 = 0;
+                }
+
+                m_ChannelWeight[virtualMicIdx][0][0] = indexChannel1;
+                m_ChannelWeight[virtualMicIdx][0][1] = weight1;
+                m_ChannelWeight[virtualMicIdx][1][0] = indexChannel2;
+                m_ChannelWeight[virtualMicIdx][1][1] = weight2;
+
+                if (virtualMicIdx == 0) {
+                    
+                    //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << m_ChannelWeight[virtualMicIdx][0][0] << " - Weight1 : " << m_ChannelWeight[virtualMicIdx][0][1] << " - Channel2 : " << (int)m_ChannelWeight[virtualMicIdx][1][0] << " - Weight2 : " << m_ChannelWeight[virtualMicIdx][1][1] << " \n";
+                    //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << indexChannel1 << " - Weight1 : " << weight1 << " - Channel2 : " << indexChannel1 << " - Weight2 : " << weight1 << " \n";
+                   
+                }
+            }
+    
+            
+        // --------------------------------
+
+    }
 
     void At_WfsSpatializer::updateWfsVolumeAndDelay() {
 
@@ -183,13 +294,13 @@ namespace Spatializer
 
 
 #ifdef DEBUGLOG
-
+            /*
             if (virtualMicIdx == 0)
             {
                 std::cout << "volume # " << virtualMicIdx << " : " << m_pWfsVolume[virtualMicIdx] << " \n";
                 std::cout << "delay # " << virtualMicIdx << " : " << m_pWfsDelay[virtualMicIdx] << " \n";
             }
-
+            */
 #endif
         }
 
@@ -213,9 +324,27 @@ namespace Spatializer
         }
 
     }
+    //modif mathias 06-17-2021
+    void At_WfsSpatializer::updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount) {
 
+        int arrayLength = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
+        int numLengthInDelBuf = arrayLength / bufferLength;
+
+        for (int InputChannel = 0; InputChannel < inChannelCount; InputChannel++) {
+            for (int count = 1; count < numLengthInDelBuf; count++) {
+                int startTo = (count - 1) * bufferLength;
+                int startFrom = count * bufferLength;
+                    for (int sample = 0; sample < bufferLength; sample++) {
+                        m_pDelayMultiChannelBuffer[InputChannel][startTo + sample] = m_pDelayMultiChannelBuffer[InputChannel][startFrom + sample];
+                    }
+            }
+            for (int sample = 0; sample < bufferLength; sample++) {
+                    m_pDelayMultiChannelBuffer[InputChannel][(numLengthInDelBuf - 1) * bufferLength + sample] = inBuffer[inChannelCount * sample + InputChannel];
+            }    
+        }
+    }
+    
     void At_WfsSpatializer::updateDelayBuffer(int bufferLength) {
-
 
         int arrayLength = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
         int numLengthInDelBuf = arrayLength / bufferLength;
@@ -241,12 +370,25 @@ namespace Spatializer
 
         
         //std::cout << "-------------------------------------- PROCESS -------------------------------- " << "\n";
+        float direction[3];
 
         m_virtualMicCount = outChannelCount;
 
-        forceMonoInput(inBuffer, bufferLength, inChannelCount);
-        
-        updateDelayBuffer(bufferLength);
+        updateWfsVolumeAndDelay();
+        updateMixMaxDelay();
+
+        // modif Mathias 06-14-2021
+        // si isDirectionnalSource == true
+        if (m_isDirective == true) {
+            updateMixedDirectiveChannel(m_virtualMicCount, inChannelCount); 
+            updateMultichannelDelayBuffer(inBuffer, bufferLength, inChannelCount);
+
+        }
+        // si isDirectionnalSource == false
+        else if (m_isDirective == false) {
+            forceMonoInput(inBuffer, bufferLength, inChannelCount);
+            updateDelayBuffer(bufferLength);
+        }     
 
         float* inBufferInit = inBuffer;
 
@@ -254,15 +396,10 @@ namespace Spatializer
         // FOR WFS PANNING - GAIN AND DELAY
         float wfsVolume, wfsDelay;
 
-        float direction[3];
-
-        updateWfsVolumeAndDelay();
-        updateMixMaxDelay();
-
         for (int virtualMicIndex = 0; virtualMicIndex < m_virtualMicCount; virtualMicIndex++) {
 
             // APPLY WFS PANNING - GAIN AND DELAY
-            applyWfsGainDelay(virtualMicIndex, bufferLength);
+            applyWfsGainDelay(virtualMicIndex, bufferLength, m_isDirective); //modif mathias 06-17-2021
             
 
             // m_virtualMicCount are supposed to be equal to outChannelCount !!!!! Why 2 differents variables !!!
@@ -271,13 +408,11 @@ namespace Spatializer
                 //outBuffer[sample * m_virtualMicCount + virtualMicIndex] = m_pTmpMonoBuffer_in[sample];
             }
         }
-       
-        
 
         return 0;
     }
 
-    int At_WfsSpatializer::setSourcePosition(float* position) {
+    int At_WfsSpatializer::setSourcePosition(float* position, float* rotation, float* forward) { //modif mathias 06-14-2021
 #ifdef DEBUGLOG
         //std::cout << "Set position Position !\n";
         //std::cout << "Set source position Position (x) : "<< position[0] << " " << position[1] << " " << position[2] << " " <<" \n";
@@ -285,6 +420,16 @@ namespace Spatializer
         m_sourcePosition[0] = position[0];
         m_sourcePosition[1] = position[1];
         m_sourcePosition[2] = position[2];
+        
+        //modif mathias 06-14-2021
+        m_sourceRotation[0] = rotation[0];
+        m_sourceRotation[1] = rotation[1];
+        m_sourceRotation[2] = rotation[2];
+        
+        //modif mathias 06-14-2021
+        m_sourceForward[0] = forward[0];
+        m_sourceForward[1] = forward[1];
+        m_sourceForward[2] = forward[2];
         return 0;
     }
 
@@ -346,9 +491,5 @@ namespace Spatializer
     }
     void At_WfsSpatializer::setSampleRate(float sampleRate) {
         m_sampleRate = sampleRate;
-    }
-
-
-   
-
+    }    
 }

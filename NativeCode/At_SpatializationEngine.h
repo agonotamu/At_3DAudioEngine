@@ -6,7 +6,7 @@
 #include <iostream>
 using namespace std;
 
-//#define DEBUGLOG
+#define DEBUGLOG
 
 namespace Spatializer
 {
@@ -26,7 +26,7 @@ namespace Spatializer
 		}
 
 		vector<At_WfsSpatializer> m_pWfsSpatializerList;	
-		void CreateWfsSpatializer(int* id);
+		void CreateWfsSpatializer(int* id, bool is3D, bool isDirective); //modif mathias 06-17-2021
 
 		// One for all Spatializer ----------------------------------------------------------------------------------------
 		void WFS_setSampleRate(float sampleRatte);
@@ -35,7 +35,7 @@ namespace Spatializer
 		void WFS_destroyAllSpatializer();
 
 		// One for each Spatializer ---------------------------------------------------------------------------------------
-		void WFS_setSourcePosition(int id, float* position);	
+		void WFS_setSourcePosition(int id, float* position, float* rotation, float* forward); //modif mathias 06-14-2021
 		void WFS_setAttenuation(int id, float attenuation);
 		void WFS_setSourceOmniBalance(int id, float omniBalance);
 		void WFS_setTimeReversal(int id, float timeReversal);
@@ -43,4 +43,3 @@ namespace Spatializer
 
 	};
 }
-

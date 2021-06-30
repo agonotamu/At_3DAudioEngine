@@ -10,14 +10,13 @@ using namespace Spatializer;
 
 
 //One for each Spatializer
-extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_CreateWfsSpatializer(int* id)
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_CreateWfsSpatializer(int* id, bool is3D, bool isDirective) //modif mathias 06-17-2021
 {
-
-    At_SpatializationEngine::getInstance().CreateWfsSpatializer(id);
+    At_SpatializationEngine::getInstance().CreateWfsSpatializer(id, is3D, isDirective); //modif mathias 06-17-2021
 }
-extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setSourcePosition(int id, float* position)
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setSourcePosition(int id, float* position, float* rotation, float* forward) //modif mathias 06-14-2021
 {
-    At_SpatializationEngine::getInstance().WFS_setSourcePosition(id, position);
+    At_SpatializationEngine::getInstance().WFS_setSourcePosition(id, position, rotation, forward); //modif mathias 06-14-2021
 }
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setSourceAttenuation(int id, float attenuation)
 {
