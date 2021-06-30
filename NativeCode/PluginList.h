@@ -1,0 +1,4 @@
+
+#if PLATFORM_OSX | PLATFORM_LINUX | PLATFORM_WIN
+DECLARE_EFFECT("Demo Teleport", Teleport)
+#endif
