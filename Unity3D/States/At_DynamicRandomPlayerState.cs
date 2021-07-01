@@ -22,6 +22,7 @@ public class At_DynamicRandomPlayerState
     public float gain = 0;
     // boolean telling if the player is 2D (no spatialization applyied) or 3D (spatialization applied)
     public bool is3D = false;
+    public bool isDirective = false; //modif mathias 06-17-2021
     public float omniBalance = 0f;
     public float attenuation = 2f;
     public int selectedAttenuation = 2;

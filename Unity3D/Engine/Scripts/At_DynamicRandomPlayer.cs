@@ -22,6 +22,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 {
 
     public bool is3D = false;
+    public bool isDirective = false; //modif mathias 06-17-2021
     public float gain;
     public string[] fileNames;
     public float attenuation;
@@ -46,6 +47,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             playerInstances[playerInstances.Count - 1].AddComponent<At_Player>();
             At_Player p = playerInstances[playerInstances.Count - 1].GetComponent<At_Player>();
             p.is3D = is3D;
+            p.isDirective = isDirective;//modif mathias 06-17-2021
             p.gain = gain;
             p.omniBalance = omniBalance;            
             p.attenuation = attenuation;            

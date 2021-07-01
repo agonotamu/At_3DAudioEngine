@@ -12,7 +12,7 @@ public class At_RuntimeParamControlGUI : MonoBehaviour
     public Text gainText;
     public Toggle isRemoteToogle;
 
-    RuntimePlayerState voicePlayerState;
+    RuntimePlayerState Test3DPlayerState;
 
     At_Player[] players;
 
@@ -38,9 +38,9 @@ public class At_RuntimeParamControlGUI : MonoBehaviour
             At_PlayerState ps = At_AudioEngineUtils.getPlayerStateWithName(p.name);
             playersState.Add(ps);
         }
-        At_PlayerState voice_state = At_AudioEngineUtils.getPlayerStateWithName("3DSourceVoice");
-        gainSlider.value = voice_state.gain;
-        osc.SetAddressHandler("/3DAudioEngine/Player/3DSourceVoice", OnReceiveGainslider);
+        At_PlayerState Test3D_state = At_AudioEngineUtils.getPlayerStateWithName("Test3D");
+        gainSlider.value = Test3D_state.gain;
+        osc.SetAddressHandler("/3DAudioEngine/Player/Test3D", OnReceiveGainslider);
     }
 
     // Update is called once per frame
@@ -61,11 +61,12 @@ public class At_RuntimeParamControlGUI : MonoBehaviour
 
     public void OnGainslider(string sourceName)
     {
-        gainText.text = "Gain \"Voice\" : " + gainSlider.value.ToString("0.0") + "dB";
-        
+        gainText.text = "Gain " + sourceName + " : " + gainSlider.value.ToString("0.0") + "dB";
+
         At_PlayerState ps = At_AudioEngineUtils.getPlayerStateWithName(sourceName);
         ps.gain = gainSlider.value;
-        At_AudioEngineUtils.SavePlayerStateWithName(sourceName);
+        //At_AudioEngineUtils.SavePlayerStateWithName(sourceName); modif mathias 30-06-2021
+        At_AudioEngineUtils.SaveAllState();
         GameObject.Find(sourceName).GetComponent<At_Player>().gain = gainSlider.value;
     }
 
@@ -89,7 +90,4 @@ public class At_RuntimeParamControlGUI : MonoBehaviour
     {
         randomPlayer.AddOneShotInstanceAndRandomPlay();
     }
-
-    
-
 }

@@ -172,7 +172,7 @@ public class At_MasterOutput : MonoBehaviour
         for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
         {
             int id = -1;
-            AT_SPAT_CreateWfsSpatializer(ref id);
+            AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerIndex].is3D, playerList[playerIndex].isDirective); //modif mathias 06-17-2021
             playerList[playerIndex].spatID = id;
             playerList[playerIndex].outputChannelCount = outputChannelCount;
             Debug.Log("spat created with id : " + id);
@@ -192,7 +192,7 @@ public class At_MasterOutput : MonoBehaviour
     {
         int id = playerList.Count - 1;
         playerList.Add(p);
-        AT_SPAT_CreateWfsSpatializer(ref id);
+        AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective); //modif mathias 06-17-2021
         playerList[playerList.Count - 1].spatID = id;
         playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
         Debug.Log("spat created with id : " + id);
@@ -347,7 +347,7 @@ public class At_MasterOutput : MonoBehaviour
      */
     #region DllImport
     [DllImport("AudioPlugin_AtSpatializer")]
-    private static extern void AT_SPAT_CreateWfsSpatializer(ref int id);
+    private static extern void AT_SPAT_CreateWfsSpatializer(ref int id, bool is3D, bool isDirective);
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_setListenerPosition(float[] position, float[] rotation);
     [DllImport("AudioPlugin_AtSpatializer")]

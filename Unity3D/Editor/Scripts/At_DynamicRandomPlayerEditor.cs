@@ -42,6 +42,7 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.fileNames = randomPlayerState.fileNames;
         randomPlayer.gain = randomPlayerState.gain;
         randomPlayer.is3D = randomPlayerState.is3D;
+        randomPlayer.isDirective = randomPlayerState.isDirective; //modif mathias 06-17-2021
         randomPlayer.attenuation = randomPlayerState.attenuation;
         randomPlayer.omniBalance = randomPlayerState.omniBalance;
 
@@ -71,7 +72,20 @@ public class At_DynamicRandomPlayerEditor : Editor
 
             }
         }
-        
+        //modif mathias 06-17-2021
+        if (randomPlayerState.is3D == true)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                bool b = GUILayout.Toggle(randomPlayerState.isDirective, "Directive");
+                if (b != randomPlayerState.isDirective)
+                {
+                    shouldSave = true;
+                    randomPlayerState.isDirective = b;
+
+                }
+            }
+        }
 
         using (new GUILayout.HorizontalScope())
         {
@@ -178,13 +192,15 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.fileNames = randomPlayerState.fileNames;
         randomPlayer.gain = randomPlayerState.gain;
         randomPlayer.is3D = randomPlayerState.is3D;
+        randomPlayer.isDirective = randomPlayerState.isDirective; //modif mathias 06-17-2021
         randomPlayer.attenuation = randomPlayerState.attenuation;
         randomPlayer.omniBalance = randomPlayerState.omniBalance;
         //randomPlayer.state = randomPlayerState; 
 
         if (shouldSave)
         {
-            At_AudioEngineUtils.SaveRandomPlayerStateWithName(randomPlayer.name);
+            //At_AudioEngineUtils.SaveRandomPlayerStateWithName(randomPlayer.name); modif mathias 30-06-202
+            At_AudioEngineUtils.SaveAllState();
         }
 
     }

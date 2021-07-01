@@ -354,9 +354,9 @@ public class At_MasterOutputEditor : Editor
         masterOutput.samplingRate = outputState.samplingRate;
         masterOutput.isStartingEngineOnAwake = outputState.isStartingEngineOnAwake;
         if (shouldSave == true)
-            At_AudioEngineUtils.SaveOutputState();
-
-        shouldSave = false;
+            // At_AudioEngineUtils.SaveOutputState(); modif mathias 30-06-202
+            At_AudioEngineUtils.SaveAllState();
+            shouldSave = false;
     }
 
     // utility method

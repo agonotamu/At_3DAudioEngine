@@ -22,7 +22,6 @@ using System.IO;
 [CustomEditor(typeof(At_Player))]
 public class At_PlayerEditor : Editor
 {
-
     // reference to the instance of the At_Player which has been added 
     At_Player player;
     // name of the GameObject the At_Player script is attached to (used as a unique identifier !!!) 
@@ -70,6 +69,7 @@ public class At_PlayerEditor : Editor
             player.fileName = playerState.fileName;
             player.gain = playerState.gain;
             player.is3D = playerState.is3D;
+            player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
             player.isLooping = playerState.isLooping;
             player.isPlayingOnAwake = playerState.isPlayingOnAwake;
             player.attenuation = playerState.attenuation;
@@ -105,7 +105,6 @@ public class At_PlayerEditor : Editor
     public void Start()
     {
         Debug.Log("Start Game");
-
     }
 
     // load ressources for the GUI (textures, etc.)
@@ -129,8 +128,6 @@ public class At_PlayerEditor : Editor
 
             // laod ressources if needed
             AffirmResources();
-
-
 
             string audioFilePath = "";
             using (new GUILayout.HorizontalScope())
@@ -190,6 +187,21 @@ public class At_PlayerEditor : Editor
 
                 }
             }
+            //modif mathias 06-17-2021
+            if (playerState.is3D == true)
+            {
+                using (new GUILayout.HorizontalScope())
+                {
+                    bool b = GUILayout.Toggle(playerState.isDirective, "Directive");
+                    if (b != playerState.isDirective)
+                    {
+                        shouldSave = true;
+                        playerState.isDirective = b;
+
+                    }
+                }
+            }
+
             HorizontalLine(Color.grey);
 
             using (new GUILayout.HorizontalScope())
@@ -319,16 +331,17 @@ public class At_PlayerEditor : Editor
 
             player.gain = playerState.gain;
             player.is3D = playerState.is3D;
+            player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
             player.isPlayingOnAwake = playerState.isPlayingOnAwake;
             player.fileName = playerState.fileName;
             player.isLooping = playerState.isLooping;
             player.attenuation = playerState.attenuation;
             player.omniBalance = playerState.omniBalance;
             player.timeReversal = playerState.timeReversal;
-
             // save the Player State to be always updated !!
-            if (shouldSave)
-                At_AudioEngineUtils.SavePlayerStateWithName(playerState.name);
+           if (shouldSave)
+                //At_AudioEngineUtils.SavePlayerStateWithName(playerState.name); modif mathias 30-06-202
+                At_AudioEngineUtils.SaveAllState();
         }
 
     }

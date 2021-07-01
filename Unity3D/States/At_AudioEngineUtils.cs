@@ -27,6 +27,7 @@ public class At_AudioEngineUtils : MonoBehaviour
     static bool readable = true;
 
     // Save the list of Player States contained in the At_3DAudioEngineState object    
+    /*
     public static void SaveOutputState()
     {
         Scene scene = SceneManager.GetActiveScene();
@@ -60,8 +61,28 @@ public class At_AudioEngineUtils : MonoBehaviour
             }
         }
     }
-
-
+    */
+    public static void SaveAllState()
+    {
+        string jsonAllState = JsonUtility.ToJson(audioEngineStates.outputState);
+        foreach (At_PlayerState state in audioEngineStates.playerStates)
+        {
+            string jsonPlayerState = JsonUtility.ToJson(state);
+            jsonAllState = jsonAllState + "\n" + jsonPlayerState;
+        }
+        foreach (At_DynamicRandomPlayerState state in audioEngineStates.randomPlayerStates)
+        {
+            string jsonRandomPlayerState = JsonUtility.ToJson(state);
+            jsonAllState = jsonAllState + "\n" + jsonRandomPlayerState;
+        }
+        Scene scene = SceneManager.GetActiveScene();
+        WriteToFile(scene.name + "_States.txt", jsonAllState);
+    }
+    //modif mathias 07-01-2021
+    static string readOutputState(string jsonAllStates)
+    {        
+        return (jsonAllStates.Split('\n'))[0];        
+    }
     public static At_OutputState getOutputState()
     {
         if (audioEngineStates == null)
@@ -72,8 +93,9 @@ public class At_AudioEngineUtils : MonoBehaviour
         {
             At_OutputState os = new At_OutputState();
             Scene scene = SceneManager.GetActiveScene();
-            string json = ReadFromFile(scene.name + "_OutputState.txt");
-            JsonUtility.FromJsonOverwrite(json, os);
+            string json = ReadFromFile(scene.name + "_States.txt");
+            string Firstline = readOutputState(json);
+            JsonUtility.FromJsonOverwrite(Firstline, os);
             if (os == null)
             {
                 audioEngineStates.outputState = new At_OutputState();
@@ -82,13 +104,26 @@ public class At_AudioEngineUtils : MonoBehaviour
             {
                 audioEngineStates.outputState = os;
             }
-
         }
 
         return audioEngineStates.outputState;
     }
 
-
+    //modif mathias 07-01-2021
+    static string readPlayerState(string jsonAllStates, string name)
+    {
+        string foundLine = null;
+        string[] lines = jsonAllStates.Split('\n');
+        foreach (string line in lines)
+        {
+            if (line.IndexOf(name) != -1)
+            {
+                foundLine = line;
+                break;
+            }
+        }
+        return foundLine;  
+    }
     public static At_PlayerState getPlayerStateWithName(string name)
     {
         if (audioEngineStates == null)
@@ -100,23 +135,37 @@ public class At_AudioEngineUtils : MonoBehaviour
 
         if (playerStateInList == null)
         {
-
             At_PlayerState ps = new At_PlayerState();
             Scene scene = SceneManager.GetActiveScene();
-            string json = ReadFromFile(scene.name + "_" + name + "_PlayerState.txt");
-            JsonUtility.FromJsonOverwrite(json, ps);
+            string json = ReadFromFile(scene.name + "_States.txt");
+            string line = readPlayerState(json, name);
+            JsonUtility.FromJsonOverwrite(line, ps);
+
             if (ps == null) ps = new At_PlayerState();
             ps.name = name;
             audioEngineStates.playerStates.Add(ps);
             json = JsonUtility.ToJson(ps);
-            WriteToFile(scene.name + "_" + ps.name + "_PlayerState.txt", json);
+            //WriteToFile(scene.name + "_AllStates.txt", json);
             playerStateInList = audioEngineStates.playerStates[audioEngineStates.playerStates.Count - 1];
         }
-
-
         return playerStateInList;     
     }
 
+    //modif mathias 07-01-2021
+    static string readRandomPlayerState(string jsonAllStates, string name)
+    {
+        string foundLine = null;
+        string[] lines = jsonAllStates.Split('\n');
+        foreach (string line in lines)
+        {
+            if (line.IndexOf(name) != -1)
+            {
+                foundLine = line;
+                break;
+            }
+        }
+        return foundLine;
+    }
     public static At_DynamicRandomPlayerState getRandomPlayerStateWithName(string name)
     {
         if (audioEngineStates == null)
@@ -128,22 +177,22 @@ public class At_AudioEngineUtils : MonoBehaviour
 
         if (randomPlayerStateInList == null)
         {
-
             At_DynamicRandomPlayerState rps = new At_DynamicRandomPlayerState();
             Scene scene = SceneManager.GetActiveScene();
-            string json = ReadFromFile(scene.name + "_" + name + "_RandomPlayerState.txt");
-            JsonUtility.FromJsonOverwrite(json, rps);
+            string json = ReadFromFile(scene.name + "_States.txt");
+            string line = readRandomPlayerState(json, name);
+            JsonUtility.FromJsonOverwrite(line, rps);
+
             if (rps == null) rps = new At_DynamicRandomPlayerState();
             rps.name = name;
             audioEngineStates.randomPlayerStates.Add(rps);
             json = JsonUtility.ToJson(rps);
-            WriteToFile(scene.name + "_" + rps.name + "_RandomPlayerState.txt", json);
+            //WriteToFile(scene.name + "_AllStates.txt", json);
             randomPlayerStateInList = audioEngineStates.randomPlayerStates[audioEngineStates.randomPlayerStates.Count - 1];
         }
 
         return randomPlayerStateInList;
     }
-
     private static void WriteToFile(string fileName, string json)
     {
 
@@ -153,6 +202,7 @@ public class At_AudioEngineUtils : MonoBehaviour
         using (StreamWriter writer = new StreamWriter(fileStream))
         {
             writer.Write(json);
+            AssetDatabase.Refresh();
         }
     }
     private static string ReadFromFile(string fileName)

@@ -58,6 +58,8 @@ public class At_Player : MonoBehaviour
     public float gain;
     /// boolean telling if the player is 2D (no spatialization applied) or 3D (spatialization applied)
     public bool is3D;
+    /// boolean telling if the player 3D is omnidirectional(mono) or directional (multicanal)
+    public bool isDirective; //modif mathias 06-17-2021
     /// boolean telling if the player start to play On Awake
     public bool isPlayingOnAwake;
     /// boolean telling if the player is looping the read audio file
@@ -94,7 +96,7 @@ public class At_Player : MonoBehaviour
     // Awake, Disable, Get/Start/Stop playing 
     //-----------------------------------------------------
     public bool GetIsPlaying() { return isPlaying; }
-    public void StartPlaying(){
+    public void StartPlaying() {
         isPlaying = true;
         // reset the read offset for each channel
         for (int i = 0; i < audioFileReadOffset.Length; i++) { audioFileReadOffset[i] = 0; }
@@ -105,10 +107,10 @@ public class At_Player : MonoBehaviour
         playerCount++;
         initAudioFile();
     }
-    public void initMeters(){
+    public void initMeters() {
         string path = Application.dataPath + "/StreamingAssets/" + fileName;
         //Parse the file with NAudio
-        if (fileName != null){
+        if (fileName != null) {
             aud = new AudioFileReader(path);
             // get the number of channel in audio file (should be =16)
             numChannelsInAudioFile = aud.WaveFormat.Channels;
@@ -129,14 +131,14 @@ public class At_Player : MonoBehaviour
     public void initAudioFile()
     {
         string path = Application.dataPath + "/StreamingAssets/" + fileName;
-        
+
         //Parse the file with NAudio
         if (fileName != null)
         {
             aud = new AudioFileReader(path);
             // get the number of channel in audio file (should be =16)
             numChannelsInAudioFile = aud.WaveFormat.Channels;
-            
+
             // init the read offset for each channel of the audio file
             audioFileReadOffset = new int[numChannelsInAudioFile];
 
@@ -155,7 +157,7 @@ public class At_Player : MonoBehaviour
                 StartPlaying();
             }
         }
-        
+
         // init the buffer used for playing
         // - the buffer this used to read a small buffer in the raw data of the audio file (size = size fo the asio output buffer)
         inputFileBuffer = new float[MAX_BUF_SIZE * MAX_OUTPUT_CHANNEL];
@@ -182,17 +184,35 @@ public class At_Player : MonoBehaviour
         {
             // Get the position of the GameObject
             float[] position = new float[3];
+            float[] rotation = new float[3]; //modif mathias 06-14-2021
+            float[] forward = new float[3]; //modif mathias 06-14-2021
+
             position[0] = gameObject.transform.position.x;
             position[1] = gameObject.transform.position.y;
             position[2] = gameObject.transform.position.z;
+
+            //modif mathias 06-14-2021
+            rotation[0] = gameObject.transform.rotation.x;
+            rotation[1] = gameObject.transform.rotation.y;
+            rotation[2] = gameObject.transform.rotation.z;
+
+            //modif mathias 06-14-2021
+            forward[0] = gameObject.transform.forward.x;
+            forward[1] = gameObject.transform.forward.y;
+            forward[2] = gameObject.transform.forward.z;
+
             /// set the source position in the spatializer (C++ dll call)
-            AT_SPAT_WFS_setSourcePosition(spatID, position);
+            AT_SPAT_WFS_setSourcePosition(spatID, position, rotation, forward); //modif mathias 06-14-2021
             /// set the type of distance attenuation in the spatialize : 0 = none, 1 = linera, 2 = square (C++ dll call)
             AT_SPAT_WFS_setSourceAttenuation(spatID, attenuation);
             /// set the directivity balance of the virtual microphone used for this source : balance [0,1] between omnidirectionnal and cardiod (C++ dll call)
             AT_SPAT_WFS_setSourceOmniBalance(spatID, omniBalance);
             /// set the balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS (C++ dll call)
             AT_SPAT_WFS_setTimeReversal(spatID, timeReversal);
+        }
+        else //
+        {
+            isDirective = false; //modif mathias 06-17-2021
         }
     }
 
@@ -353,7 +373,7 @@ public class At_Player : MonoBehaviour
      */
     #region DllImport    
     [DllImport("AudioPlugin_AtSpatializer")]
-    private static extern void AT_SPAT_WFS_setSourcePosition(int id, float[] position);
+    private static extern void AT_SPAT_WFS_setSourcePosition(int id, float[] position, float[] rotation, float[] forward); //modif mathias 06-14-2021
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_setSourceAttenuation(int id, float attenuation);
     [DllImport("AudioPlugin_AtSpatializer")]
