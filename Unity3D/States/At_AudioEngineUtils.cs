@@ -88,6 +88,8 @@ public class At_AudioEngineUtils : MonoBehaviour
         if (audioEngineStates == null)
         {
             audioEngineStates = new At_3DAudioEngineState();
+            Scene scene = SceneManager.GetActiveScene();
+            get3DAudioEngineState(scene);
         }
         if (audioEngineStates.outputState == null)
         {
@@ -124,11 +126,55 @@ public class At_AudioEngineUtils : MonoBehaviour
         }
         return foundLine;  
     }
+
+    //modif mathias 07-02-2021
+    static void get3DAudioEngineState(Scene scene)
+    {
+        string jsonAllStates = ReadFromFile(scene.name + "_States.txt");
+
+        // On récupère toutes les lignes 
+        string[] lines = jsonAllStates.Split('\n');
+
+        //At_3DAudioEngineState s = null;
+
+        // On boucle sur toutes les lignes
+        for (int i = 0; i < lines.Length; i++)
+        {
+            // si c'est la première c'est le master output, alors on l'init
+            if (i == 0)
+            {
+                getOutputState();
+            }
+            else
+            {
+                // On trouve le numéro assocé au champs "type"
+                int index = lines[i].IndexOf(":");
+                int type = int.Parse(lines[i].Substring(index + 1, 1));
+
+                if (type == 0)
+                {
+                    At_PlayerState ps = new At_PlayerState();
+                    JsonUtility.FromJsonOverwrite(lines[i], ps);
+                    audioEngineStates.playerStates.Add(ps);
+                }
+                else if (type == 1)
+                {
+                    At_DynamicRandomPlayerState rps = new At_DynamicRandomPlayerState();
+                    JsonUtility.FromJsonOverwrite(lines[i], rps);
+                    audioEngineStates.randomPlayerStates.Add(rps);
+                }
+            }
+        }
+
+    }
+
     public static At_PlayerState getPlayerStateWithName(string name)
     {
         if (audioEngineStates == null)
         {
             audioEngineStates = new At_3DAudioEngineState();
+            Scene scene = SceneManager.GetActiveScene();
+            get3DAudioEngineState(scene);
         }
 
         At_PlayerState playerStateInList = audioEngineStates.getPlayerState(name);
@@ -171,6 +217,8 @@ public class At_AudioEngineUtils : MonoBehaviour
         if (audioEngineStates == null)
         {
             audioEngineStates = new At_3DAudioEngineState();
+            Scene scene = SceneManager.GetActiveScene();
+            get3DAudioEngineState(scene);
         }
 
         At_DynamicRandomPlayerState randomPlayerStateInList = audioEngineStates.getRandomPlayerState(name);
@@ -202,8 +250,8 @@ public class At_AudioEngineUtils : MonoBehaviour
         using (StreamWriter writer = new StreamWriter(fileStream))
         {
             writer.Write(json);
-            AssetDatabase.Refresh();
         }
+        AssetDatabase.Refresh();
     }
     private static string ReadFromFile(string fileName)
     {

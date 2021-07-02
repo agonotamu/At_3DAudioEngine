@@ -34,9 +34,9 @@ public class At_DynamicRandomPlayerEditor : Editor
 
         randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithName(gameObjectName);
 
-        for (int i = 0; i < randomPlayer.fileNames.Length; i++)
+        for (int i = 0; i < randomPlayerState.fileNames.Length; i++)//modif mathias 07-02-2021
         {
-            fileNames.Add(randomPlayer.fileNames[i]);
+            fileNames.Add(randomPlayerState.fileNames[i]);//modif mathias 07-02-2021
         }
 
         randomPlayer.fileNames = randomPlayerState.fileNames;
@@ -45,7 +45,6 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.isDirective = randomPlayerState.isDirective; //modif mathias 06-17-2021
         randomPlayer.attenuation = randomPlayerState.attenuation;
         randomPlayer.omniBalance = randomPlayerState.omniBalance;
-
         //randomPlayer.state = randomPlayerState;
 
     }
@@ -85,6 +84,10 @@ public class At_DynamicRandomPlayerEditor : Editor
 
                 }
             }
+        }
+        else //modif mathias 07-01-2021
+        {
+            randomPlayerState.isDirective = false;
         }
 
         using (new GUILayout.HorizontalScope())

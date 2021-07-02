@@ -210,7 +210,7 @@ public class At_Player : MonoBehaviour
             /// set the balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS (C++ dll call)
             AT_SPAT_WFS_setTimeReversal(spatID, timeReversal);
         }
-        else //
+        else
         {
             isDirective = false; //modif mathias 06-17-2021
         }
@@ -320,6 +320,7 @@ public class At_Player : MonoBehaviour
                 // array according to the number of output channel of the master bus 
                 else
                 {
+                    isDirective = false; //modif mathias 07-01-2021
                     int indexInputChannel = 0;
                     for (int outputChannelIndex = 0; outputChannelIndex < outputChannelCount; outputChannelIndex++)
                     {

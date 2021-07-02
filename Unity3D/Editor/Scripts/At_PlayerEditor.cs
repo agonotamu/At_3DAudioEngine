@@ -201,6 +201,10 @@ public class At_PlayerEditor : Editor
                     }
                 }
             }
+            else //modif mathias 07-01-2021
+            {
+                playerState.isDirective = false;
+            }
 
             HorizontalLine(Color.grey);
 
