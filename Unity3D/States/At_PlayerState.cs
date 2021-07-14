@@ -14,8 +14,6 @@ using UnityEngine;
 
 public class At_PlayerState
 {
-    /// Type of the GameObject : if type = 0 --> Player; if type = 1; Random Player
-    public int type = 0; //modif mathias 07-02-2021
     /// Name of the GameObject the At_PLayer is attached to
     public string name = "";
     /// name of the audio file to play (Supposed to be in "Assets\Streaming Asset")
@@ -34,8 +32,11 @@ public class At_PlayerState
     public float omniBalance = 0f;
     /// balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS
     public float timeReversal = 0;
-    ///type of distance attenuation in the spatialize : 0 = none, 1 = linera, 2 = square
+    ///type of distance attenuation in the spatialize : 0 = none, 1 = linear, 2 = square
     public float attenuation = 2f;
     /// Selected attenuation type in the popup menu of the AT_Player Component GUI
     public int selectedAttenuation = 2;
+    /// minimum distance above which the sound produced by the source is attenuated
+    public float minDistance = 1;
+
 }

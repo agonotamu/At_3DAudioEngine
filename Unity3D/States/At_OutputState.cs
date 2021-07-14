@@ -29,6 +29,8 @@ public class At_OutputState
     public int samplingRate = 44100;
     /// boolean telling if the ASIO output should run when starting the application
     public bool isStartingEngineOnAwake = true;
+    /// size of the virtual mic rig in the the scne (1 unit = 1 meter)
+    public float virtualMicRigSize = 3;
 
     static public bool Compare(At_OutputState s1, At_OutputState s2)
     {        

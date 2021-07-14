@@ -39,11 +39,16 @@ public class At_PlayerEditor : Editor
     GUIStyle horizontalLine;
 
     string[] attenuationType = { "None", "Lin", "Log" };
+    
+    bool shouldSave = false;
+
 
 
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
+        SceneView.duringSceneGui += OnSceneGUI;
+
         // get a reference to the At_Player isntance (core engine of the player)
         player = (At_Player)target;
 
@@ -75,6 +80,7 @@ public class At_PlayerEditor : Editor
             player.attenuation = playerState.attenuation;
             player.omniBalance = playerState.omniBalance;
             player.timeReversal = playerState.timeReversal;
+            player.minDistance = playerState.minDistance;
             //player.state = playerState;
         }
 
@@ -85,6 +91,14 @@ public class At_PlayerEditor : Editor
 
     public void OnDisable()
     {
+
+        if (shouldSave)
+        {
+            //At_AudioEngineUtils.SavePlayerStateWithName(playerState.name); modif mathias 30-06-202
+            At_AudioEngineUtils.SaveAllState();
+            shouldSave = false;
+        }
+
         if (player == null && !Application.isPlaying)
         {
             // BUG - THIS IS CALL WHEN PLAY MODE IS ACTIVE !!!
@@ -117,6 +131,19 @@ public class At_PlayerEditor : Editor
         }
     }
 
+    void OnSceneGUI(SceneView sceneView)
+    {
+        const float numStepDrawCircle = 20;
+        float angle = 2 * Mathf.PI / numStepDrawCircle;
+
+        for (int i = 0; i < numStepDrawCircle; i++)
+        {            
+            Vector3 pos1 = player.gameObject.transform.position + new Vector3(playerState.minDistance * Mathf.Cos(i*angle), 0, playerState.minDistance * Mathf.Sin(i * angle)) ;
+            Vector3 pos2 = player.gameObject.transform.position + new Vector3(playerState.minDistance * Mathf.Cos((i+1) * angle), 0, playerState.minDistance * Mathf.Sin((i+1) * angle)); ;
+            Debug.DrawLine(pos1, pos2, Color.green);
+        }
+        
+    }
     //============================================================================================================================
     //                                                       DRAWING
     //============================================================================================================================
@@ -124,7 +151,7 @@ public class At_PlayerEditor : Editor
     {
         if (!player.isDynamicInstance)
         {
-            bool shouldSave = false;
+            //bool shouldSave = false;
 
             // laod ressources if needed
             AffirmResources();
@@ -201,10 +228,6 @@ public class At_PlayerEditor : Editor
                     }
                 }
             }
-            else //modif mathias 07-01-2021
-            {
-                playerState.isDirective = false;
-            }
 
             HorizontalLine(Color.grey);
 
@@ -226,8 +249,7 @@ public class At_PlayerEditor : Editor
             HorizontalLine(Color.grey);
 
             using (new GUILayout.VerticalScope())
-            {
-
+            {               
                 using (new GUILayout.HorizontalScope())
                 {
 
@@ -249,6 +271,31 @@ public class At_PlayerEditor : Editor
 
                 HorizontalLine(Color.grey);
             }
+
+            using (new GUILayout.VerticalScope())
+            {
+                using (new GUILayout.HorizontalScope())
+                {
+
+                    GUILayout.Label("Min Distance");
+
+                    float dist = GUILayout.HorizontalSlider(playerState.minDistance, 0f, 20);
+
+                    if (dist != playerState.minDistance)
+                    {
+                        playerState.minDistance = dist;
+                        shouldSave = true;
+                    }
+                    //GUILayout.Label("meter");
+
+                }
+
+
+                GUILayout.TextField((playerState.minDistance).ToString("0.00"));
+
+                HorizontalLine(Color.grey);
+            }
+            
 
             using (new GUILayout.VerticalScope())
             {
@@ -343,9 +390,7 @@ public class At_PlayerEditor : Editor
             player.omniBalance = playerState.omniBalance;
             player.timeReversal = playerState.timeReversal;
             // save the Player State to be always updated !!
-           if (shouldSave)
-                //At_AudioEngineUtils.SavePlayerStateWithName(playerState.name); modif mathias 30-06-202
-                At_AudioEngineUtils.SaveAllState();
+           
         }
 
     }

@@ -66,6 +66,8 @@ public class At_MasterOutput : MonoBehaviour
     public int samplingRate;
     /// boolean telling if the ASIO output should run when starting the application
     public bool isStartingEngineOnAwake;
+    /// size of the virtual mic rig in the scene (1 unit = 1 meter)
+    public float virtualMicRigSize;
     //-----------------------------------------------------------------
     // data used at runtime
     // ----------------------------------------------------------------    
@@ -270,8 +272,21 @@ public class At_MasterOutput : MonoBehaviour
             }
             AT_SPAT_WFS_setVirtualMicPosition(outputChannelCount, 1, positions, rotations, forwards);
         }
+        
+#if UNITY_EDITOR
+        At_VirtualMic[] vms = GameObject.FindObjectsOfType<At_VirtualMic>();
+        At_VirtualSpeaker[] vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
 
+
+        for (int micCount = 0; micCount < vms.Length; micCount++)
+        {
+            //Handles.DrawLine(mic.transform.position, spk.transform.position);
+            Debug.DrawLine(vms[micCount].gameObject.transform.position, vss[micCount].gameObject.transform.position);
+            Debug.DrawLine(vms[micCount].gameObject.transform.position, vms[(micCount + 1) % vms.Length].gameObject.transform.position, Color.green);
+        }
+#endif        
     }
+
 
     /**
     * @brief /!\ Callback method called by NAudio to provide the output buffer to the ASIO driver.
