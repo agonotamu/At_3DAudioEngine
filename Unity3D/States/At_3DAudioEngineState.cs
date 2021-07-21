@@ -70,7 +70,7 @@ public class At_3DAudioEngineState
         return false;
     }
 
-    /******************************************************************************************************
+  /******************************************************************************************************
   * 
   *                                  dynamic random players state
   * 
@@ -93,5 +93,20 @@ public class At_3DAudioEngineState
         return null;
     }
 
+    /******************************************************************************************************
+    * 
+    *                   Virtual Speakers and Virtual Microphone Configuration
+    * 
+    * ***************************************************************************************************/
+    public At_VirtualSpeakerState virtualSpeakerState = new At_VirtualSpeakerState();// = new At_OutputState();
+
+    public At_VirtualSpeakerState getVirtualSpeakerState()
+    {
+        return virtualSpeakerState;
+    }
+    public void setVirtualSpeakerState(At_VirtualSpeakerState state)
+    {
+        virtualSpeakerState = state;
+    }
 
 }

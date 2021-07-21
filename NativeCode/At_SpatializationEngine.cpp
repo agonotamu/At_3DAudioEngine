@@ -92,7 +92,13 @@ namespace Spatializer
 			m_pWfsSpatializerList[id].setTimeReversal(timeReversal);
 		}
 	}	
-	
+	void At_SpatializationEngine::WFS_setMinDistance(int id, float minDistance) {
+		if (id < m_pWfsSpatializerList.size()) {
+			m_pWfsSpatializerList[id].setMinDistance(minDistance);
+		}
+	}
+
+
 	void At_SpatializationEngine::WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount) {
 		if (id < m_pWfsSpatializerList.size()) {
 			m_pWfsSpatializerList[id].process(inBuffer, outBuffer, bufferLength, inChannelCount, outChannelCount);

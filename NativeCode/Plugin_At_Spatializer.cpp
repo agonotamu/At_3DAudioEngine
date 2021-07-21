@@ -30,6 +30,10 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setTimeReversal(int id, fl
 {
     At_SpatializationEngine::getInstance().WFS_setTimeReversal(id, timeReversal);
 }
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setMinDistance(int id, float minDistance)
+{
+    At_SpatializationEngine::getInstance().WFS_setMinDistance(id, minDistance);
+}
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount)
 {
     At_SpatializationEngine::getInstance().WFS_process(id, inBuffer, outBuffer, bufferLength, inChannelCount, outChannelCount);

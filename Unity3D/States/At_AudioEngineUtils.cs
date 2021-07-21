@@ -26,42 +26,122 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     static bool readable = true;
 
-    // Save the list of Player States contained in the At_3DAudioEngineState object    
-    /*
-    public static void SaveOutputState()
+    /***************************************************************************
+     * 
+     * SAVE AND LOAD VIRTUAL SPEAKERS AND VIRTUAL MICROPHONE CONFIGURATION
+     * 
+     **************************************************************************/
+
+
+    public static bool setSpeakerState(At_VirtualMic[] virtualMics, At_VirtualSpeaker[] virtualSpeakers)
     {
+        bool hasChanged = false;
+
+        if (audioEngineStates.virtualSpeakerState == null)
+            audioEngineStates.virtualSpeakerState = new At_VirtualSpeakerState();
+        if(audioEngineStates.virtualSpeakerState.virtualSpeakerId == null)
+            audioEngineStates.virtualSpeakerState.virtualSpeakerId = new int[virtualMics.Length];
+        if (audioEngineStates.virtualSpeakerState.virtualMicId == null)
+            audioEngineStates.virtualSpeakerState.virtualMicId = new int[virtualMics.Length];
+        if (audioEngineStates.virtualSpeakerState.virtualMicPositions == null)
+            audioEngineStates.virtualSpeakerState.virtualMicPositions = new float [3*virtualMics.Length];
+        if (audioEngineStates.virtualSpeakerState.virtualSpeakerPositions == null)
+            audioEngineStates.virtualSpeakerState.virtualSpeakerPositions = new float[3* virtualSpeakers.Length];
+
+        for (int i = 0; i< virtualMics.Length; i++)
+        {
+
+            if (audioEngineStates.virtualSpeakerState.virtualSpeakerPositions[3 * i] != virtualSpeakers[i].gameObject.transform.position.x)
+            {
+                audioEngineStates.virtualSpeakerState.virtualSpeakerPositions[3 * i] = virtualSpeakers[i].gameObject.transform.position.x;
+                audioEngineStates.virtualSpeakerState.virtualMicPositions[3 * i] = virtualMics[i].gameObject.transform.position.x;
+                hasChanged = true;
+            }
+            if (audioEngineStates.virtualSpeakerState.virtualSpeakerPositions[3 * i + 1] != virtualSpeakers[i].gameObject.transform.position.y)
+            {
+                audioEngineStates.virtualSpeakerState.virtualSpeakerPositions[3 * i + 1] = virtualSpeakers[i].gameObject.transform.position.y;
+                audioEngineStates.virtualSpeakerState.virtualMicPositions[3 * i + 1] = virtualMics[i].gameObject.transform.position.y;
+                hasChanged = true;
+            }
+            if (audioEngineStates.virtualSpeakerState.virtualSpeakerPositions[3 * i + 2] != virtualSpeakers[i].gameObject.transform.position.z)
+            {
+                audioEngineStates.virtualSpeakerState.virtualSpeakerPositions[3 * i + 2] = virtualSpeakers[i].gameObject.transform.position.z;
+                audioEngineStates.virtualSpeakerState.virtualMicPositions[3 * i + 2] = virtualMics[i].gameObject.transform.position.z;
+                hasChanged = true;
+            }
+            audioEngineStates.virtualSpeakerState.virtualSpeakerId[i] = virtualSpeakers[i].id;
+            audioEngineStates.virtualSpeakerState.virtualMicId[i] = virtualMics[i].id;
+
+        }
+
+        return hasChanged;
+    }
+    
+    public static void saveSpeakerState()
+    {
+        string json = JsonUtility.ToJson(audioEngineStates.virtualSpeakerState);
         Scene scene = SceneManager.GetActiveScene();
-        string json = JsonUtility.ToJson(audioEngineStates.outputState);
-        WriteToFile(scene.name+"_OutputState.txt", json);
+        WriteToFile(scene.name + "_VirtualSpeakerState.txt", json);
     }
 
-    public static void SavePlayerStateWithName(string name)
-    { 
+    public static At_VirtualSpeakerState getVirtualSpeakerState()
+    {
+        At_VirtualSpeakerState vss = null;
+        if (audioEngineStates == null)
+        {
+            audioEngineStates = new At_3DAudioEngineState();
+        }
+
+        if (audioEngineStates.virtualSpeakerState == null)
+        {
+            vss = new At_VirtualSpeakerState();
+            Scene scene = SceneManager.GetActiveScene();
+            string json = ReadFromFile(scene.name + "_VirtualSpeakerState.txt");
+            //string Firstline = readVirtualSpeakerState(json);            
+            JsonUtility.FromJsonOverwrite(json, vss);
+            return vss;
+            
+        }
+        else
+        {
+            return audioEngineStates.virtualSpeakerState;
+        }
+        
+    }
+
+    /***************************************************************************
+     * 
+     * CHANGE THE NAME OF A PLAYER IN A PLAYER STATE AND SAVE THE STATE
+     * 
+     **************************************************************************/
+    public static void changePlayerName(string previousName, string newName)
+    {
         foreach (At_PlayerState state in audioEngineStates.playerStates)
         {
-            if (name == state.name)
+            if (state.name == previousName)
             {
-                Scene scene = SceneManager.GetActiveScene();
-                string json = JsonUtility.ToJson(state);
-                WriteToFile(scene.name + "_" + state.name + "_PlayerState.txt", json);
+                state.name = newName;
             }
         }
+        SaveAllState();
     }
-
-    public static void SaveRandomPlayerStateWithName(string name)
+    public static void changeRandomPlayerName(string previousName, string newName)
     {
         foreach (At_DynamicRandomPlayerState state in audioEngineStates.randomPlayerStates)
         {
-            if (name == state.name)
+            if (state.name == previousName)
             {
-                Scene scene = SceneManager.GetActiveScene();
-                string json = JsonUtility.ToJson(state);
-                WriteToFile(scene.name + "_" + state.name + "_RandomPlayerState.txt", json);
-
+                state.name = newName;
             }
         }
+        SaveAllState();
     }
-    */
+
+    /***************************************************************************
+     * 
+     * SAVE OUTPUT AND PLAYER STATE IN A UNIQUE JSON FILE
+     * 
+     **************************************************************************/
     public static void SaveAllState()
     {
         string jsonAllState = JsonUtility.ToJson(audioEngineStates.outputState);
@@ -88,8 +168,6 @@ public class At_AudioEngineUtils : MonoBehaviour
         if (audioEngineStates == null)
         {
             audioEngineStates = new At_3DAudioEngineState();
-            Scene scene = SceneManager.GetActiveScene();
-            get3DAudioEngineState(scene);
         }
         if (audioEngineStates.outputState == null)
         {
@@ -126,55 +204,11 @@ public class At_AudioEngineUtils : MonoBehaviour
         }
         return foundLine;  
     }
-
-    //modif mathias 07-02-2021
-    static void get3DAudioEngineState(Scene scene)
-    {
-        string jsonAllStates = ReadFromFile(scene.name + "_States.txt");
-
-        // On récupère toutes les lignes 
-        string[] lines = jsonAllStates.Split('\n');
-
-        //At_3DAudioEngineState s = null;
-
-        // On boucle sur toutes les lignes
-        for (int i = 0; i < lines.Length; i++)
-        {
-            // si c'est la première c'est le master output, alors on l'init
-            if (i == 0)
-            {
-                getOutputState();
-            }
-            else
-            {
-                // On trouve le numéro assocé au champs "type"
-                int index = lines[i].IndexOf(":");
-                int type = int.Parse(lines[i].Substring(index + 1, 1));
-
-                if (type == 0)
-                {
-                    At_PlayerState ps = new At_PlayerState();
-                    JsonUtility.FromJsonOverwrite(lines[i], ps);
-                    audioEngineStates.playerStates.Add(ps);
-                }
-                else if (type == 1)
-                {
-                    At_DynamicRandomPlayerState rps = new At_DynamicRandomPlayerState();
-                    JsonUtility.FromJsonOverwrite(lines[i], rps);
-                    audioEngineStates.randomPlayerStates.Add(rps);
-                }
-            }
-        }
-
-    }
-
     public static At_PlayerState getPlayerStateWithName(string name)
     {
         if (audioEngineStates == null)
         {
             audioEngineStates = new At_3DAudioEngineState();
-            Scene scene = SceneManager.GetActiveScene();
-            get3DAudioEngineState(scene);
         }
 
         At_PlayerState playerStateInList = audioEngineStates.getPlayerState(name);
@@ -217,8 +251,6 @@ public class At_AudioEngineUtils : MonoBehaviour
         if (audioEngineStates == null)
         {
             audioEngineStates = new At_3DAudioEngineState();
-            Scene scene = SceneManager.GetActiveScene();
-            get3DAudioEngineState(scene);
         }
 
         At_DynamicRandomPlayerState randomPlayerStateInList = audioEngineStates.getRandomPlayerState(name);
@@ -250,8 +282,8 @@ public class At_AudioEngineUtils : MonoBehaviour
         using (StreamWriter writer = new StreamWriter(fileStream))
         {
             writer.Write(json);
+            AssetDatabase.Refresh();
         }
-        AssetDatabase.Refresh();
     }
     private static string ReadFromFile(string fileName)
     {
@@ -272,8 +304,9 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     private static string GetFilePath(string fileName)
     {
+        string externAssetsPath = PlayerPrefs.GetString("externAssetsPath_state");
         //return Application.persistentDataPath + "/" + fileName;
-        return Application.dataPath+ "/At_3DAudioEngine/States/"+ fileName;
+        return (externAssetsPath + "/"+fileName);//Application.dataPath+ "/At_3DAudioEngine/States/"+ fileName;
     }
 
 }

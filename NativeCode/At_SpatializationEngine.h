@@ -6,7 +6,7 @@
 #include <iostream>
 using namespace std;
 
-#define DEBUGLOG
+//#define DEBUGLOG
 
 namespace Spatializer
 {
@@ -39,6 +39,9 @@ namespace Spatializer
 		void WFS_setAttenuation(int id, float attenuation);
 		void WFS_setSourceOmniBalance(int id, float omniBalance);
 		void WFS_setTimeReversal(int id, float timeReversal);
+		void WFS_setMinDistance(int id, float minDistance);
+		
+
 		void WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount);
 
 	};

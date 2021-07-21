@@ -39,4 +39,8 @@ public class At_PlayerState
     /// minimum distance above which the sound produced by the source is attenuated
     public float minDistance = 1;
 
+    public int[] channelRouting;
+
+    public int numChannelInAudiofile;
+
 }

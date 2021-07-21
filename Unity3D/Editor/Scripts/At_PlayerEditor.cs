@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-
+using SFB;
 
 [CanEditMultipleObjects]
 [CustomEditor(typeof(At_Player))]
@@ -42,49 +42,80 @@ public class At_PlayerEditor : Editor
     
     bool shouldSave = false;
 
+    int currentOutputChannelCount;
 
+    string externAssetsPath;
 
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
-        SceneView.duringSceneGui += OnSceneGUI;
-
         // get a reference to the At_Player isntance (core engine of the player)
         player = (At_Player)target;
-
         if (!player.isDynamicInstance)
         {
-            horizontalLine = new GUIStyle();
-            horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
-            horizontalLine.margin = new RectOffset(0, 0, 4, 4);
-            horizontalLine.fixedHeight = 1;
+            externAssetsPath = GameObject.FindObjectOfType<At_ExternAssets>().externAssetsPath_audio;
 
-            // get the name of the GameObject 
-            gameObjectName = player.gameObject.name;
+            //SceneView.duringSceneGui += OnSceneGUI;
 
-            // Get the state of the player
-            // - If the GameObject name is found just return the instance in the At_PlayerState List
-            // - If the GameObject name is not found, it try loud read a json file for this name.
-            //      - if the file is found, it's read, an instance is created and added to the list and is returned
-            //      - if the file is not found, create a new "empty" At_PlayerState"
-            playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObjectName);
+           
+            player.externAssetsPath = externAssetsPath;
 
-            // set all the
+            if (!player.isDynamicInstance)
+            {
+                horizontalLine = new GUIStyle();
+                horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
+                horizontalLine.margin = new RectOffset(0, 0, 4, 4);
+                horizontalLine.fixedHeight = 1;
 
-            player.fileName = playerState.fileName;
-            player.gain = playerState.gain;
-            player.is3D = playerState.is3D;
-            player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
-            player.isLooping = playerState.isLooping;
-            player.isPlayingOnAwake = playerState.isPlayingOnAwake;
-            player.attenuation = playerState.attenuation;
-            player.omniBalance = playerState.omniBalance;
-            player.timeReversal = playerState.timeReversal;
-            player.minDistance = playerState.minDistance;
-            //player.state = playerState;
+                // get the name of the GameObject 
+                gameObjectName = player.gameObject.name;
+
+                // Get the state of the player
+                // - If the GameObject name is found just return the instance in the At_PlayerState List
+                // - If the GameObject name is not found, it try loud read a json file for this name.
+                //      - if the file is found, it's read, an instance is created and added to the list and is returned
+                //      - if the file is not found, create a new "empty" At_PlayerState"
+                playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObjectName);
+
+                // set all the
+
+                player.fileName = playerState.fileName;
+                player.gain = playerState.gain;
+                player.is3D = playerState.is3D;
+                player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
+                player.isLooping = playerState.isLooping;
+                player.isPlayingOnAwake = playerState.isPlayingOnAwake;
+                player.attenuation = playerState.attenuation;
+                player.omniBalance = playerState.omniBalance;
+                player.timeReversal = playerState.timeReversal;
+                player.minDistance = playerState.minDistance;
+                player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
+
+
+                At_OutputState outputState = At_AudioEngineUtils.getOutputState();
+                if (playerState.fileName != "")
+                {
+                    if (playerState.channelRouting == null || playerState.channelRouting.Length == 0)//|| player.outputChannelCount != outputState.outputChannelCount)
+                    {
+                        //currentOutputChannelCount = outputState.outputChannelCount;
+                        int numChannel = player.getNumChannelInAudioFile();
+                        playerState.channelRouting = new int[numChannel];
+                        for (int i = 0; i < numChannel; i++)
+                        {
+                            playerState.channelRouting[i] = i;
+                        }
+
+                    }
+                }
+
+
+                //|| currentOutputChannelCount != outputState.outputChannelCount
+                player.outputChannelCount = outputState.outputChannelCount;
+                player.channelRouting = playerState.channelRouting;
+                //player.state = playerState;
+            }
         }
-
-
+        
 
     }
 
@@ -95,8 +126,11 @@ public class At_PlayerEditor : Editor
         if (shouldSave)
         {
             //At_AudioEngineUtils.SavePlayerStateWithName(playerState.name); modif mathias 30-06-202
-            At_AudioEngineUtils.SaveAllState();
-            shouldSave = false;
+            if (!player.isDynamicInstance)
+            {
+                At_AudioEngineUtils.SaveAllState();
+                shouldSave = false;
+            }
         }
 
         if (player == null && !Application.isPlaying)
@@ -110,6 +144,8 @@ public class At_PlayerEditor : Editor
             // save the Player State to be always updated !!
             At_AudioEngineUtils.SavePlayerState();
             */
+            
+
         }
         //Debug.Log("save players state on disable");
         //At_AudioEngineUtils.SaveState("players");
@@ -119,6 +155,7 @@ public class At_PlayerEditor : Editor
     public void Start()
     {
         Debug.Log("Start Game");
+        
     }
 
     // load ressources for the GUI (textures, etc.)
@@ -130,27 +167,25 @@ public class At_PlayerEditor : Editor
             meterOff = EditorGUIUtility.Load("/At_3DAudioEngine/LevelMeterOff.png") as Texture;
         }
     }
+   
 
-    void OnSceneGUI(SceneView sceneView)
-    {
-        const float numStepDrawCircle = 20;
-        float angle = 2 * Mathf.PI / numStepDrawCircle;
-
-        for (int i = 0; i < numStepDrawCircle; i++)
-        {            
-            Vector3 pos1 = player.gameObject.transform.position + new Vector3(playerState.minDistance * Mathf.Cos(i*angle), 0, playerState.minDistance * Mathf.Sin(i * angle)) ;
-            Vector3 pos2 = player.gameObject.transform.position + new Vector3(playerState.minDistance * Mathf.Cos((i+1) * angle), 0, playerState.minDistance * Mathf.Sin((i+1) * angle)); ;
-            Debug.DrawLine(pos1, pos2, Color.green);
-        }
-        
-    }
     //============================================================================================================================
     //                                                       DRAWING
     //============================================================================================================================
     public override void OnInspectorGUI()
     {
+        
+
         if (!player.isDynamicInstance)
         {
+            if (player.name != playerState.name)
+            {
+                Debug.Log(playerState.name + " as changed to : " + player.name);
+                At_AudioEngineUtils.changePlayerName(playerState.name, player.name);
+
+
+            }
+
             //bool shouldSave = false;
 
             // laod ressources if needed
@@ -162,11 +197,20 @@ public class At_PlayerEditor : Editor
                 // Display and test if the Button "Open" has been clicked
                 if (GUILayout.Button("Open"))
                 {
+                    /*
                     string[] filter = { "Audio File", "wav,aiff, mp3, aac, mp4" };
                     // if it is, open the panel for choosing an audio file
                     audioFilePath = EditorUtility.OpenFilePanelWithFilters("Open Audio File", Application.dataPath + "/StreamingAssets/", filter);
 
                     string s = audioFilePath.Replace(Application.dataPath + "/StreamingAssets/", "");
+                    */
+                    var extensions = new[] {
+                        new ExtensionFilter("Sound Files", "mp3", "wav", "aiff", "aac", "mp4"),
+                    };
+                    string[] paths;
+                    paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsPath, extensions, false);
+                    string s = paths[0].Replace(externAssetsPath, "");
+
                     if (s != playerState.fileName)
                     {
                         // Get the filename without complete path
@@ -177,8 +221,17 @@ public class At_PlayerEditor : Editor
                     //At_AudioEngineUtils.getState().addFileNameToPlayerState(gameObjectName, playerState.fileName);
                     // update the Player Engine the file name
 
-
+                    player.fileName = playerState.fileName;
                     player.initMeters();
+                    playerState.numChannelInAudiofile = player.numChannelsInAudioFile;
+                    //currentOutputChannelCount = outputState.outputChannelCount;
+                    int numChannel = player.getNumChannelInAudioFile();
+                    playerState.channelRouting = new int[numChannel];
+                    for (int i = 0; i < numChannel; i++)
+                    {
+                        playerState.channelRouting[i] = i;
+                    }
+                    GUIUtility.ExitGUI();
                 }
             }
             using (new GUILayout.HorizontalScope())
@@ -215,6 +268,7 @@ public class At_PlayerEditor : Editor
                 }
             }
             //modif mathias 06-17-2021
+            /*
             if (playerState.is3D == true)
             {
                 using (new GUILayout.HorizontalScope())
@@ -228,75 +282,80 @@ public class At_PlayerEditor : Editor
                     }
                 }
             }
-
-            HorizontalLine(Color.grey);
-
-            using (new GUILayout.HorizontalScope())
+            */
+            if (playerState.is3D == true)
             {
-                GUILayout.Label("Distance attenuation");
-                int selected = EditorGUILayout.Popup(playerState.selectedAttenuation, attenuationType);
+                HorizontalLine(Color.grey);
 
-                if (selected != playerState.selectedAttenuation)
-                {
-                    shouldSave = true;
-                    if (selected == 0) playerState.attenuation = 0f;
-                    if (selected == 1) playerState.attenuation = 1f;
-                    if (selected == 2) playerState.attenuation = 2f;
-
-                    playerState.selectedAttenuation = selected;
-                }
-            }
-            HorizontalLine(Color.grey);
-
-            using (new GUILayout.VerticalScope())
-            {               
                 using (new GUILayout.HorizontalScope())
                 {
+                    GUILayout.Label("Distance attenuation");
+                    int selected = EditorGUILayout.Popup(playerState.selectedAttenuation, attenuationType);
 
-                    GUILayout.Label("Omni");
-
-                    float bal = GUILayout.HorizontalSlider(playerState.omniBalance, 1f, 0);
-
-                    if (bal != playerState.omniBalance)
+                    if (selected != playerState.selectedAttenuation)
                     {
-                        playerState.omniBalance = bal;
                         shouldSave = true;
+                        if (selected == 0) playerState.attenuation = 0f;
+                        if (selected == 1) playerState.attenuation = 1f;
+                        if (selected == 2) playerState.attenuation = 2f;
+
+                        playerState.selectedAttenuation = selected;
                     }
-                    GUILayout.Label("Cardioid");
-
                 }
-
-
-                GUILayout.TextField((playerState.omniBalance).ToString("0.00"));
-
                 HorizontalLine(Color.grey);
-            }
 
-            using (new GUILayout.VerticalScope())
-            {
-                using (new GUILayout.HorizontalScope())
+                using (new GUILayout.VerticalScope())
                 {
-
-                    GUILayout.Label("Min Distance");
-
-                    float dist = GUILayout.HorizontalSlider(playerState.minDistance, 0f, 20);
-
-                    if (dist != playerState.minDistance)
+                    using (new GUILayout.HorizontalScope())
                     {
-                        playerState.minDistance = dist;
-                        shouldSave = true;
-                    }
-                    //GUILayout.Label("meter");
 
+                        GUILayout.Label("Omni");
+
+                        float bal = GUILayout.HorizontalSlider(playerState.omniBalance, 1f, 0);
+
+                        if (bal != playerState.omniBalance)
+                        {
+                            playerState.omniBalance = bal;
+                            shouldSave = true;
+                        }
+                        GUILayout.Label("Cardioid");
+
+                    }
+
+
+                    GUILayout.TextField((playerState.omniBalance).ToString("0.00"));
+
+                    HorizontalLine(Color.grey);
                 }
 
+                using (new GUILayout.VerticalScope())
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
 
-                GUILayout.TextField((playerState.minDistance).ToString("0.00"));
+                        GUILayout.Label("Min Distance");
 
-                HorizontalLine(Color.grey);
+                        float dist = GUILayout.HorizontalSlider(playerState.minDistance, 0f, 20);
+
+                        if (dist != playerState.minDistance)
+                        {
+                            playerState.minDistance = dist;
+                            shouldSave = true;
+                            SceneView.RepaintAll();
+                        }
+                        //GUILayout.Label("meter");
+
+                    }
+
+
+                    GUILayout.TextField((playerState.minDistance).ToString("0.00"));
+
+                    HorizontalLine(Color.grey);
+                }
             }
+
             
-
+            /*
             using (new GUILayout.VerticalScope())
             {
 
@@ -321,7 +380,7 @@ public class At_PlayerEditor : Editor
 
                 HorizontalLine(Color.grey);
             }
-
+            */
 
             if (playerState.fileName != "")
             {
@@ -348,35 +407,52 @@ public class At_PlayerEditor : Editor
                     }
                 }
                 GUILayout.Label("");
+                HorizontalLine(Color.grey);
                 //GUILayout.Label("");
             }
 
 
-
-            //int numChannel = 4;
-            /*
-            string[] channelRouting = new string[player.outputChannelCount];
-            for (int i = 0; i < channelRouting.Length; i++)
+            if (playerState.is3D == false)
             {
-                channelRouting[i] = i.ToString();
-            }
-            int [] selectedChannelRouting = new int[player.numChannelsInAudioFile];
-            for (int i = 0; i < selectedChannelRouting.Length; i++)
-            {
-                selectedChannelRouting[i] = i;
-            }
-
-            for (int c = 0; c < player.numChannelsInAudioFile; c++)
-            {
-                using (new GUILayout.HorizontalScope())
+                using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("channel " + c);
-                    int select = EditorGUILayout.Popup(selectedChannelRouting[c], channelRouting);
-                }
+                    GUILayout.Label("File channel Routing ");
+                    if (playerState.channelRouting != null && playerState.channelRouting.Length == player.numChannelsInAudioFile)
+                    {
+                        string[] channelRouting = new string[player.outputChannelCount];
+                        for (int i = 0; i < channelRouting.Length; i++)
+                        {
+                            channelRouting[i] = i.ToString();
+                        }
+                        int[] selectedChannelRouting = new int[player.numChannelsInAudioFile];
+                        for (int i = 0; i < selectedChannelRouting.Length; i++)
+                        {
+                            selectedChannelRouting[i] = i;
+                        }
 
+                        for (int c = 0; c < player.numChannelsInAudioFile; c++)
+                        {
+                            using (new GUILayout.HorizontalScope())
+                            {
+                                GUILayout.Label("channel " + c);
+                                int select = EditorGUILayout.Popup(playerState.channelRouting[c], channelRouting);
+
+                                if (select != playerState.channelRouting[c])
+                                {
+                                    playerState.channelRouting[c] = select;
+                                    shouldSave = true;
+                                }
+
+                            }
+
+                        }
+                    }
+
+                }
             }
-            */
-            
+       
+
+
 
 
 
@@ -389,8 +465,11 @@ public class At_PlayerEditor : Editor
             player.attenuation = playerState.attenuation;
             player.omniBalance = playerState.omniBalance;
             player.timeReversal = playerState.timeReversal;
+            player.minDistance = playerState.minDistance;
+            player.channelRouting = playerState.channelRouting;
+            player.channelRouting = playerState.channelRouting;
             // save the Player State to be always updated !!
-           
+
         }
 
     }

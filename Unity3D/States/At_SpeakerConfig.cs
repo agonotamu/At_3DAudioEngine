@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
-public class At_SpeakerConfig : MonoBehaviour
+public class At_SpeakerConfig : Editor
 {
 
     static float virtualMicScale = 50f;
-    static float virtualSpeakerScale = 0.2f;
+    static float virtualSpeakerScale = 3f;
     static string virtualMicModel = "At_3DAudioEngine/Prefabs/simpleArrowModel";
     static string virtualSpeakerModel = "At_3DAudioEngine/Prefabs/simpleSpeakerModel";
 
@@ -48,6 +49,7 @@ public class At_SpeakerConfig : MonoBehaviour
 
                 Vector3 position = center + (virtualMic[spkCount].transform.position - center).normalized * speakerRigSize;
                 speakers[spkCount] = Instantiate(Resources.Load<GameObject>(virtualSpeakerModel), position, Quaternion.identity);
+                //UnityEditor.PrefabUtility.UnpackPrefabInstance(speakers[spkCount], PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 speakers[spkCount].transform.localScale = new Vector3(virtualSpeakerScale, virtualSpeakerScale, virtualSpeakerScale);
                 speakers[spkCount].transform.eulerAngles = new Vector3(virtualMic[spkCount].transform.eulerAngles.x, virtualMic[spkCount].transform.eulerAngles.y, virtualMic[spkCount].transform.eulerAngles.z);
                 speakers[spkCount].GetComponent<At_VirtualSpeaker>().id = virtualMic[spkCount].GetComponent<At_VirtualMic>().id;
@@ -61,6 +63,7 @@ public class At_SpeakerConfig : MonoBehaviour
             {
                 Vector3 position = virtualMic[spkCount].transform.position;
                 speakers[spkCount] = Instantiate(Resources.Load<GameObject>(virtualSpeakerModel), position, Quaternion.identity);
+                //UnityEditor.PrefabUtility.UnpackPrefabInstance(speakers[spkCount], PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 speakers[spkCount].transform.localScale = new Vector3(virtualSpeakerScale, virtualSpeakerScale, virtualSpeakerScale);
                 speakers[spkCount].transform.eulerAngles = new Vector3(virtualMic[spkCount].transform.eulerAngles.x, virtualMic[spkCount].transform.eulerAngles.y, virtualMic[spkCount].transform.eulerAngles.z);
                 speakers[spkCount].GetComponent<At_VirtualSpeaker>().id = virtualMic[spkCount].GetComponent<At_VirtualMic>().id;
@@ -86,6 +89,7 @@ public class At_SpeakerConfig : MonoBehaviour
             Vector3 position = new Vector3(-virtualMicRigSize / 2 + virtualMicTargetwidth / 2 + micCount * virtualMicTargetwidth, 0, 0);
 
             virtualMic[micCount] = Instantiate(Resources.Load<GameObject>(virtualMicModel), position + virtualMicParent.transform.parent.transform.position, Quaternion.identity);
+            //UnityEditor.PrefabUtility.UnpackPrefabInstance(virtualMic[micCount], PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             virtualMic[micCount].transform.localScale = new Vector3(virtualMicScale, virtualMicScale, virtualMicScale);
             virtualMic[micCount].GetComponent<At_VirtualMic>().id = micCount;
             virtualMic[micCount].transform.SetParent(virtualMicParent.transform);
@@ -108,13 +112,17 @@ public class At_SpeakerConfig : MonoBehaviour
         for (int micCount = 0; micCount < outputChannelCount; micCount++)
         {
             Vector3 position = new Vector3(virtualMicRigSize * Mathf.Sin(angle),0, virtualMicRigSize * Mathf.Cos(angle));
+            //virtualMic[micCount] = Instantiate(Resources.Load<GameObject>(virtualMicModel), position + virtualMicParent.transform.parent.transform.position, Quaternion.identity);
             virtualMic[micCount] = Instantiate(Resources.Load<GameObject>(virtualMicModel), position + virtualMicParent.transform.parent.transform.position, Quaternion.identity);
+            //UnityEditor.PrefabUtility.UnpackPrefabInstance(virtualMic[micCount], PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
             virtualMic[micCount].transform.localScale = new Vector3(virtualMicScale, virtualMicScale, virtualMicScale);
             virtualMic[micCount].transform.LookAt(virtualMicParent.transform.parent.transform.position);
             virtualMic[micCount].transform.Rotate(new Vector3(0, 180, 0));
             virtualMic[micCount].GetComponent<At_VirtualMic>().id = micCount;
             virtualMic[micCount].transform.SetParent(virtualMicParent.transform);
             angle += angularStep;
+            
+            
         }
         addSpeakers(true, ref speakers, virtualMic, speakerRigSize, virtualSpkParent);
     }

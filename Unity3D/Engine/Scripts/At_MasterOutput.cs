@@ -60,6 +60,8 @@ public class At_MasterOutput : MonoBehaviour
     public string audioDeviceName;
     /// number of channel used for the output bus
     public int outputChannelCount;
+    /// index of the selected speaker configuration in the popup menu of the At_MasterOutput Component GUI
+    public int outputConfigDimension;
     /// master gain for the output bus
     public float gain;
     /// audio sampling rate (44.1kHz by default)
@@ -68,6 +70,8 @@ public class At_MasterOutput : MonoBehaviour
     public bool isStartingEngineOnAwake;
     /// size of the virtual mic rig in the scene (1 unit = 1 meter)
     public float virtualMicRigSize;
+
+    At_OutputState outputState;
     //-----------------------------------------------------------------
     // data used at runtime
     // ----------------------------------------------------------------    
@@ -88,7 +92,9 @@ public class At_MasterOutput : MonoBehaviour
 
     // Start is called before the first frame update
     void Awake()
-    {        
+    {
+        outputState = At_AudioEngineUtils.getOutputState();
+
         // get the reference of the At_Mixer instance
         mixer = gameObject.GetComponent<At_Mixer>();
 
@@ -273,18 +279,6 @@ public class At_MasterOutput : MonoBehaviour
             AT_SPAT_WFS_setVirtualMicPosition(outputChannelCount, 1, positions, rotations, forwards);
         }
         
-#if UNITY_EDITOR
-        At_VirtualMic[] vms = GameObject.FindObjectsOfType<At_VirtualMic>();
-        At_VirtualSpeaker[] vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
-
-
-        for (int micCount = 0; micCount < vms.Length; micCount++)
-        {
-            //Handles.DrawLine(mic.transform.position, spk.transform.position);
-            Debug.DrawLine(vms[micCount].gameObject.transform.position, vss[micCount].gameObject.transform.position);
-            Debug.DrawLine(vms[micCount].gameObject.transform.position, vms[(micCount + 1) % vms.Length].gameObject.transform.position, Color.green);
-        }
-#endif        
     }
 
 
@@ -356,6 +350,96 @@ public class At_MasterOutput : MonoBehaviour
         }
 
     }
+
+
+    /**
+   * @brief Method used to display properties of the At_MasterOutput in the Scene View.    
+   */
+
+    private void OnDrawGizmos()
+    {
+        At_VirtualMic[] vms = GameObject.FindObjectsOfType<At_VirtualMic>();
+        At_VirtualSpeaker[] vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
+        
+        if (outputConfigDimension == 2)
+        {
+            outputState = At_AudioEngineUtils.getOutputState();
+
+            if (vms != null && vms.Length != 0 && vms != null && vms.Length != 0)
+            {
+
+                At_VirtualMic currentMic = null;
+                At_VirtualMic nextMic = null;
+                At_VirtualSpeaker currentSpk = null;
+                for (int micCount = 0; micCount < vms.Length; micCount++)
+                {
+                    currentMic = micWithIndex(vms, micCount);
+                    currentSpk = speakerWithIndex(vss, micCount);
+                    //currentMic.transform.position = currentMic.transform.position.normalized * virtualMicRigSize * 0.5f * currentSpk.transform.position.magnitude / currentSpk.distance ;                 
+                    //At_SpeakerConfig.updateVirtualMicPosition(currentMic, currentSpk, virtualMicRigSize, virtualMicWidth, speakerRigSize);
+                    if (currentSpk.gameObject.transform.position.magnitude != 0 && currentSpk.distance != 0)
+                    {
+                        float ratio = currentSpk.distance / currentSpk.gameObject.transform.position.magnitude;
+                        
+                        currentMic.transform.position = currentMic.transform.parent.transform.position + currentSpk.transform.position.normalized * outputState.virtualMicRigSize / ratio;
+
+                    }
+                }
+
+                for (int micCount = 0; micCount < vms.Length; micCount++)
+                {
+
+                    currentMic.gameObject.transform.LookAt(currentSpk.gameObject.transform);
+                    currentSpk.gameObject.transform.LookAt(currentMic.gameObject.transform);
+                    currentMic = micWithIndex(vms, micCount);
+                    nextMic = micWithIndex(vms, (micCount + 1) % vms.Length);
+                    currentSpk = speakerWithIndex(vss, micCount);
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawLine(currentMic.gameObject.transform.position, currentSpk.gameObject.transform.position);
+                    Gizmos.DrawLine(currentMic.gameObject.transform.position, nextMic.gameObject.transform.position);
+                }
+            }
+
+        }
+        /*
+        if (At_AudioEngineUtils.setSpeakerState(vms, vss))
+            At_AudioEngineUtils.saveSpeakerState();
+        
+        */
+        //At_AudioEngineUtils.saveVirtualSpeakerState(vms, vss);
+    }
+
+    At_VirtualSpeaker speakerWithIndex(At_VirtualSpeaker[] vss, int index)
+    {
+
+        if (vss != null)
+        {
+            foreach (At_VirtualSpeaker vs in vss)
+            {
+                if (vs.id == index)
+                {
+                    return vs;
+                }
+            }
+        }
+        return null;
+    }
+    At_VirtualMic micWithIndex(At_VirtualMic[] vms, int index)
+    {
+
+        if (vms != null)
+        {
+            foreach (At_VirtualMic vm in vms)
+            {
+                if (vm.id == index)
+                {
+                    return vm;
+                }
+            }
+        }
+        return null;
+    }
+
 
     /**
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)

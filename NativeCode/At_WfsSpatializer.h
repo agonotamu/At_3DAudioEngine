@@ -67,6 +67,7 @@ namespace Spatializer
         int setSourceAttenuation(float attenuation);
         int setSourceOmniBalance(float omniBalance);
         int setTimeReversal(float timeReversal);
+        int setMinDistance(float minDistance);
 
         int setVirtualMicPosition(int speakerCount, float virtualMicMinDistance, float* positions, float* rotations, float* forwards);
         int setListenerPosition(float* position, float* rotation);
@@ -108,6 +109,7 @@ namespace Spatializer
         float m_timeReversal;
         float m_minDelay;
         float m_maxDelay;
+        float m_minDistance;
 
         float m_ChannelWeight[MAX_OUTPUT_CHANNEL][2][2]; //modif mathias 06-14-2021
         // todo : utiliser plutôt une structure 

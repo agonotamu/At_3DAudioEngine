@@ -28,12 +28,26 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public float attenuation;
     public float omniBalance;   
     List<GameObject> playerInstances;
-        
+    // minimum distance above which the sound produced by the source is attenuated
+    public float minDistance;
+
+    public int[] channelRouting;
+
+    public string externAssetsPath;
+    // max number of channel in the audio files
+    public int maxChannelsInAudioFile = 0;
+    /// number of channel of the output bus
+    public int outputChannelCount;
+    public float spawnMinAngle;
+    public float spawnMaxAngle;
+    public float spawnDistance;
+
+    At_DynamicRandomPlayerState randomPlayerState;
     // Start is called before the first frame update
     void Start()
     {
         playerInstances = new List<GameObject>();
-        
+        externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
     }
 
 
@@ -42,18 +56,26 @@ public class At_DynamicRandomPlayer : MonoBehaviour
         if (fileNames != null && fileNames.Length != 0 && fileNames[0] !="")
         {
             playerInstances.Add(new GameObject(gameObject.name+"(Clone"+ playerInstances.Count+")"));            
-            playerInstances[playerInstances.Count - 1].transform.SetParent(transform);
-            playerInstances[playerInstances.Count - 1].transform.localPosition = Vector3.zero;
+            //playerInstances[playerInstances.Count - 1].transform.SetParent(transform);
+            float r_angle = Random.Range(spawnMinAngle, spawnMaxAngle) * Mathf.PI / 180f;
+            float r_distance = Random.Range(0, spawnDistance);
+            playerInstances[playerInstances.Count - 1].transform.position = transform.position + new Vector3(r_distance * Mathf.Cos(r_angle), 0, r_distance * Mathf.Sin(r_angle));
+            //playerInstances[playerInstances.Count - 1].transform.localPosition = Vector3.zero;
+            
+            
             playerInstances[playerInstances.Count - 1].AddComponent<At_Player>();
             At_Player p = playerInstances[playerInstances.Count - 1].GetComponent<At_Player>();
             p.is3D = is3D;
             p.isDirective = isDirective;//modif mathias 06-17-2021
             p.gain = gain;
+            p.isLooping = false;
             p.omniBalance = omniBalance;            
             p.attenuation = attenuation;            
             int r = Random.Range(0, fileNames.Length);
             p.fileName = fileNames[r];
             p.isDynamicInstance = true;
+            p.channelRouting = channelRouting;
+            p.minDistance = minDistance;
             p.initAudioFile();
             GameObject.FindObjectOfType<At_MasterOutput>().addPlayerToList(p);
             p.StartPlaying();
@@ -62,6 +84,45 @@ public class At_DynamicRandomPlayer : MonoBehaviour
         
     }
 
+    private void OnDrawGizmos()
+    {
+        //randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithName(gameObject.name);
 
+        if (is3D)
+        {
+            //float angleOffset = gameObject.transform.eulerAngles.y;
+            //Debug.Log(angleOffset);
+            const float numStepDrawCircle = 20;
+            /*
+            float startAngle = randomPlayerState.spawnMinAngle * Mathf.PI / 180f;
+            float endAngle = randomPlayerState.spawnMaxAngle * Mathf.PI / 180f;
+            */
+            float startAngle = spawnMinAngle * Mathf.PI / 180f;
+            float endAngle = spawnMaxAngle * Mathf.PI / 180f;
+
+            float angle = (endAngle - startAngle) / numStepDrawCircle;
+            Gizmos.color = Color.green;
+
+            
+            for (int i = 0; i < numStepDrawCircle; i++)
+            {
+                /*
+                Vector3 center = transform.position + new Vector3(randomPlayerState.spawnDistance * Mathf.Cos(startAngle + i * angle), 0, randomPlayerState.spawnDistance * Mathf.Sin(startAngle + i * angle));
+                Vector3 nextCenter = transform.position + new Vector3(randomPlayerState.spawnDistance * Mathf.Cos(startAngle + (i + 1) * angle), 0, randomPlayerState.spawnDistance * Mathf.Sin(startAngle + (i + 1) * angle));
+                */
+                Vector3 center = transform.position + new Vector3(spawnDistance * Mathf.Cos(startAngle + i * angle), 0, spawnDistance * Mathf.Sin(startAngle + i * angle));
+                Vector3 nextCenter = transform.position + new Vector3(spawnDistance * Mathf.Cos(startAngle + (i + 1) * angle), 0, spawnDistance * Mathf.Sin(startAngle + (i + 1) * angle));
+
+                if (i == 0) Gizmos.DrawLine(transform.position, center);
+                else if (i == numStepDrawCircle-1) Gizmos.DrawLine(nextCenter, transform.position);
+                //Debug.DrawLine(center, nextCenter, Color.green);
+
+                Gizmos.DrawLine(center, nextCenter);
+            }
+
+            SceneView.RepaintAll();
+
+        }
+    }
 
 }

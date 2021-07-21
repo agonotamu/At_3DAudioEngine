@@ -276,11 +276,12 @@ namespace Spatializer
             m_pWfsDelay[virtualMicIdx] = (virtualMicDistance / 340.0f) * 1000.0f; // time in milliseconds;
 
             float rolloff;
-            if (virtualMicDistance < At_WfsSpatializer::m_virtualMicMinDistance || m_attenuation == 0) {
+            //if (virtualMicDistance < At_WfsSpatializer::m_virtualMicMinDistance || m_attenuation == 0) {
+            if (virtualMicDistance < m_minDistance || m_attenuation == 0) {
                 rolloff = 1;
             }
             else {
-                rolloff = 1.0f / pow((virtualMicDistance - At_WfsSpatializer::m_virtualMicMinDistance) + 1, m_attenuation);
+                rolloff = 1.0f / pow((virtualMicDistance - m_minDistance) + 1, m_attenuation);
             }
 
             float forwardProj = normalizedDirection[0] * m_pVirtualMicForwards[virtualMicIdx][0]
@@ -448,6 +449,12 @@ namespace Spatializer
         m_timeReversal = timeReversal;
         return 0;
     }
+    int At_WfsSpatializer::setMinDistance(float minDistance) {
+
+        m_minDistance = minDistance;
+        return 0;
+    }
+
 
     int At_WfsSpatializer::setVirtualMicPosition(int virtualMicCount, float virtualMicMinDistance, float* positions, float* rotations, float* forwards) {
         

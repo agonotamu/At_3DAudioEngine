@@ -15,8 +15,6 @@ using UnityEngine;
 //[System.Serializable]
 public class At_DynamicRandomPlayerState
 {
-    /// Type of the GameObject : if type = 0 --> Player; if type = 1; Random Player
-    public int type = 1; //modif mathias 07-02-2021
     // Name of the GameObject the At_PLayer is attached to
     public string name = "";
     // name of the audio file to play (Supposed to be in "Assets\Streaming Asset")
@@ -28,5 +26,17 @@ public class At_DynamicRandomPlayerState
     public float omniBalance = 0f;
     public float attenuation = 2f;
     public int selectedAttenuation = 2;
+    
+    public float minDistance = 1;
+
+    public int[] channelRouting;
+
+    public int maxChannelInAudiofile;
+
+    public int numChannelInAudiofile;
+
+    public float spawnMinAngle = 0;
+    public float spawnMaxAngle = 0;
+    public float spawnDistance = 1;
 
 }
