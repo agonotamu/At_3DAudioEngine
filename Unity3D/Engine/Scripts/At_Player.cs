@@ -324,7 +324,10 @@ public class At_Player : MonoBehaviour
                             else
                             {
                                 isPlaying = false;
-                                if (isDynamicInstance) mustBeDestroyed = true;
+                                if (isDynamicInstance)
+                                {
+                                    mustBeDestroyed = true;                                    
+                                }
                             }
                             break;
                         }
