@@ -113,6 +113,7 @@ public class At_Player : MonoBehaviour
     public void StopPlaying() { isPlaying = false; }
     public void OnDisable() { playerCount--; }
     public void Awake() {
+        
         playerCount++;
         //if(!isDynamicInstance)
             //playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObject.name);
