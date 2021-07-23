@@ -15,6 +15,8 @@ using UnityEngine;
 //[System.Serializable]
 public class At_DynamicRandomPlayerState
 {
+    // integer given the type of the player 
+    public int type = 1;
     // Name of the GameObject the At_PLayer is attached to
     public string name = "";
     // name of the audio file to play (Supposed to be in "Assets\Streaming Asset")

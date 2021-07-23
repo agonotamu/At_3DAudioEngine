@@ -26,12 +26,18 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     static bool readable = true;
 
+
     /***************************************************************************
      * 
      * SAVE AND LOAD VIRTUAL SPEAKERS AND VIRTUAL MICROPHONE CONFIGURATION
      * 
      **************************************************************************/
 
+    static At_AudioEngineUtils()
+    {
+        Debug.Log("opening !");
+        LoadAll();
+    }
 
     public static bool setSpeakerState(At_VirtualMic[] virtualMics, At_VirtualSpeaker[] virtualSpeakers)
     {
@@ -137,6 +143,54 @@ public class At_AudioEngineUtils : MonoBehaviour
         SaveAllState();
     }
 
+
+    /***************************************************************************
+     * 
+     * LOAD ALL WHEN THE FIRST "READ" action is done
+     * 
+     **************************************************************************/
+
+    static void LoadAll()
+    {
+        audioEngineStates = new At_3DAudioEngineState();
+        
+        Scene scene = SceneManager.GetActiveScene();
+        string json = ReadFromFile(scene.name + "_States.txt");
+        string[] lines = json.Split('\n');
+        for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+        {
+            // OutputState
+            if (lineIndex == 0)
+            {
+                At_OutputState os = new At_OutputState();
+                JsonUtility.FromJsonOverwrite(lines[lineIndex], os);
+                audioEngineStates.outputState = os;
+            }
+            // At_Player or At_DynamicRandomPlayer
+            else
+            {   // this is an At_player
+                if (lines[lineIndex].Contains("\"type\":0"))
+                {
+                    At_PlayerState ps = new At_PlayerState();
+                    JsonUtility.FromJsonOverwrite(lines[lineIndex], ps);
+                    audioEngineStates.playerStates.Add(ps);
+                }
+                // this is an At_DynamicRandomPlayer
+                else if (lines[lineIndex].Contains("\"type\":1"))
+                {
+                    At_DynamicRandomPlayerState drps = new At_DynamicRandomPlayerState();
+                    JsonUtility.FromJsonOverwrite(lines[lineIndex], drps);
+                    audioEngineStates.randomPlayerStates.Add(drps);
+                }
+
+            }
+
+
+        }
+    }
+
+   
+
     /***************************************************************************
      * 
      * SAVE OUTPUT AND PLAYER STATE IN A UNIQUE JSON FILE
@@ -165,6 +219,7 @@ public class At_AudioEngineUtils : MonoBehaviour
     }
     public static At_OutputState getOutputState()
     {
+
         if (audioEngineStates == null)
         {
             audioEngineStates = new At_3DAudioEngineState();

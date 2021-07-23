@@ -41,15 +41,28 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public float spawnMinAngle;
     public float spawnMaxAngle;
     public float spawnDistance;
-
+    float time = 0;
     At_DynamicRandomPlayerState randomPlayerState;
+    
+
     // Start is called before the first frame update
     void Start()
     {
         playerInstances = new List<GameObject>();
         externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
     }
-
+    private void Update()
+    {
+        // Auto-generate (Debug)
+        
+        time += Time.deltaTime;
+        if (time > 0.5f)
+        {
+            AddOneShotInstanceAndRandomPlay();
+            time = 0;
+        }
+        
+    }
 
     public void AddOneShotInstanceAndRandomPlay()
     {
@@ -86,19 +99,17 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        //randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithName(gameObject.name);
+        randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithName(gameObject.name);
 
         if (is3D)
         {
             //float angleOffset = gameObject.transform.eulerAngles.y;
             //Debug.Log(angleOffset);
             const float numStepDrawCircle = 20;
-            /*
+           
             float startAngle = randomPlayerState.spawnMinAngle * Mathf.PI / 180f;
             float endAngle = randomPlayerState.spawnMaxAngle * Mathf.PI / 180f;
-            */
-            float startAngle = spawnMinAngle * Mathf.PI / 180f;
-            float endAngle = spawnMaxAngle * Mathf.PI / 180f;
+            
 
             float angle = (endAngle - startAngle) / numStepDrawCircle;
             Gizmos.color = Color.green;
@@ -106,13 +117,11 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             
             for (int i = 0; i < numStepDrawCircle; i++)
             {
-                /*
+               
                 Vector3 center = transform.position + new Vector3(randomPlayerState.spawnDistance * Mathf.Cos(startAngle + i * angle), 0, randomPlayerState.spawnDistance * Mathf.Sin(startAngle + i * angle));
                 Vector3 nextCenter = transform.position + new Vector3(randomPlayerState.spawnDistance * Mathf.Cos(startAngle + (i + 1) * angle), 0, randomPlayerState.spawnDistance * Mathf.Sin(startAngle + (i + 1) * angle));
-                */
-                Vector3 center = transform.position + new Vector3(spawnDistance * Mathf.Cos(startAngle + i * angle), 0, spawnDistance * Mathf.Sin(startAngle + i * angle));
-                Vector3 nextCenter = transform.position + new Vector3(spawnDistance * Mathf.Cos(startAngle + (i + 1) * angle), 0, spawnDistance * Mathf.Sin(startAngle + (i + 1) * angle));
-
+                
+                
                 if (i == 0) Gizmos.DrawLine(transform.position, center);
                 else if (i == numStepDrawCircle-1) Gizmos.DrawLine(nextCenter, transform.position);
                 //Debug.DrawLine(center, nextCenter, Color.green);

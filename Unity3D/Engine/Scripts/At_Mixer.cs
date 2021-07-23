@@ -50,20 +50,36 @@ public class At_Mixer : MonoBehaviour
     * @param[in] channelIndex : index of the channel to fill
     * 
     */
-    public void fillMasterChannelInput(ref float[] mixBuffer, int bufferSize, int channelIndex)
+    public void fillMasterChannelInput(ref float[] mixBuffer, int bufferSize, int channelIndex, List<int> spatIDToDestroy)
     {
         if (playerList != null)
         {            
             for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
             {
-                // ask the At_Player object to copy the output of the player in the "tmpMonoBuffer" array
-                playerList[playerIndex].fillMixerChannelInputWithPlayerOutput(ref tmpMonoBuffer, bufferSize, channelIndex);
-                // add the samples of the "tmpMonoBuffer" array to the samples of the "mixBuffer" array provided by the At_MasterOutput object
-                Add(ref mixBuffer, tmpMonoBuffer, bufferSize);
-                // clear the "tmpMonoBuffer" array
-                System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
+                if (!playerIsDestroyedOnNextFrame(playerList[playerIndex], spatIDToDestroy))
+                {
+                    // ask the At_Player object to copy the output of the player in the "tmpMonoBuffer" array
+                    playerList[playerIndex].fillMixerChannelInputWithPlayerOutput(ref tmpMonoBuffer, bufferSize, channelIndex);
+                    // add the samples of the "tmpMonoBuffer" array to the samples of the "mixBuffer" array provided by the At_MasterOutput object
+                    Add(ref mixBuffer, tmpMonoBuffer, bufferSize);
+                    // clear the "tmpMonoBuffer" array
+                    System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
+                }
+                
             }            
         }
+    }
+
+    bool playerIsDestroyedOnNextFrame(At_Player player, List<int> spatIDToDestroy)
+    {
+        for (int i = 0; i < spatIDToDestroy.Count; i++)
+        {
+            if (player.spatID == spatIDToDestroy[i])
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     // add the samples of "buffer" array to the samples of "addBuffer" array

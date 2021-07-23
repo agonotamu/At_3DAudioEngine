@@ -99,8 +99,10 @@ public class At_Player : MonoBehaviour
 
     public string externAssetsPath;
 
-    bool mustBeDestroyed = false;
-
+    bool mustBeDestroyedNow = false;
+    bool mustBeDestroyedSafely = false;
+    bool mustBeDestroyedOnNextFrame = false;
+    public At_MasterOutput masterOutput;
     //-----------------------------------------------------     
     // Awake, Disable, Get/Start/Stop playing 
     //-----------------------------------------------------
@@ -260,13 +262,37 @@ public class At_Player : MonoBehaviour
         {
             isDirective = false; //modif mathias 06-17-2021
         }
-        if (mustBeDestroyed)
+        if (mustBeDestroyedNow)
         {
-            aud.Dispose();
-            aud = null;
-            Destroy(gameObject);
+            masterOutput.destroyPlayerNow(this);
+            mustBeDestroyedNow = false;
         }
+        if (mustBeDestroyedSafely)
+        {
+            masterOutput.destroyPlayerSafely(this);
+            mustBeDestroyedSafely = false;
+        }
+        if (mustBeDestroyedOnNextFrame)
+        {
+            masterOutput.destroyPlayerNow(this);
+            mustBeDestroyedOnNextFrame = false;
+        }
+       
+
     }
+
+    public void DestroyOnNextFrame()
+    {
+        mustBeDestroyedOnNextFrame = true;
+    }
+
+    public void DestroyNow()
+    {
+        aud.Dispose();
+        aud = null;
+        Destroy(gameObject);
+    }
+
 
     /**
      * 
@@ -283,7 +309,7 @@ public class At_Player : MonoBehaviour
     {
         if (isPlaying)
         {
-            if (rawAudioData != null)
+            if (rawAudioData != null && aud != null)
             {
                 // loop on each channel of the audio file
                 for (int channelIndex = 0; channelIndex < numChannelsInAudioFile; channelIndex++)
@@ -327,7 +353,12 @@ public class At_Player : MonoBehaviour
                                 isPlaying = false;
                                 if (isDynamicInstance)
                                 {
-                                    mustBeDestroyed = true;                                    
+                                    Debug.Log("player with spatID=" + spatID + " reach end");
+                                    //mustBeDestroyedNow = true;
+                                    mustBeDestroyedSafely = true;
+                                    //masterOutput.destroyPlayer(this);
+                                    //AT_SPAT_DestroyWfsSpatializer(spatID);
+                                    //Destroy(gameObject);
                                 }
                             }
                             break;
@@ -467,12 +498,12 @@ public class At_Player : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        /*
+        
         if (!isDynamicInstance)
         {
             playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObject.name);            
         }
-        */
+        
         if (is3D)
         {
 
@@ -486,17 +517,14 @@ public class At_Player : MonoBehaviour
 
                 for (int i = 0; i < numChannelsInAudioFile; i++)
                 {
-                    /*
+                    
                     float distance;
                     if (!isDynamicInstance) distance = playerState.minDistance;
                     else distance = minDistance;
 
-
                     Vector3 center = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - i * angle), 0, distance * Mathf.Sin(angleOffset - i * angle));
                     Vector3 nextCenter = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - (i + 1) * angle), 0, distance * Mathf.Sin(angleOffset - (i + 1) * angle));
-                    */
-                    Vector3 center = gameObject.transform.position + new Vector3(minDistance * Mathf.Cos(angleOffset - i * angle), 0, minDistance * Mathf.Sin(angleOffset - i * angle));
-                    Vector3 nextCenter = gameObject.transform.position + new Vector3(minDistance * Mathf.Cos(angleOffset - (i + 1) * angle), 0, minDistance * Mathf.Sin(angleOffset - (i + 1) * angle));
+                    
                     Color c;
                     if (i == 0) Gizmos.color = Color.red;
                     else if (i == 1) Gizmos.color = Color.green;
@@ -524,8 +552,8 @@ public class At_Player : MonoBehaviour
 
                 for (int i = 0; i < numStepDrawCircle; i++)
                 {
-                    Vector3 center = transform.position + new Vector3(minDistance * Mathf.Cos(i * angle), 0, minDistance * Mathf.Sin(i * angle));
-                    Vector3 nextCenter = transform.position + new Vector3(minDistance * Mathf.Cos((i + 1) * angle), 0, minDistance * Mathf.Sin((i + 1) * angle)); ;
+                    Vector3 center = transform.position + new Vector3(playerState.minDistance * Mathf.Cos(i * angle), 0, playerState.minDistance * Mathf.Sin(i * angle));
+                    Vector3 nextCenter = transform.position + new Vector3(playerState.minDistance * Mathf.Cos((i + 1) * angle), 0, playerState.minDistance * Mathf.Sin((i + 1) * angle)); ;
                     //Debug.DrawLine(center, nextCenter, Color.green);
                     Gizmos.color = Color.green;
                     Gizmos.DrawLine(center, nextCenter);
@@ -542,7 +570,7 @@ public class At_Player : MonoBehaviour
     /**
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)
      */
-    #region DllImport    
+    #region DllImport        
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_setSourcePosition(int id, float[] position, float[] rotation, float[] forward); //modif mathias 06-14-2021
     [DllImport("AudioPlugin_AtSpatializer")]

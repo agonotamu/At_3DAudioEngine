@@ -14,6 +14,8 @@ using UnityEngine;
 
 public class At_PlayerState
 {
+    // integer given the type of the player 
+    public int type = 0;
     /// Name of the GameObject the At_PLayer is attached to
     public string name = "";
     /// name of the audio file to play (Supposed to be in "Assets\Streaming Asset")
