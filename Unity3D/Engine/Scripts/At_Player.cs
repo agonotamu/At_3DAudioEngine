@@ -274,7 +274,8 @@ public class At_Player : MonoBehaviour
         }
         if (mustBeDestroyedOnNextFrame)
         {
-            masterOutput.destroyPlayerNow(this);
+            DestroyNow();
+            //masterOutput.destroyPlayerNow(this);
             mustBeDestroyedOnNextFrame = false;
         }
        
@@ -426,6 +427,7 @@ public class At_Player : MonoBehaviour
                 // to the "playerOutputBuffer" array according to the number of output channel of the master bus
                 if (is3D)
                 {
+                    Debug.Log("process spatID = " + spatID);
                     AT_SPAT_WFS_process(spatID,inputFileBuffer, playerOutputBuffer, bufferSize, numChannelsInAudioFile, outputChannelCount);                    
                     
                 }
@@ -499,9 +501,20 @@ public class At_Player : MonoBehaviour
     private void OnDrawGizmos()
     {
         
+        float distance;
         if (!isDynamicInstance)
         {
-            playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObject.name);            
+            playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObject.name);
+            distance = playerState.minDistance;
+        }
+        else
+        {
+            distance = minDistance;
+        }
+
+        if (!isDynamicInstance)
+        {
+                        
         }
         
         if (is3D)
@@ -515,12 +528,12 @@ public class At_Player : MonoBehaviour
                 float angleOffset = transform.eulerAngles.y * Mathf.PI / 180.0f + Mathf.PI / 2.0f + angle / 2f;
                 float squareSize = 0.5f;
 
+               
+
                 for (int i = 0; i < numChannelsInAudioFile; i++)
                 {
                     
-                    float distance;
-                    if (!isDynamicInstance) distance = playerState.minDistance;
-                    else distance = minDistance;
+                    
 
                     Vector3 center = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - i * angle), 0, distance * Mathf.Sin(angleOffset - i * angle));
                     Vector3 nextCenter = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - (i + 1) * angle), 0, distance * Mathf.Sin(angleOffset - (i + 1) * angle));
@@ -552,8 +565,8 @@ public class At_Player : MonoBehaviour
 
                 for (int i = 0; i < numStepDrawCircle; i++)
                 {
-                    Vector3 center = transform.position + new Vector3(playerState.minDistance * Mathf.Cos(i * angle), 0, playerState.minDistance * Mathf.Sin(i * angle));
-                    Vector3 nextCenter = transform.position + new Vector3(playerState.minDistance * Mathf.Cos((i + 1) * angle), 0, playerState.minDistance * Mathf.Sin((i + 1) * angle)); ;
+                    Vector3 center = transform.position + new Vector3(distance * Mathf.Cos(i * angle), 0, distance * Mathf.Sin(i * angle));
+                    Vector3 nextCenter = transform.position + new Vector3(distance * Mathf.Cos((i + 1) * angle), 0, distance * Mathf.Sin((i + 1) * angle)); ;
                     //Debug.DrawLine(center, nextCenter, Color.green);
                     Gizmos.color = Color.green;
                     Gizmos.DrawLine(center, nextCenter);

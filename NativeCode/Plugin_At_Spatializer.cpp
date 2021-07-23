@@ -14,6 +14,10 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_CreateWfsSpatializer(int* id, 
 {
     At_SpatializationEngine::getInstance().CreateWfsSpatializer(id, is3D, isDirective); //modif mathias 06-17-2021
 }
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_DestroyWfsSpatializer(int id)
+{
+    At_SpatializationEngine::getInstance().DestroyWfsSpatializer(id);
+}
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setSourcePosition(int id, float* position, float* rotation, float* forward) //modif mathias 06-14-2021
 {
     At_SpatializationEngine::getInstance().WFS_setSourcePosition(id, position, rotation, forward); //modif mathias 06-14-2021

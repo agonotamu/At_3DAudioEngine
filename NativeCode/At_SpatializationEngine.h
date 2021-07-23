@@ -27,6 +27,7 @@ namespace Spatializer
 
 		vector<At_WfsSpatializer> m_pWfsSpatializerList;	
 		void CreateWfsSpatializer(int* id, bool is3D, bool isDirective); //modif mathias 06-17-2021
+		void At_SpatializationEngine::DestroyWfsSpatializer(int id);
 
 		// One for all Spatializer ----------------------------------------------------------------------------------------
 		void WFS_setSampleRate(float sampleRatte);
@@ -35,6 +36,7 @@ namespace Spatializer
 		void WFS_destroyAllSpatializer();
 
 		// One for each Spatializer ---------------------------------------------------------------------------------------
+
 		void WFS_setSourcePosition(int id, float* position, float* rotation, float* forward); //modif mathias 06-14-2021
 		void WFS_setAttenuation(int id, float attenuation);
 		void WFS_setSourceOmniBalance(int id, float omniBalance);
@@ -44,5 +46,10 @@ namespace Spatializer
 
 		void WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount);
 
+	private:
+		At_WfsSpatializer *findSpatializerWithSpatID(int id);
+
+	public:
+		int incrementalUniqueID = 0;
 	};
 }

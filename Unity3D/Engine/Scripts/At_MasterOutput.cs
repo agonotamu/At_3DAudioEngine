@@ -51,7 +51,7 @@ public class At_MasterOutput : MonoBehaviour
 
     /// List of references to the instances of At_Player classes
     List<int> spatIDToDestroy;
-
+    List<At_Player> playerObjectToDestroy;
     /******************************************************************
     * DATA GIVEN THE STATE OF THE PLAYER
     * ****************************************************************/
@@ -95,8 +95,10 @@ public class At_MasterOutput : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        At_AudioEngineUtils.LoadAllStates();
 
         spatIDToDestroy = new List<int>();
+        playerObjectToDestroy = new List<At_Player>();
 
         outputState = At_AudioEngineUtils.getOutputState();
 
@@ -189,7 +191,7 @@ public class At_MasterOutput : MonoBehaviour
             playerList[playerIndex].masterOutput = this;
             playerList[playerIndex].spatID = id;
             playerList[playerIndex].outputChannelCount = outputChannelCount;
-            Debug.Log("spat created with id : " + id);
+            //Debug.Log("spat created with id : " + id);
 
         }
 
@@ -226,14 +228,15 @@ public class At_MasterOutput : MonoBehaviour
        
         //AT_SPAT_DestroyWfsSpatializer(player.spatID);
         player.DestroyNow();
-        
+        /*
         for (int i = 0; i < spatIDToDestroy.Count; i++)
         {
             if (spatIDToDestroy[i] == player.spatID)
             {
                 spatIDToDestroy.RemoveAt(i);
             }
-        }        
+        } 
+        */
 
     }
 
@@ -369,10 +372,11 @@ public class At_MasterOutput : MonoBehaviour
             bool result;
             for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
             {
+                
                 if (!playerIsDestroyedOnNextFrame(playerList[playerIndex]) && playerIndex < playerList.Count && playerList[playerIndex] != null)
                 {
-                    Debug.Log("size =" + playerList.Count);
-                    Debug.Log("index =" +playerIndex);
+                    //Debug.Log("size =" + playerList.Count);
+                    //Debug.Log("index =" +playerIndex);
                     // tell each player to extract a buffer from their audio file if it is in "play" mode
                     result = playerList[playerIndex].extractInputBuffer(e.SamplesPerBuffer);
                     // conform the input buffer to the output bus format (including spatialization if 3D player)
@@ -414,6 +418,7 @@ public class At_MasterOutput : MonoBehaviour
                 }
                 // call the Sample Provider methtod to convert the sample format to the format requiered 
                 // and output the converted samples to the output buffer of the audio device. 
+                
                 inputPatcher.ProcessBuffer(tmpMonoBuffer, e.OutputBuffers, e.SamplesPerBuffer, e.AsioSampleType, UMC_outputRouting[masterChannel], maxDeviceChannel);
                 System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
             }
@@ -426,12 +431,14 @@ public class At_MasterOutput : MonoBehaviour
         {
             
             At_Player p = FindPlayerWithSpatID(spatIDToDestroy[i]);
+            playerObjectToDestroy.Add(p);
             AT_SPAT_DestroyWfsSpatializer(spatIDToDestroy[i]);
             //playerList.RemoveAt(indexPlayerToDestroy[i]);
             RemovePlayerFromListWithSpatID(spatIDToDestroy[i]);
+            mixer.setPlayerList(playerList);
             //indexPlayerToDestroy.RemoveAt(i);
             p.DestroyOnNextFrame();
-            
+            spatIDToDestroy.RemoveAt(i);
         }
         //spatToDestroy.Clear();
         //spatIDtoDestroy.Add(spatID);

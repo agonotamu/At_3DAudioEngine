@@ -54,13 +54,14 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     private void Update()
     {
         // Auto-generate (Debug)
-        
+        /*
         time += Time.deltaTime;
         if (time > 0.5f)
         {
             AddOneShotInstanceAndRandomPlay();
             time = 0;
         }
+        */
         
     }
 

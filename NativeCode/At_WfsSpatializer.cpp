@@ -21,6 +21,9 @@ namespace Spatializer
        
         if (virtualMicIdx == 0) {
 
+#ifdef DEBUGLOG
+            std::cout << spatID << ": minDistance =" << m_minDistance << " - delaySample[0] : " << delaySample << " - volume[0] : " << m_pWfsVolume[virtualMicIdx] << "\n";
+#endif
             //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << m_ChannelWeight[virtualMicIdx][0][0] << " - Weight1 : " << m_ChannelWeight[virtualMicIdx][0][1] << " - Channel2 : " << (int)m_ChannelWeight[virtualMicIdx][1][0] << " - Weight2 : " << m_ChannelWeight[virtualMicIdx][1][1] << " \n";
             //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << indexChannel1 << " - Weight1 : " << weight1 << " - Channel2 : " << indexChannel1 << " - Weight2 : " << weight1 << " \n";
 

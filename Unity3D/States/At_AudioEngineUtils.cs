@@ -39,6 +39,11 @@ public class At_AudioEngineUtils : MonoBehaviour
         LoadAll();
     }
 
+    public static void LoadAllStates()
+    {
+        LoadAll();
+    }
+
     public static bool setSpeakerState(At_VirtualMic[] virtualMics, At_VirtualSpeaker[] virtualSpeakers)
     {
         bool hasChanged = false;

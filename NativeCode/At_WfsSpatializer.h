@@ -74,6 +74,8 @@ namespace Spatializer
         
         void setSampleRate(float sampleRate);
 
+        int spatID = 0;
+
         bool m_is3D; //modif mathias 06-17-2021
         bool m_isDirective; //modif mathias 06-17-2021
 
@@ -97,8 +99,8 @@ namespace Spatializer
         void updateMixedDirectiveChannel(int virtualMicIdx, int inChannelCount);
 
         float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];
-        float m_pDelayBuffer[MAX_BUFFER_SIZE * 4];
-        float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * 4];
+        float m_pDelayBuffer[MAX_BUFFER_SIZE * 2];
+        float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * 2];
 
 
         float m_sourcePosition[3];
