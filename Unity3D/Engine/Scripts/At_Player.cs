@@ -13,6 +13,8 @@
  * 
  */
 
+
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,6 +79,12 @@ public class At_Player : MonoBehaviour
 
     At_PlayerState playerState;
 
+    public bool isStreaming = true;
+    int numSampleReadForStream = 0;
+    int audReadOffset = 0;
+    const int MAX_BUFFER_SIZE = 2048;
+    const int MAX_INPUT_CHANNEL = 16;
+    bool reachEndOfFile = false;
     //-----------------------------------------------------------------
     // data used at runtime
     // ----------------------------------------------------------------
@@ -191,12 +199,24 @@ public class At_Player : MonoBehaviour
             // init the array containing the rms value for each channel
             meters = new float[numChannelsInAudioFile];
 
-            // init the buffer containing all the raw data of the audio file
-            rawAudioData = new float[(int)aud.Length];
+            if (!isStreaming)
+            {
+                // init the buffer containing all the raw data of the audio file
+                rawAudioData = new float[(int)aud.Length];
 
-            // copy all the data of the audio file in the raw data buffer
-            aud.Read(rawAudioData, 0, (int)aud.Length);
-            
+                // copy all the data of the audio file in the raw data buffer
+                aud.Read(rawAudioData, 0, (int)aud.Length);
+
+            }
+            else
+            {
+                // init the buffer for streaming from disk
+                // Raw Data are in Bytes !! And we read 32bit float -> 4 bytes per sample
+                //rawAudioData = new float[MAX_BUFFER_SIZE*MAX_INPUT_CHANNEL * 4];
+                rawAudioData = new float[768];
+                
+            }
+
             // if the player is set to play on awake, start playing
             if (isPlayingOnAwake)
             {
@@ -289,6 +309,8 @@ public class At_Player : MonoBehaviour
 
     public void DestroyNow()
     {
+        //delete(rawAudioData);
+        
         aud.Dispose();
         aud = null;
         Destroy(gameObject);
@@ -310,6 +332,30 @@ public class At_Player : MonoBehaviour
     {
         if (isPlaying)
         {
+
+            if (isStreaming)
+            {
+                if (bufferSize < MAX_BUFFER_SIZE)
+                {
+                    // fill the raw data buffer 
+                    if (aud.Position + bufferSize * numChannelsInAudioFile * 4 <= (int)aud.Length)
+                    {
+                        
+                       aud.Read(rawAudioData, 0, bufferSize * numChannelsInAudioFile);
+                       numSampleReadForStream = bufferSize * numChannelsInAudioFile;
+                    }
+                    else
+                    {
+                        numSampleReadForStream = (int)(aud.Length - aud.Position) / 4;
+                        aud.Read(rawAudioData, 0, numSampleReadForStream);
+                        
+
+                    }
+                    audReadOffset += 4 * bufferSize * numChannelsInAudioFile;
+
+                }   
+            }
+
             if (rawAudioData != null && aud != null)
             {
                 // loop on each channel of the audio file
@@ -327,17 +373,37 @@ public class At_Player : MonoBehaviour
 
                         // while the index in raw data is less than the size of the raw data, copy the data. 
                         // WARNING : I DO NOT UNDERSTANT WHY THIS SHOULD BE "aud.Length / 4.0f"
-                        if (indexInRawData < aud.Length / 4.0f)
+                        // Apply gain set in the custom inspector editor of the player
+                        float volume = Mathf.Pow(10.0f, gain / 20.0f);// Mathf.Sqrt(2.0f);
+                        if (isStreaming)
                         {
-                            // Apply gain set in the custom inspector editor of the player
-                            float volume = Mathf.Pow(10.0f, gain / 20.0f);// Mathf.Sqrt(2.0f);
-                            inputFileBuffer[indexInInputFileBuffer] = volume * rawAudioData[indexInRawData];
+                            if (sampleIndex < numSampleReadForStream)
+                            {
+                                inputFileBuffer[indexInInputFileBuffer] = volume * rawAudioData[indexInInputFileBuffer];
+                                meters[channelIndex] += Mathf.Pow(inputFileBuffer[indexInInputFileBuffer], 2f);
+                            }
+                            else
+                            {
+                                reachEndOfFile = true;
+                            }
                             
-                            // Start calculating the meter value for each channel (sum of square)
-                            meters[channelIndex] += Mathf.Pow(inputFileBuffer[indexInInputFileBuffer], 2f);
                         }
-                        // Otherwise : this is the and of the audiofile
                         else
+                        {
+                            if (indexInRawData < aud.Length / 4.0f)
+                            {
+                                inputFileBuffer[indexInInputFileBuffer] = volume * rawAudioData[indexInRawData];
+                                // Start calculating the meter value for each channel (sum of square)
+                                meters[channelIndex] += Mathf.Pow(inputFileBuffer[indexInInputFileBuffer], 2f);
+                            }        
+                            else
+                            {
+                                reachEndOfFile = true;
+                            }
+                        }
+
+                        // Otherwise : this is the and of the audiofile
+                        if (reachEndOfFile)
                         {
                             // if looping, reset the offset for each channel to zero
                             if (isLooping)
@@ -347,6 +413,8 @@ public class At_Player : MonoBehaviour
                                     audioFileReadOffset[i] = 0;
                                     
                                 }
+                                audReadOffset = 0;
+                                aud.Position = 0;
                             }
                             // other wise stop playing
                             else
@@ -362,14 +430,18 @@ public class At_Player : MonoBehaviour
                                     //Destroy(gameObject);
                                 }
                             }
+                            reachEndOfFile = false;
                             break;
                         }
+
                     }
                     // update the read offset for each channel
                     audioFileReadOffset[channelIndex] += bufferSize * numChannelsInAudioFile;
+                    
                     // compute the RMS value for this buffer (sa:
                     meters[channelIndex] = Mathf.Sqrt(meters[channelIndex] / bufferSize);
                 }
+                
             }
             return true;
         }
@@ -427,7 +499,7 @@ public class At_Player : MonoBehaviour
                 // to the "playerOutputBuffer" array according to the number of output channel of the master bus
                 if (is3D)
                 {
-                    Debug.Log("process spatID = " + spatID);
+                    //Debug.Log("process spatID = " + spatID);
                     AT_SPAT_WFS_process(spatID,inputFileBuffer, playerOutputBuffer, bufferSize, numChannelsInAudioFile, outputChannelCount);                    
                     
                 }

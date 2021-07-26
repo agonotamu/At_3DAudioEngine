@@ -257,17 +257,21 @@ public class At_MasterOutput : MonoBehaviour
     }
     // Destroy all spatializer when the At_OutputMixer class is remove from the Game Object
     private void OnDisable(){
-        Debug.Log("OnDisable Output");
+        //Debug.Log("OnDisable Output");
         AT_SPAT_WFS_destroyAllSpatializer();
     }
     // Destroy all spatializer when the the user quit the application
     public void OnApplicationQuit(){
-        Debug.Log("OnDisable Output");
+        //Debug.Log("OnDisable Output");
         AT_SPAT_WFS_destroyAllSpatializer();
-        asioOut.Stop();
-        asioOut.Dispose();
-        asioOut = null;
-        running = false;
+        if (asioOut != null)
+        {
+            asioOut.Stop();
+            asioOut.Dispose();
+            asioOut = null;
+            running = false;
+
+        }
     }
 
     /**

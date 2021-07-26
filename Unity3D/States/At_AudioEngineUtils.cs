@@ -35,7 +35,7 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     static At_AudioEngineUtils()
     {
-        Debug.Log("opening !");
+        //Debug.Log("opening !");
         LoadAll();
     }
 
@@ -342,7 +342,7 @@ public class At_AudioEngineUtils : MonoBehaviour
         using (StreamWriter writer = new StreamWriter(fileStream))
         {
             writer.Write(json);
-            AssetDatabase.Refresh();
+            //AssetDatabase.Refresh();
         }
     }
     private static string ReadFromFile(string fileName)
