@@ -244,39 +244,44 @@ public class At_Player : MonoBehaviour
     * @details - balance [0,1] between "normal delay" and "reverse delay" for focalised source (see Time Reversal technic used for WFS)
     * 
      */
+
+    public void UpdateSpatialParameters()
+    {
+        // Get the position of the GameObject
+        float[] position = new float[3];
+        float[] rotation = new float[3]; //modif mathias 06-14-2021
+        float[] forward = new float[3]; //modif mathias 06-14-2021
+
+        position[0] = gameObject.transform.position.x;
+        position[1] = gameObject.transform.position.y;
+        position[2] = gameObject.transform.position.z;
+
+        //modif mathias 06-14-2021
+        rotation[0] = gameObject.transform.rotation.x;
+        rotation[1] = gameObject.transform.rotation.y;
+        rotation[2] = gameObject.transform.rotation.z;
+
+        //modif mathias 06-14-2021
+        forward[0] = gameObject.transform.forward.x;
+        forward[1] = gameObject.transform.forward.y;
+        forward[2] = gameObject.transform.forward.z;
+
+        /// set the source position in the spatializer (C++ dll call)
+        AT_SPAT_WFS_setSourcePosition(spatID, position, rotation, forward); //modif mathias 06-14-2021
+        /// set the min distance for this source
+        AT_SPAT_WFS_setMinDistance(spatID, minDistance);
+        /// set the type of distance attenuation in the spatialize : 0 = none, 1 = linera, 2 = square (C++ dll call)
+        AT_SPAT_WFS_setSourceAttenuation(spatID, attenuation);
+        /// set the directivity balance of the virtual microphone used for this source : balance [0,1] between omnidirectionnal and cardiod (C++ dll call)
+        AT_SPAT_WFS_setSourceOmniBalance(spatID, omniBalance);
+        /// set the balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS (C++ dll call)
+        AT_SPAT_WFS_setTimeReversal(spatID, timeReversal);
+    }
     private void Update()
     {
         if (is3D)
         {
-            // Get the position of the GameObject
-            float[] position = new float[3];
-            float[] rotation = new float[3]; //modif mathias 06-14-2021
-            float[] forward = new float[3]; //modif mathias 06-14-2021
-
-            position[0] = gameObject.transform.position.x;
-            position[1] = gameObject.transform.position.y;
-            position[2] = gameObject.transform.position.z;
-
-            //modif mathias 06-14-2021
-            rotation[0] = gameObject.transform.rotation.x;
-            rotation[1] = gameObject.transform.rotation.y;
-            rotation[2] = gameObject.transform.rotation.z;
-
-            //modif mathias 06-14-2021
-            forward[0] = gameObject.transform.forward.x;
-            forward[1] = gameObject.transform.forward.y;
-            forward[2] = gameObject.transform.forward.z;
-
-            /// set the source position in the spatializer (C++ dll call)
-            AT_SPAT_WFS_setSourcePosition(spatID, position, rotation, forward); //modif mathias 06-14-2021
-            /// set the min distance for this source
-            AT_SPAT_WFS_setMinDistance(spatID, minDistance);
-            /// set the type of distance attenuation in the spatialize : 0 = none, 1 = linera, 2 = square (C++ dll call)
-            AT_SPAT_WFS_setSourceAttenuation(spatID, attenuation);
-            /// set the directivity balance of the virtual microphone used for this source : balance [0,1] between omnidirectionnal and cardiod (C++ dll call)
-            AT_SPAT_WFS_setSourceOmniBalance(spatID, omniBalance);
-            /// set the balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS (C++ dll call)
-            AT_SPAT_WFS_setTimeReversal(spatID, timeReversal);
+            UpdateSpatialParameters();
         }
         else //
         {
@@ -422,7 +427,7 @@ public class At_Player : MonoBehaviour
                                 isPlaying = false;
                                 if (isDynamicInstance)
                                 {
-                                    Debug.Log("player with spatID=" + spatID + " reach end");
+                                    //Debug.Log("player with spatID=" + spatID + " reach end");
                                     //mustBeDestroyedNow = true;
                                     mustBeDestroyedSafely = true;
                                     //masterOutput.destroyPlayer(this);
@@ -500,7 +505,11 @@ public class At_Player : MonoBehaviour
                 if (is3D)
                 {
                     //Debug.Log("process spatID = " + spatID);
-                    AT_SPAT_WFS_process(spatID,inputFileBuffer, playerOutputBuffer, bufferSize, numChannelsInAudioFile, outputChannelCount);                    
+                    AT_SPAT_WFS_process(spatID,inputFileBuffer, playerOutputBuffer, bufferSize, numChannelsInAudioFile, outputChannelCount);     
+                    if (float.IsNaN(playerOutputBuffer[0]))
+                    {
+                        Debug.Log("out Nan from playerOutputBuffer !");
+                    }
                     
                 }
                 // Otherwise (2D) :
@@ -564,7 +573,15 @@ public class At_Player : MonoBehaviour
                 // get a buffer for one channel 
                 for (int sampleIndex = 0; sampleIndex < bufferSize; sampleIndex++)
                 {
-                    mixerInputBuffer[sampleIndex] = playerOutputBuffer[outputChannelCount * sampleIndex + channelIndex];
+                    if (playerOutputBuffer == null)
+                    {
+                        Debug.Log("playerOutputBuffer is null !!");
+                    }
+                    else
+                    {
+                        mixerInputBuffer[sampleIndex] = playerOutputBuffer[outputChannelCount * sampleIndex + channelIndex];
+                    }
+                    
                 }                
             }
         }

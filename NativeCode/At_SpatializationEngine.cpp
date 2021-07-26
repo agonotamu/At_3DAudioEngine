@@ -41,6 +41,7 @@ namespace Spatializer
 		s->m_isDirective = isDirective; //modif mathias 06-17-2021
 		//s->spatID = m_pWfsSpatializerList.size() - 1;
 		s->spatID = incrementalUniqueID;
+		s->initDelayBuffer();
 		m_pWfsSpatializerList.push_back(*s);
 		*id = incrementalUniqueID;
 

@@ -176,6 +176,43 @@ public class At_MasterOutput : MonoBehaviour
 
     }
 
+    private void UpdateVirtualMicPosition()
+    {
+        if (meters != null)
+        {
+            virtualMics = GameObject.FindObjectsOfType<At_VirtualMic>();
+            float[] positions = new float[outputChannelCount * 3];
+            float[] rotations = new float[outputChannelCount * 3];
+            float[] forwards = new float[outputChannelCount * 3];
+            for (int i = 0; i < virtualMics.Length; i++)
+            {
+
+                float eulerX = virtualMics[i].gameObject.transform.eulerAngles.x;
+                float eulerY = virtualMics[i].gameObject.transform.eulerAngles.y;
+                float eulerZ = virtualMics[i].gameObject.transform.eulerAngles.z;
+
+                if (eulerY == 180 && eulerZ == 180)
+                {
+                    eulerX = 180 - eulerX;
+                    eulerY = 0;
+                    eulerZ = 0;
+                }
+                // x, y and z value fo the vectors are multiplexed in a unique array (x0,y0,z0, x1,y1,z1, ..., xN,yN,zN)
+                positions[virtualMics[i].id * 3] = virtualMics[i].gameObject.transform.position.x;
+                rotations[virtualMics[i].id * 3] = eulerX;
+                forwards[virtualMics[i].id * 3] = virtualMics[i].gameObject.transform.forward.x;
+                positions[virtualMics[i].id * 3 + 1] = virtualMics[i].gameObject.transform.position.y;
+                rotations[virtualMics[i].id * 3 + 1] = eulerY;
+                forwards[virtualMics[i].id * 3 + 1] = virtualMics[i].gameObject.transform.forward.y;
+                positions[virtualMics[i].id * 3 + 2] = virtualMics[i].gameObject.transform.position.z;
+                rotations[virtualMics[i].id * 3 + 2] = eulerZ;
+                forwards[virtualMics[i].id * 3 + 2] = virtualMics[i].gameObject.transform.forward.z;
+
+            }
+            AT_SPAT_WFS_setVirtualMicPosition(outputChannelCount, 1, positions, rotations, forwards);
+        }
+    }
+
     /**
     * @brief Initialise the spatialization engine : set the sampling rate, and create as much 
     * Spatializer than there are At_Player instances in the scene. Each player is given a 
@@ -191,9 +228,14 @@ public class At_MasterOutput : MonoBehaviour
             playerList[playerIndex].masterOutput = this;
             playerList[playerIndex].spatID = id;
             playerList[playerIndex].outputChannelCount = outputChannelCount;
+            if (playerList[playerIndex].is3D)
+            {
+                playerList[playerIndex].UpdateSpatialParameters();
+            }
             //Debug.Log("spat created with id : " + id);
 
         }
+        UpdateVirtualMicPosition();
 
         mixer.setPlayerList(playerList);
     }
@@ -212,8 +254,15 @@ public class At_MasterOutput : MonoBehaviour
         playerList[playerList.Count - 1].masterOutput = this;
         playerList[playerList.Count - 1].spatID = id;
         playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
-        Debug.Log("spat created with id : " + id);
+        //Debug.Log("spat created with id : " + id);
         mixer.setPlayerList(playerList);
+        if (playerList[playerList.Count - 1].is3D)
+        {
+            playerList[playerList.Count - 1].UpdateSpatialParameters();
+        }
+
+        UpdateVirtualMicPosition();
+
     }
 
 
@@ -283,39 +332,9 @@ public class At_MasterOutput : MonoBehaviour
     private void Update()
     {
 
-        if (meters != null)
-        {
-            virtualMics = GameObject.FindObjectsOfType<At_VirtualMic>();
-            float[] positions = new float[outputChannelCount *  3];
-            float[] rotations = new float[outputChannelCount * 3];
-            float[] forwards = new float[outputChannelCount * 3];
-            for (int i = 0;  i<virtualMics.Length;i++){
+        UpdateVirtualMicPosition();
 
-                float eulerX = virtualMics[i].gameObject.transform.eulerAngles.x;
-                float eulerY = virtualMics[i].gameObject.transform.eulerAngles.y;
-                float eulerZ = virtualMics[i].gameObject.transform.eulerAngles.z;
 
-                if (eulerY == 180 && eulerZ == 180)
-                {
-                    eulerX = 180 - eulerX;
-                    eulerY = 0;
-                    eulerZ = 0;
-                }
-                // x, y and z value fo the vectors are multiplexed in a unique array (x0,y0,z0, x1,y1,z1, ..., xN,yN,zN)
-                positions[virtualMics[i].id * 3] = virtualMics[i].gameObject.transform.position.x;                    
-                rotations[virtualMics[i].id * 3] = eulerX;
-                forwards[virtualMics[i].id * 3] = virtualMics[i].gameObject.transform.forward.x;
-                positions[virtualMics[i].id * 3 + 1] = virtualMics[i].gameObject.transform.position.y;
-                rotations[virtualMics[i].id * 3 + 1] = eulerY;
-                forwards[virtualMics[i].id * 3 + 1] = virtualMics[i].gameObject.transform.forward.y;
-                positions[virtualMics[i].id * 3 + 2] = virtualMics[i].gameObject.transform.position.z;
-                rotations[virtualMics[i].id * 3 + 2] = eulerZ;
-                forwards[virtualMics[i].id * 3 + 2] = virtualMics[i].gameObject.transform.forward.z;
-
-            }
-            AT_SPAT_WFS_setVirtualMicPosition(outputChannelCount, 1, positions, rotations, forwards);
-        }
-        
     }
 
 

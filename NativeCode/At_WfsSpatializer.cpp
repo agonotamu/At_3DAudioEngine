@@ -9,6 +9,20 @@
 namespace Spatializer
 {
 
+    At_WfsSpatializer::At_WfsSpatializer() {
+
+    }
+    At_WfsSpatializer::~At_WfsSpatializer() {
+
+        /*
+        delete m_pTmpMonoBuffer_in;
+        delete m_pDelayBuffer;
+        delete m_pDelayMultiChannelBuffer;
+        */
+
+    }
+
+
     void At_WfsSpatializer::applyWfsGainDelay(int virtualMicIdx, int bufferLength, bool isDirective) { //modif mathias 06-17-2021
 
 
@@ -22,7 +36,7 @@ namespace Spatializer
         if (virtualMicIdx == 0) {
 
 #ifdef DEBUGLOG
-            std::cout << spatID << ": minDistance =" << m_minDistance << " - delaySample[0] : " << delaySample << " - volume[0] : " << m_pWfsVolume[virtualMicIdx] << "\n";
+            //std::cout << spatID << ": minDistance =" << m_minDistance << " - delaySample[0] : " << delaySample << " - volume[0] : " << m_pWfsVolume[virtualMicIdx] << "\n";
 #endif
             //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << m_ChannelWeight[virtualMicIdx][0][0] << " - Weight1 : " << m_ChannelWeight[virtualMicIdx][0][1] << " - Channel2 : " << (int)m_ChannelWeight[virtualMicIdx][1][0] << " - Weight2 : " << m_ChannelWeight[virtualMicIdx][1][1] << " \n";
             //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << indexChannel1 << " - Weight1 : " << weight1 << " - Channel2 : " << indexChannel1 << " - Weight2 : " << weight1 << " \n";
@@ -36,13 +50,17 @@ namespace Spatializer
             if (idx >= 0 && idx < delayBufferSize) {
                 //modif mathias 06-17-2021
                 if (isDirective == true) {
+#if DIRECTIVE_PLAYER
                     // on copie dans m_pTmpMonoBuffer_in la somme des deux canaux pondérés et retardés et atténué
                     m_pTmpMonoBuffer_in[i] = m_pWfsVolume[virtualMicIdx] *
                         (m_ChannelWeight[virtualMicIdx][0][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][0][0]][idx]
                             + m_ChannelWeight[virtualMicIdx][1][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][1][0]][idx]);
+#endif
                 }
                 else {
+                   
                     m_pTmpMonoBuffer_in[i] = m_pWfsVolume[virtualMicIdx] * m_pDelayBuffer[idx];
+                    
                 }         
             }
             else {    
@@ -150,11 +168,20 @@ namespace Spatializer
         m_isDirective = isDirective;
     }
 
+    void At_WfsSpatializer::initDelayBuffer() {
+        for (int i = 0; i < MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY; i++) {
+            m_pDelayBuffer[i] = 0;
+        }
+    }
+
+
     void At_WfsSpatializer::forceMonoInput(float* inBuffer, int bufferLength, int inchannels) {
 
         int count = 0;
         for (int i = 0; i < bufferLength * inchannels; i += inchannels) {
+
             m_pTmpMonoBuffer_in[count] = inBuffer[i];
+            
             count++;
         }       
 
@@ -273,8 +300,6 @@ namespace Spatializer
             normalizedDirection[1] = direction[1] / virtualMicDistance;
             normalizedDirection[2] = direction[2] / virtualMicDistance;
 
-
-
             //*wfsDelay = (virtualMicDistance / 340.0f) * 1000.0f; // time in milliseconds
             m_pWfsDelay[virtualMicIdx] = (virtualMicDistance / 340.0f) * 1000.0f; // time in milliseconds;
 
@@ -285,6 +310,7 @@ namespace Spatializer
             }
             else {
                 rolloff = 1.0f / pow((virtualMicDistance - m_minDistance) + 1, m_attenuation);
+
             }
 
             float forwardProj = normalizedDirection[0] * m_pVirtualMicForwards[virtualMicIdx][0]
@@ -292,19 +318,31 @@ namespace Spatializer
                 + normalizedDirection[2] * m_pVirtualMicForwards[virtualMicIdx][2];
 
             float cardioidSens = m_omniBalance + (1 - m_omniBalance) * (0.5f * (1 + forwardProj));
-
+            if (isnan(cardioidSens)) {
+#ifdef DEBUGLOG
+                std::cout << "SpatID = " << spatID << " - MicIdx = " << virtualMicIdx << " -  cardioidSens is NaN" << "\n";
+#endif
+            }
+            if (isnan(rolloff)) {
+#ifdef DEBUGLOG
+                std::cout << "SpatID = " << spatID << " - MicIdx = " << virtualMicIdx << " -  rolloff is NaN" << "\n";
+#endif
+            }
             //*wfsVolume = cardioidSens * rolloff;
             m_pWfsVolume[virtualMicIdx] = cardioidSens * rolloff;
 
 
 #ifdef DEBUGLOG
-            /*
+            
             if (virtualMicIdx == 0)
             {
-                std::cout << "volume # " << virtualMicIdx << " : " << m_pWfsVolume[virtualMicIdx] << " \n";
-                std::cout << "delay # " << virtualMicIdx << " : " << m_pWfsDelay[virtualMicIdx] << " \n";
+                std::cout << "virtualMicDistance : " << virtualMicDistance << " \n";
+                std::cout << "min distance : " << m_minDistance << " \n";
+                std::cout << "attenuation : " << m_attenuation << " \n";
+                std::cout << "omni balance : " << m_omniBalance << " \n";
+                std::cout << "omni balance : " << m_omniBalance << " \n";
             }
-            */
+            
 #endif
         }
 
@@ -330,7 +368,7 @@ namespace Spatializer
     }
     //modif mathias 06-17-2021
     void At_WfsSpatializer::updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount) {
-
+#if DIRECTIVE_PLAYER
         int arrayLength = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
         int numLengthInDelBuf = arrayLength / bufferLength;
 
@@ -346,6 +384,7 @@ namespace Spatializer
                     m_pDelayMultiChannelBuffer[InputChannel][(numLengthInDelBuf - 1) * bufferLength + sample] = inBuffer[inChannelCount * sample + InputChannel];
             }    
         }
+#endif
     }
     
     void At_WfsSpatializer::updateDelayBuffer(int bufferLength) {
@@ -357,12 +396,22 @@ namespace Spatializer
             int startTo = (count - 1) * bufferLength;
             int startFrom = count * bufferLength;
             for (int sample = 0; sample < bufferLength; sample++) {
+                if (isnan(m_pDelayBuffer[startFrom + sample])) {
+#ifdef DEBUGLOG
+                    std::cout << "sample = " << startFrom + sample << " -  m_pDelayBuffer is NaN" << "\n";               
+#endif
+                }
                 m_pDelayBuffer[startTo + sample] = m_pDelayBuffer[startFrom + sample];
             }
         }
 
         for (int sample = 0; sample < bufferLength; sample++) {
                      
+            if (isnan(m_pTmpMonoBuffer_in[sample])) {
+#ifdef DEBUGLOG
+                std::cout << "sample = " << sample << " - m_pTmpMonoBuffer_in is NaN" << "\n";
+#endif
+            }
             m_pDelayBuffer[(numLengthInDelBuf - 1) * bufferLength + sample] = m_pTmpMonoBuffer_in[sample];
         }        
     }
@@ -384,9 +433,10 @@ namespace Spatializer
         // modif Mathias 06-14-2021
         // si isDirectionnalSource == true
         if (m_isDirective == true) {
+#if DIRECTIVE_PLAYER
             updateMixedDirectiveChannel(m_virtualMicCount, inChannelCount); 
             updateMultichannelDelayBuffer(inBuffer, bufferLength, inChannelCount);
-
+#endif
         }
         // si isDirectionnalSource == false
         else if (m_isDirective == false) {
@@ -409,6 +459,13 @@ namespace Spatializer
             // m_virtualMicCount are supposed to be equal to outChannelCount !!!!! Why 2 differents variables !!!
             for (int sampleIndex = 0; sampleIndex < bufferLength; sampleIndex++) {
                 outBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pTmpMonoBuffer_in[sampleIndex];
+                
+                if (isnan(outBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex])) {
+#ifdef DEBUGLOG
+                    std::cout << "spatID = " << spatID << " - MicIndex = "<< virtualMicIndex << " - SampleIndex = " << sampleIndex << " - outBuffer is NaN !" <<"\n";
+#endif
+                }
+                
                 //outBuffer[sample * m_virtualMicCount + virtualMicIndex] = m_pTmpMonoBuffer_in[sample];
             }
         }

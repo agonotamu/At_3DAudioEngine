@@ -58,6 +58,11 @@ public class At_Mixer : MonoBehaviour
             {
                 if (!playerIsDestroyedOnNextFrame(playerList[playerIndex], spatIDToDestroy))
                 {
+                    if (playerList[playerIndex] == null)
+                    {
+                        Debug.Log("At_Player is null !!");
+                    }
+
                     // ask the At_Player object to copy the output of the player in the "tmpMonoBuffer" array
                     playerList[playerIndex].fillMixerChannelInputWithPlayerOutput(ref tmpMonoBuffer, bufferSize, channelIndex);
                     // add the samples of the "tmpMonoBuffer" array to the samples of the "mixBuffer" array provided by the At_MasterOutput object

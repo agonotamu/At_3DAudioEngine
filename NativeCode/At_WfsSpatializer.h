@@ -34,6 +34,7 @@
 #endif
 
 #define MAX_BUFFER_SIZE 2048
+#define NUM_BUFFER_IN_DELAY 2
 #define MAX_OUTPUT_CHANNEL 48
 #define MAX_INPUT_CHANNEL 16
 
@@ -62,6 +63,9 @@ namespace Spatializer
         }
         */
 
+        At_WfsSpatializer();
+        ~At_WfsSpatializer();
+
         int process(float* inBuffer, float* outBuffer, int bufferLength, int inChannel, int outChannel);
         int setSourcePosition(float* position, float* rotation, float* forward); //modif mathias 06-14-2021
         int setSourceAttenuation(float attenuation);
@@ -74,6 +78,8 @@ namespace Spatializer
         
         void setSampleRate(float sampleRate);
 
+        void initDelayBuffer();
+
         int spatID = 0;
 
         bool m_is3D; //modif mathias 06-17-2021
@@ -84,6 +90,7 @@ namespace Spatializer
         void forceMonoInput(float* inBuffer, int bufferLength, int inchannels);
         void updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount);
 
+        
         void updateDelayBuffer(int bufferLength);
         // 11/03/2021 - BUG CORRECTION- we do not use azimuth and elevation any more, but forward vector only.
         /*
@@ -99,9 +106,10 @@ namespace Spatializer
         void updateMixedDirectiveChannel(int virtualMicIdx, int inChannelCount);
 
         float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];
-        float m_pDelayBuffer[MAX_BUFFER_SIZE * 2];
+        float m_pDelayBuffer[MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
+#if DIRECTIVE_PLAYER
         float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * 2];
-
+#endif
 
         float m_sourcePosition[3];
         float m_sourceRotation[3]; //modif mathias 06-14-2021
