@@ -182,6 +182,10 @@ public class At_Player : MonoBehaviour
     */
     public void initAudioFile()
     {
+        if (is3D == false)
+        {
+            isStreaming = false;
+        }
         //string path = Application.dataPath + "/StreamingAssets/" + fileName;
         externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
         string path = externAssetsPath + fileName;
