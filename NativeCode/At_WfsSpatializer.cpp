@@ -23,7 +23,7 @@ namespace Spatializer
     }
 
 
-    void At_WfsSpatializer::applyWfsGainDelay(int virtualMicIdx, int bufferLength, bool isDirective) { //modif mathias 06-17-2021
+    void At_WfsSpatializer::applyWfsGainDelay(int virtualMicIdx, int m_virtualMicCount, int bufferLength, bool isDirective) { //modif mathias 06-17-2021
 
 
         float reverse_delay = m_maxDelay + m_minDelay - m_pWfsDelay[virtualMicIdx];
@@ -31,8 +31,15 @@ namespace Spatializer
 
         float delaySample = m_sampleRate * delay / 1000.0f;
 
+#ifdef DEBUGLOG
+        std::cout << "virtualMicIdx = " << virtualMicIdx << "\n";
+#endif
+
         int delayBufferSize = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
-       
+        //m_pCircularDelayBuffer.Clear();
+        //m_pCircularDelayBuffer.readpos = 0;
+        //  m_pCircularDelayBuffer.Skip((int)delaySample);
+        //m_pCircularDelayBuffer.readpos = (int)delaySample;
         if (virtualMicIdx == 0) {
 
 #ifdef DEBUGLOG
@@ -42,6 +49,40 @@ namespace Spatializer
             //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << indexChannel1 << " - Weight1 : " << weight1 << " - Channel2 : " << indexChannel1 << " - Weight2 : " << weight1 << " \n";
 
         }
+
+        //m_pCircularDelayBuffer.readpos += (int)delaySample;
+#ifdef RING_BUFFER
+        float circularbuffer;
+        //m_pCircularDelayBuffer.SyncWritePos();
+#ifdef DEBUGLOG
+        std::cout << "-------------------------------------------------------" << "\n";
+        std::cout << "writepos = " << m_pCircularDelayBuffer.writepos << "\n";
+        std::cout << "readpos = " << m_pCircularDelayBuffer.readpos << "\n";
+        std::cout << "delay = " << (int)delaySample << "\n";
+        std::cout << "-------------------------------------------------------" << "\n";
+#endif
+        
+        for (int i = 0; i < bufferLength; i++)
+        {
+            if (delaySample < MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY) {
+                m_pCircularDelayBuffer.Read(circularbuffer);
+                m_pTmpMonoBuffer_in[i] = m_pWfsVolume[virtualMicIdx] * circularbuffer;
+                std::cout << "readpos = " << m_pCircularDelayBuffer.readpos << "\n";
+            }
+            else {
+                m_pTmpMonoBuffer_in[i] = 0;
+            }
+
+        }
+
+        //m_pCircularDelayBuffer.readpos = m_pCircularDelayBuffer.writepos - bufferLength;
+        if (virtualMicIdx != m_virtualMicCount-1) {
+
+            //m_pCircularDelayBuffer.readpos -= (int)delaySample;
+            m_pCircularDelayBuffer.readpos -= bufferLength;
+        }
+        //m_pCircularDelayBuffer.SyncWritePos();
+#else
 
         for (int i = 0; i < bufferLength; i++)
         {
@@ -58,15 +99,16 @@ namespace Spatializer
 #endif
                 }
                 else {
-                   
                     m_pTmpMonoBuffer_in[i] = m_pWfsVolume[virtualMicIdx] * m_pDelayBuffer[idx];
-                    
+   
                 }         
             }
             else {    
                     m_pTmpMonoBuffer_in[i] = 0;
             }
         }
+#endif
+
     }
 
     /*
@@ -172,6 +214,10 @@ namespace Spatializer
         for (int i = 0; i < MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY; i++) {
             m_pDelayBuffer[i] = 0;
         }
+        
+        
+        m_pCircularDelayBuffer.Clear();
+
     }
 
 
@@ -389,6 +435,13 @@ namespace Spatializer
     
     void At_WfsSpatializer::updateDelayBuffer(int bufferLength) {
 
+#ifdef RING_BUFFER
+
+        for (int sample = 0; sample < bufferLength; sample++) {
+            m_pCircularDelayBuffer.Feed(m_pTmpMonoBuffer_in[sample]);
+        }
+#else
+
         int arrayLength = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
         int numLengthInDelBuf = arrayLength / bufferLength;
 
@@ -413,7 +466,9 @@ namespace Spatializer
 #endif
             }
             m_pDelayBuffer[(numLengthInDelBuf - 1) * bufferLength + sample] = m_pTmpMonoBuffer_in[sample];
-        }        
+        }  
+#endif
+
     }
 
 
@@ -450,10 +505,12 @@ namespace Spatializer
         // FOR WFS PANNING - GAIN AND DELAY
         float wfsVolume, wfsDelay;
 
+        //m_pCircularDelayBuffer.SyncWritePos();
+
         for (int virtualMicIndex = 0; virtualMicIndex < m_virtualMicCount; virtualMicIndex++) {
 
             // APPLY WFS PANNING - GAIN AND DELAY
-            applyWfsGainDelay(virtualMicIndex, bufferLength, m_isDirective); //modif mathias 06-17-2021
+            applyWfsGainDelay(virtualMicIndex, m_virtualMicCount, bufferLength, m_isDirective); //modif mathias 06-17-2021
             
 
             // m_virtualMicCount are supposed to be equal to outChannelCount !!!!! Why 2 differents variables !!!
@@ -469,7 +526,7 @@ namespace Spatializer
                 //outBuffer[sample * m_virtualMicCount + virtualMicIndex] = m_pTmpMonoBuffer_in[sample];
             }
         }
-
+        //m_pCircularDelayBuffer.readpos += bufferLength;
         return 0;
     }
 

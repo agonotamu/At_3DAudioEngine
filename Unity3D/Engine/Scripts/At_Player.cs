@@ -324,7 +324,9 @@ public class At_Player : MonoBehaviour
         
         aud.Dispose();
         aud = null;
+        
         Destroy(gameObject);
+        
     }
 
 

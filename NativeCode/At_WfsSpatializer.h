@@ -14,7 +14,7 @@
 
 #include <stdio.h>
 #include <memory> //for std::unique_ptr
-
+//#include "At_SpatializationEngine.h"
 
 
 
@@ -32,7 +32,7 @@
 #include <windows.h>
 #include <iostream>
 #endif
-
+#include "AudioPluginUtil.h"
 #define MAX_BUFFER_SIZE 2048
 #define NUM_BUFFER_IN_DELAY 2
 #define MAX_OUTPUT_CHANNEL 48
@@ -100,13 +100,17 @@ namespace Spatializer
         */
         void updateWfsVolumeAndDelay();
         void updateMixMaxDelay();
-        void applyWfsGainDelay(int virtualMicIndex, int bufferLength, bool isDirective); //modif mathias 06-17-2021
+        void applyWfsGainDelay(int virtualMicIndex, int m_virtualMicCount, int bufferLength, bool isDirective); //modif mathias 06-17-2021
        
         // modif Mathias 06-14-2021
         void updateMixedDirectiveChannel(int virtualMicIdx, int inChannelCount);
 
         float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];
         float m_pDelayBuffer[MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
+//#ifdef RING_BUFFER
+        RingBuffer<MAX_BUFFER_SIZE* NUM_BUFFER_IN_DELAY, float> m_pCircularDelayBuffer;
+//#endif
+
 #if DIRECTIVE_PLAYER
         float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * 2];
 #endif
