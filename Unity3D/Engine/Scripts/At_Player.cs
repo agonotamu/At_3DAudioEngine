@@ -182,10 +182,12 @@ public class At_Player : MonoBehaviour
     */
     public void initAudioFile()
     {
+        /*
         if (is3D == false)
         {
             isStreaming = false;
         }
+        */
         //string path = Application.dataPath + "/StreamingAssets/" + fileName;
         externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
         string path = externAssetsPath + fileName;
@@ -216,8 +218,8 @@ public class At_Player : MonoBehaviour
             {
                 // init the buffer for streaming from disk
                 // Raw Data are in Bytes !! And we read 32bit float -> 4 bytes per sample
-                //rawAudioData = new float[MAX_BUFFER_SIZE*MAX_INPUT_CHANNEL * 4];
-                rawAudioData = new float[768];
+                rawAudioData = new float[MAX_BUFFER_SIZE*MAX_INPUT_CHANNEL * 4];
+                //rawAudioData = new float[768];
                 
             }
 

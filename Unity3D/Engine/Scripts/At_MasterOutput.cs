@@ -441,8 +441,12 @@ public class At_MasterOutput : MonoBehaviour
                 }
                 // call the Sample Provider methtod to convert the sample format to the format requiered 
                 // and output the converted samples to the output buffer of the audio device. 
-                
+
+                /*
                 inputPatcher.ProcessBuffer(tmpMonoBuffer, e.OutputBuffers, e.SamplesPerBuffer, e.AsioSampleType, UMC_outputRouting[masterChannel], maxDeviceChannel);
+                System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
+                */
+                inputPatcher.ProcessBuffer(tmpMonoBuffer, e.OutputBuffers, e.SamplesPerBuffer, e.AsioSampleType, masterChannel, maxDeviceChannel);
                 System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
             }
 
