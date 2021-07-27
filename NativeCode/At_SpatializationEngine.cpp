@@ -31,6 +31,7 @@ namespace Spatializer
 		std::cout << "Clear all Spatializer !\n";
 #endif
 		m_pWfsSpatializerList.clear();
+		//delete& m_pWfsSpatializerList;
 		incrementalUniqueID = 0;
 	}
 
@@ -50,7 +51,7 @@ namespace Spatializer
 
 
 #ifdef DEBUGLOG
-		std::cout << "adding spatializer with spatID "<< s->spatID <<"\n";
+		//std::cout << "adding spatializer with spatID "<< s->spatID <<"\n";
 		
 #endif
 
@@ -61,22 +62,19 @@ namespace Spatializer
 #ifdef DEBUGLOG
 		//std::cout << "destroy spatializer with index " << id << "\n";
 #endif
+
 		for (int i = 0; i < m_pWfsSpatializerList.size(); i++) {
 			if (m_pWfsSpatializerList[i].spatID == id) {
 				m_pWfsSpatializerList.erase(m_pWfsSpatializerList.begin() + i);
-
-#ifdef DEBUGLOG
-				std::cout << "destroy spatializer with spatID "<< id<< "\n";
-				//std::cout << "m_pWfsSpatializerList is size : " << m_pWfsSpatializerList.size() << "\n";
-#endif
 				break;
 			}
 		}
 		
-		
-		
 
-
+#ifdef DEBUGLOG
+		//std::cout << "destroy spatializer with spatID "<< id<< "\n";
+		std::cout << "m_pWfsSpatializerList is size : " << m_pWfsSpatializerList.size() << "\n";
+#endif
 
 	}
 

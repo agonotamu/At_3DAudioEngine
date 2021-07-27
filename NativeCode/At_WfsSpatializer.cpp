@@ -320,12 +320,12 @@ namespace Spatializer
             float cardioidSens = m_omniBalance + (1 - m_omniBalance) * (0.5f * (1 + forwardProj));
             if (isnan(cardioidSens)) {
 #ifdef DEBUGLOG
-                std::cout << "SpatID = " << spatID << " - MicIdx = " << virtualMicIdx << " -  cardioidSens is NaN" << "\n";
+                //std::cout << "SpatID = " << spatID << " - MicIdx = " << virtualMicIdx << " -  cardioidSens is NaN" << "\n";
 #endif
             }
             if (isnan(rolloff)) {
 #ifdef DEBUGLOG
-                std::cout << "SpatID = " << spatID << " - MicIdx = " << virtualMicIdx << " -  rolloff is NaN" << "\n";
+                //std::cout << "SpatID = " << spatID << " - MicIdx = " << virtualMicIdx << " -  rolloff is NaN" << "\n";
 #endif
             }
             //*wfsVolume = cardioidSens * rolloff;
@@ -333,7 +333,7 @@ namespace Spatializer
 
 
 #ifdef DEBUGLOG
-            
+            /*
             if (virtualMicIdx == 0)
             {
                 std::cout << "virtualMicDistance : " << virtualMicDistance << " \n";
@@ -342,7 +342,7 @@ namespace Spatializer
                 std::cout << "omni balance : " << m_omniBalance << " \n";
                 std::cout << "omni balance : " << m_omniBalance << " \n";
             }
-            
+            */
 #endif
         }
 
@@ -398,7 +398,7 @@ namespace Spatializer
             for (int sample = 0; sample < bufferLength; sample++) {
                 if (isnan(m_pDelayBuffer[startFrom + sample])) {
 #ifdef DEBUGLOG
-                    std::cout << "sample = " << startFrom + sample << " -  m_pDelayBuffer is NaN" << "\n";               
+                    //std::cout << "sample = " << startFrom + sample << " -  m_pDelayBuffer is NaN" << "\n";               
 #endif
                 }
                 m_pDelayBuffer[startTo + sample] = m_pDelayBuffer[startFrom + sample];
@@ -409,7 +409,7 @@ namespace Spatializer
                      
             if (isnan(m_pTmpMonoBuffer_in[sample])) {
 #ifdef DEBUGLOG
-                std::cout << "sample = " << sample << " - m_pTmpMonoBuffer_in is NaN" << "\n";
+                //std::cout << "sample = " << sample << " - m_pTmpMonoBuffer_in is NaN" << "\n";
 #endif
             }
             m_pDelayBuffer[(numLengthInDelBuf - 1) * bufferLength + sample] = m_pTmpMonoBuffer_in[sample];
@@ -462,7 +462,7 @@ namespace Spatializer
                 
                 if (isnan(outBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex])) {
 #ifdef DEBUGLOG
-                    std::cout << "spatID = " << spatID << " - MicIndex = "<< virtualMicIndex << " - SampleIndex = " << sampleIndex << " - outBuffer is NaN !" <<"\n";
+                    //std::cout << "spatID = " << spatID << " - MicIndex = "<< virtualMicIndex << " - SampleIndex = " << sampleIndex << " - outBuffer is NaN !" <<"\n";
 #endif
                 }
                 

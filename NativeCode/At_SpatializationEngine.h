@@ -6,7 +6,7 @@
 #include <iostream>
 using namespace std;
 
-//#define DEBUGLOG
+#define DEBUGLOG
 //#define DIRECTIVE_PLAYER
 
 namespace Spatializer
