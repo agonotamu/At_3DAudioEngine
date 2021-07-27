@@ -1,0 +1,2 @@
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.pdb

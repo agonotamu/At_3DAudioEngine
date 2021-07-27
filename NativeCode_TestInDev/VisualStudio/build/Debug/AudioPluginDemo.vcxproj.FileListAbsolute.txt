@@ -1,0 +1,4 @@
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\UnityJack_WFS_v3_MassiveMultichannel_audio\NativeCode\VisualStudio\build\Debug\AudioPluginDemo.dll
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\UnityJack_WFS_v3_MassiveMultichannel_audio\NativeCode\VisualStudio\build\Debug\AudioPluginDemo.pdb
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPluginDemo.dll
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPluginDemo.pdb

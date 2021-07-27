@@ -1,0 +1,94 @@
+﻿cl : ligne de commande warning D9002: option '/arch:SSE2' inconnue ignorée
+  At_SpatializationEngine.cpp
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(746,1): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_SpatializationEngine.cpp(20): message : voir la référence à l'instanciation de la fonction modèle 'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char *)' en cours de compilation
+  At_WfsSpatializer.cpp
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(253,101): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(260,106): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(278,33): warning C4244: '=' : conversion de 'double' en 'int', perte possible de données
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(291,33): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(300,56): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(302,56): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(332,90): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(502,26): warning C4101: 'wfsDelay' : variable locale non référencée
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(502,15): warning C4101: 'wfsVolume' : variable locale non référencée
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(477,15): warning C4101: 'direction' : variable locale non référencée
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(393,1): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\ostream(386): message : pendant la compilation de la fonction membre classe modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(float)'
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(101): message : voir la référence à l'instanciation de la fonction modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(float)' en cours de compilation
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\At_WfsSpatializer.cpp(101): message : voir la référence à l'instanciation classe modèle 'std::basic_ostream<char,std::char_traits<char>>' en cours de compilation
+  AudioPluginUtil.cpp
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(9,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(18,5): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(29,18): warning C4018: '<' : incompatibilité signed/unsigned
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(96): message : voir la référence à l'instanciation de la fonction modèle 'void FFTProcess<double>(UnityComplexNumber *,int,bool)' en cours de compilation
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(40,36): warning C4018: '<' : incompatibilité signed/unsigned
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(53,36): warning C4018: '<' : incompatibilité signed/unsigned
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(61,32): warning C4018: '<' : incompatibilité signed/unsigned
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.h(75,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(84): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Sub<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(84): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Sub<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(96): message : voir la référence à l'instanciation de la fonction modèle 'void FFTProcess<double>(UnityComplexNumber *,int,bool)' en cours de compilation
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.h(76,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.h(68,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(85): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Add<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.cpp(85): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Add<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\AudioPluginUtil.h(69,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+  hrtftable.cpp
+  Plugin_At_Spatializer.cpp
+     Création de la bibliothèque D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.lib et de l'objet D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.exp
+  Génération de code en cours
+  Previous IPDB not found, fall back to full compilation.
+  All 427 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Fin de la génération du code
+  AudioPlugin_AtSpatializer.vcxproj -> D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+  Un sous-répertoire ou un fichier ..\..\Assets\Plugins\x86_64 existe déjà.
+          1 fichier(s) copié(s).
