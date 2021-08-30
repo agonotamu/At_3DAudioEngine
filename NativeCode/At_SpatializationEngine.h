@@ -8,7 +8,7 @@ using namespace std;
 
 //#define DEBUGLOG
 //#define RING_BUFFER
-//#define DIRECTIVE_PLAYER
+#define DIRECTIVE_PLAYER
 
 namespace Spatializer
 {
@@ -29,7 +29,7 @@ namespace Spatializer
 
 		vector<At_WfsSpatializer> m_pWfsSpatializerList;	
 		void CreateWfsSpatializer(int* id, bool is3D, bool isDirective); //modif mathias 06-17-2021
-		void At_SpatializationEngine::DestroyWfsSpatializer(int id);
+		void DestroyWfsSpatializer(int id);
 
 		// One for all Spatializer ----------------------------------------------------------------------------------------
 		void WFS_setSampleRate(float sampleRatte);

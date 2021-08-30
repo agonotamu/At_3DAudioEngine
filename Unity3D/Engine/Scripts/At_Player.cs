@@ -38,8 +38,9 @@ public class At_Player : MonoBehaviour
     // rawAudioData -> inputFileBuffer -> playerOutputBuffer
     //-----------------------------------------------------
     /// constants used for array initialization 
-    const int MAX_BUF_SIZE = 2048;
-    const int MAX_OUTPUT_CHANNEL = 48; // very very very large !!
+    const int MAX_BUF_SIZE = 1024;
+    const int MAX_OUTPUT_CHANNEL = 24; // very very very large !!
+    const int MAX_INPUT_CHANNEL = 4;
     /// array containing the all the samples of the audio file
     private float[] rawAudioData;
     /// array containing a single frame of the audio file
@@ -82,8 +83,7 @@ public class At_Player : MonoBehaviour
     public bool isStreaming = true;
     int numSampleReadForStream = 0;
     int audReadOffset = 0;
-    const int MAX_BUFFER_SIZE = 2048;
-    const int MAX_INPUT_CHANNEL = 16;
+    
     bool reachEndOfFile = false;
     //-----------------------------------------------------------------
     // data used at runtime
@@ -91,7 +91,7 @@ public class At_Player : MonoBehaviour
     /// id of this player in the spatialization engine
     public int spatID;
     /// boolean telling if the player is actually playing
-    bool isPlaying = false;
+    public bool isPlaying = false;
     /// number of player in the Unity scene - unused
     static public int playerCount;
     /// number of channel of the output bus
@@ -114,13 +114,39 @@ public class At_Player : MonoBehaviour
     //-----------------------------------------------------     
     // Awake, Disable, Get/Start/Stop playing 
     //-----------------------------------------------------
-    public bool GetIsPlaying() { return isPlaying; }
+    //public bool GetIsPlaying() { return isPlaying; }
     public void StartPlaying() {
         isPlaying = true;
         // reset the read offset for each channel
-        for (int i = 0; i < audioFileReadOffset.Length; i++) { audioFileReadOffset[i] = 0; }
+        if (audioFileReadOffset != null)
+        {
+            for (int i = 0; i < audioFileReadOffset.Length; i++) { audioFileReadOffset[i] = 0; }
+        }
+        if (aud != null)
+        {
+            audReadOffset = 0;
+            aud.Position = 0;
+
+        }
     }
-    public void StopPlaying() { isPlaying = false; }
+    public void StopPlaying() { 
+        isPlaying = false;
+        // reset the read offset for each channel
+        if (audioFileReadOffset != null)
+        {
+            for (int i = 0; i < audioFileReadOffset.Length; i++) { audioFileReadOffset[i] = 0; }
+        }
+        
+        if (aud != null)
+        {
+            audReadOffset = 0;
+            aud.Position = 0;
+        }
+    }
+    public void SafeDestroy()
+    {
+        mustBeDestroyedSafely = true;
+    }
     public void OnDisable() { playerCount--; }
     public void Awake() {
         
@@ -218,9 +244,10 @@ public class At_Player : MonoBehaviour
             {
                 // init the buffer for streaming from disk
                 // Raw Data are in Bytes !! And we read 32bit float -> 4 bytes per sample
-                rawAudioData = new float[MAX_BUFFER_SIZE*MAX_INPUT_CHANNEL * 4];
+                //rawAudioData = new float[MAX_BUF_SIZE*MAX_INPUT_CHANNEL * 4];
+                rawAudioData = new float[MAX_BUF_SIZE * MAX_INPUT_CHANNEL];
                 //rawAudioData = new float[768];
-                
+
             }
 
             // if the player is set to play on awake, start playing
@@ -348,7 +375,7 @@ public class At_Player : MonoBehaviour
 
             if (isStreaming)
             {
-                if (bufferSize < MAX_BUFFER_SIZE)
+                if (bufferSize <= MAX_BUF_SIZE)
                 {
                     // fill the raw data buffer 
                     if (aud.Position + bufferSize * numChannelsInAudioFile * 4 <= (int)aud.Length)
@@ -415,32 +442,27 @@ public class At_Player : MonoBehaviour
                             }
                         }
 
-                        // Otherwise : this is the and of the audiofile
+                        // Otherwise : this is the end of the audiofile
                         if (reachEndOfFile)
                         {
-                            // if looping, reset the offset for each channel to zero
-                            if (isLooping)
+                            Debug.Log("source " + spatID + "reach end");
+                            for (int i = 0; i < audioFileReadOffset.Length; i++)
                             {
-                                for (int i = 0; i < audioFileReadOffset.Length; i++)
-                                {
-                                    audioFileReadOffset[i] = 0;
-                                    
-                                }
-                                audReadOffset = 0;
-                                aud.Position = 0;
+                                audioFileReadOffset[i] = 0;
+
                             }
-                            // other wise stop playing
-                            else
+                            //reset the offset for each channel to zero
+                            
+                            audReadOffset = 0;
+                            aud.Position = 0;
+                            
+                            if (!isLooping)
                             {
                                 isPlaying = false;
                                 if (isDynamicInstance)
                                 {
-                                    //Debug.Log("player with spatID=" + spatID + " reach end");
-                                    //mustBeDestroyedNow = true;
-                                    mustBeDestroyedSafely = true;
-                                    //masterOutput.destroyPlayer(this);
-                                    //AT_SPAT_DestroyWfsSpatializer(spatID);
-                                    //Destroy(gameObject);
+                                    // We do not need to destroy the GameObject because we use a static pool
+                                    //mustBeDestroyedSafely = true;
                                 }
                             }
                             reachEndOfFile = false;
@@ -594,7 +616,7 @@ public class At_Player : MonoBehaviour
             }
         }
     }
-
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         
@@ -675,7 +697,7 @@ public class At_Player : MonoBehaviour
 
         }
     }
-
+#endif
 
     /**
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)

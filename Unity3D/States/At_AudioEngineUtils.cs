@@ -179,6 +179,7 @@ public class At_AudioEngineUtils : MonoBehaviour
                     At_PlayerState ps = new At_PlayerState();
                     JsonUtility.FromJsonOverwrite(lines[lineIndex], ps);
                     audioEngineStates.playerStates.Add(ps);
+                    Debug.Log("load At_Player with name : " + ps.name);
                 }
                 // this is an At_DynamicRandomPlayer
                 else if (lines[lineIndex].Contains("\"type\":1"))
@@ -186,6 +187,11 @@ public class At_AudioEngineUtils : MonoBehaviour
                     At_DynamicRandomPlayerState drps = new At_DynamicRandomPlayerState();
                     JsonUtility.FromJsonOverwrite(lines[lineIndex], drps);
                     audioEngineStates.randomPlayerStates.Add(drps);
+                    foreach (string fileName in drps.fileNames)
+                    {
+                        Debug.Log(fileName);
+                    }
+                    Debug.Log("load At_DynamicRandomPlayer with name : " + drps.name);
                 }
 
             }

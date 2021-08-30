@@ -41,11 +41,11 @@ public class At_DynamicRandomPlayerEditor : Editor
         At_OutputState outputState = At_AudioEngineUtils.getOutputState();
         //randomPlayerState.numChannelInAudiofile = outputState.outputChannelCount;
 
-        if (randomPlayer.fileNames != null)
+        if (randomPlayerState.fileNames != null)
         {
-            for (int i = 0; i < randomPlayer.fileNames.Length; i++)
+            for (int i = 0; i < randomPlayerState.fileNames.Length; i++)
             {
-                fileNames.Add(randomPlayer.fileNames[i]);
+                fileNames.Add(randomPlayerState.fileNames[i]);
             }
         }
 
@@ -88,7 +88,7 @@ public class At_DynamicRandomPlayerEditor : Editor
     {
         if (shouldSave)
         {
-            //At_AudioEngineUtils.SaveRandomPl      ayerStateWithName(randomPlayer.name); modif mathias 30-06-202
+            //At_AudioEngineUtils.SaveRandomPlayerStateWithName(randomPlayer.name); modif mathias 30-06-202
             At_AudioEngineUtils.SaveAllState();
             shouldSave = false;
         }

@@ -477,7 +477,7 @@ public class At_MasterOutput : MonoBehaviour
     /**
    * @brief Method used to display properties of the At_MasterOutput in the Scene View.    
    */
-
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         At_VirtualMic[] vms = GameObject.FindObjectsOfType<At_VirtualMic>();
@@ -489,7 +489,6 @@ public class At_MasterOutput : MonoBehaviour
 
             if (vms != null && vms.Length != 0 && vms != null && vms.Length != 0)
             {
-
                 At_VirtualMic currentMic = null;
                 At_VirtualMic nextMic = null;
                 At_VirtualSpeaker currentSpk = null;
@@ -560,7 +559,7 @@ public class At_MasterOutput : MonoBehaviour
         }
         return null;
     }
-
+#endif
 
     /**
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)

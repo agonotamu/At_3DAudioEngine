@@ -33,41 +33,23 @@
 #include <iostream>
 #endif
 #include "AudioPluginUtil.h"
-#define MAX_BUFFER_SIZE 2048
+#define MAX_BUFFER_SIZE 1024
 #define NUM_BUFFER_IN_DELAY 2
-#define MAX_OUTPUT_CHANNEL 48
+#define MAX_OUTPUT_CHANNEL 24
 #define MAX_INPUT_CHANNEL 16
-
 
 
 namespace Spatializer
 {
     typedef struct directiveData DirectiveData;
 
-    struct directiveData {
-        int index[2];
-        int weight[2];
-    };
-
     class At_WfsSpatializer
     {
 
     public:
 
-        /*
-        static At_WfsSpatializer& getInstance()
-        {
-            static At_WfsSpatializer instance; // Guaranteed to be destroyed.
-            // Instantiated on first use.
-            return instance;
-        }
-        */
-
-        At_WfsSpatializer();
-        ~At_WfsSpatializer();
-
         int process(float* inBuffer, float* outBuffer, int bufferLength, int inChannel, int outChannel);
-        int setSourcePosition(float* position, float* rotation, float* forward); //modif mathias 06-14-2021
+        int setSourcePosition(float* position, float* rotation, float* forward); 
         int setSourceAttenuation(float attenuation);
         int setSourceOmniBalance(float omniBalance);
         int setTimeReversal(float timeReversal);
@@ -82,8 +64,8 @@ namespace Spatializer
 
         int spatID = 0;
 
-        bool m_is3D; //modif mathias 06-17-2021
-        bool m_isDirective; //modif mathias 06-17-2021
+        bool m_is3D; 
+        bool m_isDirective; 
 
     private:
         void setIs3DIsDirective(bool is3D, bool isDirective); //modif mathias 06-17-2021
@@ -92,49 +74,41 @@ namespace Spatializer
 
         
         void updateDelayBuffer(int bufferLength);
-        // 11/03/2021 - BUG CORRECTION- we do not use azimuth and elevation any more, but forward vector only.
-        /*
-        float getElevation(int virtualMicIdx, float* direction);
-        float getAzimuth(int virtualMicIdx, float* direction);        
-        void getWfsVolumeAndDelay(int virtualMicIndex, float virtualMicDistance, float* wfsVolume, float* wfsDelay);
-        */
+        
         void updateWfsVolumeAndDelay();
         void updateMixMaxDelay();
         void applyWfsGainDelay(int virtualMicIndex, int m_virtualMicCount, int bufferLength, bool isDirective); //modif mathias 06-17-2021
        
-        // modif Mathias 06-14-2021
+        
         void updateMixedDirectiveChannel(int virtualMicIdx, int inChannelCount);
 
         float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];
         float m_pDelayBuffer[MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
-//#ifdef RING_BUFFER
-        RingBuffer<MAX_BUFFER_SIZE* NUM_BUFFER_IN_DELAY, float> m_pCircularDelayBuffer;
-//#endif
 
-#if DIRECTIVE_PLAYER
-        float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * 2];
-#endif
+        float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
+
 
         float m_sourcePosition[3];
-        float m_sourceRotation[3]; //modif mathias 06-14-2021
-        float m_sourceForward[3]; //modif mathias 06-14-2021
+        float m_sourceRotation[3]; 
+        float m_sourceForward[3]; 
         float m_attenuation;
         float m_omniBalance;
         float m_timeReversal;
-        float m_minDelay;
-        float m_maxDelay;
+        float m_minDelay, m_minDelay_prevFrame;
+        float m_maxDelay, m_maxDelay_prevFrame;
+        
         float m_minDistance;
 
-        float m_ChannelWeight[MAX_OUTPUT_CHANNEL][2][2]; //modif mathias 06-14-2021
-        // todo : utiliser plutôt une structure 
-        DirectiveData m_ChannelWeightStruct;
-
-
+        float m_ChannelWeight[MAX_OUTPUT_CHANNEL][2][2];
+        
         float m_pAzimuth[MAX_OUTPUT_CHANNEL];
         float m_pElevation[MAX_OUTPUT_CHANNEL];
 
         float m_pWfsVolume[MAX_OUTPUT_CHANNEL];
         float m_pWfsDelay[MAX_OUTPUT_CHANNEL];
+        
+        float m_pWfsVolume_prevFrame[MAX_OUTPUT_CHANNEL];
+        float m_pWfsDelay_prevFrame[MAX_OUTPUT_CHANNEL];
 
         // common variables for each instance 
         float m_sampleRate = 48000.0f;

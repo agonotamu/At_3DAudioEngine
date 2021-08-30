@@ -390,7 +390,7 @@ public class At_PlayerEditor : Editor
                     float[] XYstart = new float[2];
                     if (player.meters != null)
                     {
-                        XYstart = DisplayMetering(player.meters, player.GetIsPlaying());
+                        XYstart = DisplayMetering(player.meters, player.isPlaying);
 
 
                         float sliederHeight = 86;

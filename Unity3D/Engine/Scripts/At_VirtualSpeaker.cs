@@ -10,7 +10,7 @@ public class At_VirtualSpeaker : MonoBehaviour
 #if UNITY_STANDALONE
     private void Awake()
     {
-        //GetComponent<MeshRenderer>().enabled = false;        
+        GetComponent<MeshRenderer>().enabled = false;        
     }
 #endif
 }

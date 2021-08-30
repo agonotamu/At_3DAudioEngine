@@ -26,8 +26,10 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public float gain;
     public string[] fileNames;
     public float attenuation;
-    public float omniBalance;   
-    List<GameObject> playerInstances;
+    public float omniBalance;
+    //List<GameObject> playerInstances;
+    GameObject[] playerInstances;
+    float[] playerInstancesCreationTime;
     // minimum distance above which the sound produced by the source is attenuated
     public float minDistance;
 
@@ -43,67 +45,115 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public float spawnDistance;
     float time = 0;
     At_DynamicRandomPlayerState randomPlayerState;
+    const int maxInstance = 10;
     
-
     // Start is called before the first frame update
     void Start()
     {
-        playerInstances = new List<GameObject>();
+        At_MasterOutput mo = GameObject.FindObjectOfType<At_MasterOutput>();//.
+        //playerInstances = new List<GameObject>();
+        playerInstances = new GameObject[maxInstance];
+        playerInstancesCreationTime = new float[maxInstance];
+
+        for (int i = 0;i< maxInstance; i++)
+        {
+            playerInstances[i] = new GameObject();
+            //playerInstances[i].name = randomPlayerState.name + "_" + i.ToString("00");
+            playerInstances[i].transform.SetParent(gameObject.transform);
+            playerInstances[i].AddComponent<At_Player>();
+            mo.addPlayerToList(playerInstances[i].GetComponent<At_Player>());
+        }
         externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
+
     }
     private void Update()
     {
         // Auto-generate (Debug)
-        /*
+        
         time += Time.deltaTime;
-        if (time > 0.3f)
+        if (time > 0.1f)
         {
             AddOneShotInstanceAndRandomPlay();
             time = 0;
         }
-        */
+        
         
         //System.GC.Collect();
         //Resources.UnloadUnusedAssets();
 
+    }
+    int getFreeSlot()
+    {
+        int freeSlotIndex = -1;
 
+        for (int i = 0; i < maxInstance; i++){
 
+            At_Player p = playerInstances[i].GetComponent<At_Player>();
 
+            if (!p.isPlaying)
+            {
+                freeSlotIndex = i;
+                break;
+            }
+
+        }
+
+        return freeSlotIndex;
+
+    }
+    
+    int getOlder()
+    {
+        int indexOlder = 0;
+        for (int i = 0; i < maxInstance; i++)
+        {
+            if (playerInstancesCreationTime[i] < playerInstancesCreationTime[indexOlder])
+            {
+                indexOlder = i;
+            }
+        }
+        return indexOlder;
     }
 
     public void AddOneShotInstanceAndRandomPlay()
     {
         if (fileNames != null && fileNames.Length != 0 && fileNames[0] !="")
         {
-            playerInstances.Add(new GameObject(gameObject.name+"(Clone"+ playerInstances.Count+")"));            
-            //playerInstances[playerInstances.Count - 1].transform.SetParent(transform);
+           
+            int indexinstance = getFreeSlot();
+            if (indexinstance == -1)
+            {
+                // we use the first slot
+                indexinstance = getOlder();                
+            }
+
+            playerInstancesCreationTime[indexinstance] = Time.realtimeSinceStartup;
+            Debug.Log("Inex Random =" + indexinstance);
+            At_Player p = playerInstances[indexinstance].GetComponent<At_Player>();
+            p.StopPlaying();
             float r_angle = Random.Range(spawnMinAngle, spawnMaxAngle) * Mathf.PI / 180f;
             float r_distance = Random.Range(0, spawnDistance);
-            playerInstances[playerInstances.Count - 1].transform.position = transform.position + new Vector3(r_distance * Mathf.Cos(r_angle), 0, r_distance * Mathf.Sin(r_angle));
-            //playerInstances[playerInstances.Count - 1].transform.localPosition = Vector3.zero;
-            
-            
-            playerInstances[playerInstances.Count - 1].AddComponent<At_Player>();
-            At_Player p = playerInstances[playerInstances.Count - 1].GetComponent<At_Player>();
+            playerInstances[indexinstance].transform.position = transform.position + new Vector3(r_distance * Mathf.Cos(r_angle), 0, r_distance * Mathf.Sin(r_angle));
             p.is3D = is3D;
             p.isDirective = isDirective;//modif mathias 06-17-2021
             p.gain = gain;
             p.isLooping = false;
-            p.omniBalance = omniBalance;            
-            p.attenuation = attenuation;            
+            p.omniBalance = omniBalance;
+            p.attenuation = attenuation;
             int r = Random.Range(0, fileNames.Length);
             p.fileName = fileNames[r];
             p.isDynamicInstance = true;
             p.channelRouting = channelRouting;
             p.minDistance = minDistance;
-            p.initAudioFile();
-            GameObject.FindObjectOfType<At_MasterOutput>().addPlayerToList(p);
+            p.initAudioFile();            
             p.StartPlaying();
+
         }
 
         
     }
 
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithName(gameObject.name);
@@ -140,5 +190,5 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 
         }
     }
-
+#endif
 }

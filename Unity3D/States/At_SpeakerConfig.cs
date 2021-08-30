@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class At_SpeakerConfig : Editor
+public class At_SpeakerConfig :MonoBehaviour//: Editor
 {
 
     static float virtualMicScale = 50f;
