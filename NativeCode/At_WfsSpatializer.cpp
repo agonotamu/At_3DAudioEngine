@@ -85,7 +85,16 @@ namespace Spatializer
                 indexChannel1 = 0;
             }
 
-            indexChannel2 = indexChannel1 + 1;
+            if (indexChannel1 == inChannelCount) {
+                indexChannel1 = 0;
+            }
+
+            if (indexChannel1 >= inChannelCount - 1) {
+                indexChannel2 = 0;
+            }
+            else {
+                indexChannel2 = indexChannel1 + 1;
+            }
 
             tmp = (int)indexChannels;
             if (tmp == indexChannels) {
@@ -97,19 +106,12 @@ namespace Spatializer
 
             weight2 = 1 - weight1;
 
-            if (indexChannel2 >= inChannelCount) {
-                indexChannel2 = 0;
-            }
-
             m_ChannelWeight[virtualMicIdx][0][0] = indexChannel1;
             m_ChannelWeight[virtualMicIdx][0][1] = weight1;
             m_ChannelWeight[virtualMicIdx][1][0] = indexChannel2;
             m_ChannelWeight[virtualMicIdx][1][1] = weight2;
 
-            /*if (virtualMicIdx == 0) {                    
-                std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << m_ChannelWeight[virtualMicIdx][0][0] << " - Weight1 : " << m_ChannelWeight[virtualMicIdx][0][1] << " - Channel2 : " << (int)m_ChannelWeight[virtualMicIdx][1][0] << " - Weight2 : " << m_ChannelWeight[virtualMicIdx][1][1] << " \n";
-                std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << indexChannel1 << " - Weight1 : " << weight1 << " - Channel2 : " << indexChannel1 << " - Weight2 : " << weight1 << " \n";
-            }*/
+            //std::cout << "Mic : " << virtualMicIdx << " - Channel1 : " << m_ChannelWeight[virtualMicIdx][0][0] << " - Weight1 : " << m_ChannelWeight[virtualMicIdx][0][1] << " - Channel2 : " << (int)m_ChannelWeight[virtualMicIdx][1][0] << " - Weight2 : " << m_ChannelWeight[virtualMicIdx][1][1] << " \n";  
         }
     
     }
