@@ -16,6 +16,9 @@ public class At_PlayerState
 {
     // integer given the type of the player 
     public int type = 0;
+
+    public string guid;
+
     /// Name of the GameObject the At_PLayer is attached to
     public string name = "";
     /// name of the audio file to play (Supposed to be in "Assets\Streaming Asset")
@@ -44,5 +47,7 @@ public class At_PlayerState
     public int[] channelRouting;
 
     public int numChannelInAudiofile;
+
+    
 
 }

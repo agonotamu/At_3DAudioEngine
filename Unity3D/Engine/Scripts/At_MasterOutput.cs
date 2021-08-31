@@ -101,7 +101,7 @@ public class At_MasterOutput : MonoBehaviour
         playerObjectToDestroy = new List<At_Player>();
 
         outputState = At_AudioEngineUtils.getOutputState();
-
+        samplingRate = outputState.samplingRate;
         // get the reference of the At_Mixer instance
         mixer = gameObject.GetComponent<At_Mixer>();
 
@@ -165,7 +165,7 @@ public class At_MasterOutput : MonoBehaviour
                 // Initialize a Patcher with the correct sample rate and number of intput and outputs 
                 inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);
                 // Initialize Record and Playback for the device
-                asioOut.InitRecordAndPlayback(new SampleToWaveProvider(inputPatcher), inputChannels, 44100);
+                asioOut.InitRecordAndPlayback(new SampleToWaveProvider(inputPatcher), inputChannels, samplingRate);
                 // Add a callback method to proccess the sample in the in/out buffer
                 asioOut.AudioAvailable += OnAsioOutAudioAvailable;
                 // Start processing (i.e. calling the callback method)
@@ -442,12 +442,13 @@ public class At_MasterOutput : MonoBehaviour
                 // call the Sample Provider methtod to convert the sample format to the format requiered 
                 // and output the converted samples to the output buffer of the audio device. 
 
-                /*
+                
                 inputPatcher.ProcessBuffer(tmpMonoBuffer, e.OutputBuffers, e.SamplesPerBuffer, e.AsioSampleType, UMC_outputRouting[masterChannel], maxDeviceChannel);
                 System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
-                */
+                /*
                 inputPatcher.ProcessBuffer(tmpMonoBuffer, e.OutputBuffers, e.SamplesPerBuffer, e.AsioSampleType, masterChannel, maxDeviceChannel);
                 System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
+                */
             }
 
             e.WrittenToOutputBuffers = true;
@@ -522,10 +523,10 @@ public class At_MasterOutput : MonoBehaviour
             }
 
         }
-        
+        /*
         if (At_AudioEngineUtils.setSpeakerState(vms, vss))
             At_AudioEngineUtils.saveSpeakerState();
-
+        */
         //At_AudioEngineUtils.saveVirtualSpeakerState(vms, vss);
     }
 

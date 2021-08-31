@@ -41,13 +41,13 @@ public class At_3DAudioEngineState
     public List<At_PlayerState> playerStates = new List<At_PlayerState>();
 
     // Get whole PLayer State with the GameObject Name
-    public At_PlayerState getPlayerState(string name)
+    public At_PlayerState getPlayerState(string guid)
     {
         // loop through the list of Saved Players in the scene
         for (int i = 0; i < playerStates.Count; i++)
         {
             // if the name is found, return
-            if (playerStates[i].name == name)
+            if (playerStates[i].guid == guid)
             {
                 return playerStates[i];
             }
@@ -55,20 +55,6 @@ public class At_3DAudioEngineState
         return null;
     }
 
-    // Remove a Player State from the list (when the component is removed or the GameObject Destroyed 
-    public bool removePlayerState(string name)
-    {
-        for (int i = 0; i < playerStates.Count; i++)
-        {
-            if (playerStates[i].name == name)
-            {
-                Debug.Log("remove " + name);
-                playerStates.RemoveAt(i);
-                return true;
-            }
-        }
-        return false;
-    }
 
   /******************************************************************************************************
   * 
@@ -79,13 +65,13 @@ public class At_3DAudioEngineState
     public List<At_DynamicRandomPlayerState> randomPlayerStates = new List<At_DynamicRandomPlayerState>();
 
     // Get whole PLayer State with the GameObject Name
-    public At_DynamicRandomPlayerState getRandomPlayerState(string name)
+    public At_DynamicRandomPlayerState getRandomPlayerState(string guid)
     {
         // loop through the list of Saved Players in the scene
         for (int i = 0; i < randomPlayerStates.Count; i++)
         {
             // if the name is found, return
-            if (randomPlayerStates[i].name == name)
+            if (randomPlayerStates[i].guid == guid)
             {
                 return randomPlayerStates[i];
             }

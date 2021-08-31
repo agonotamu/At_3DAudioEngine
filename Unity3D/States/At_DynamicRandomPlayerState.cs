@@ -17,6 +17,9 @@ public class At_DynamicRandomPlayerState
 {
     // integer given the type of the player 
     public int type = 1;
+
+    public string guid;
+
     // Name of the GameObject the At_PLayer is attached to
     public string name = "";
     // name of the audio file to play (Supposed to be in "Assets\Streaming Asset")

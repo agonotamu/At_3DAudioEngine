@@ -158,6 +158,7 @@ namespace Spatializer
             
             m_pWfsVolume[virtualMicIdx] = cardioidSens * rolloff;
 
+            //std::cout << "Mic : " << virtualMicIdx << " - volume : " << m_pWfsVolume[virtualMicIdx] << " \n";
         }
 
 
@@ -269,7 +270,7 @@ namespace Spatializer
                 
                 // if the source is "Directive", we get a weighted sum of the two choosen input channel and apply smooth volume and delay
                 if (isDirective == true) {
-                    sample_prevFrame = m_pWfsVolume_prevFrame[virtualMicIdx] * (m_ChannelWeight[virtualMicIdx][0][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][0][0]][idx]
+                    sample_prevFrame = m_pWfsVolume_prevFrame[virtualMicIdx] * (m_ChannelWeight[virtualMicIdx][0][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][0][0]][idx_prevFrame]
                         + m_ChannelWeight[virtualMicIdx][1][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][1][0]][idx_prevFrame]);
                     sample_currFrame = m_pWfsVolume[virtualMicIdx] * (m_ChannelWeight[virtualMicIdx][0][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][0][0]][idx]
                         + m_ChannelWeight[virtualMicIdx][1][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][1][0]][idx]);

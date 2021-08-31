@@ -18,6 +18,7 @@ using UnityEditor;
 using System.IO;
 using SFB;
 
+[ExecuteInEditMode]
 [CanEditMultipleObjects]
 [CustomEditor(typeof(At_Player))]
 public class At_PlayerEditor : Editor
@@ -44,82 +45,93 @@ public class At_PlayerEditor : Editor
 
     int currentOutputChannelCount;
 
-    string externAssetsPath;
+    string externAssetsPath_audio, externAssetsPath_audio_standalone;
 
+    private bool mRunningInEditor;
+
+    
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
+        mRunningInEditor = Application.isEditor && !Application.isPlaying;
+
+
         // get a reference to the At_Player isntance (core engine of the player)
         player = (At_Player)target;
+        
         if (!player.isDynamicInstance)
         {
-            externAssetsPath = GameObject.FindObjectOfType<At_ExternAssets>().externAssetsPath_audio;
+            At_ExternAssets ea = GameObject.FindObjectOfType<At_ExternAssets>();
+            externAssetsPath_audio = ea.externAssetsPath_audio;
+            externAssetsPath_audio_standalone = ea.externAssetsPath_audio_standalone;
 
-            //SceneView.duringSceneGui += OnSceneGUI;
-
-           
-            player.externAssetsPath = externAssetsPath;
-
-            if (!player.isDynamicInstance)
-            {
-                horizontalLine = new GUIStyle();
-                horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
-                horizontalLine.margin = new RectOffset(0, 0, 4, 4);
-                horizontalLine.fixedHeight = 1;
-
-                // get the name of the GameObject 
-                gameObjectName = player.gameObject.name;
-
-                // Get the state of the player
-                // - If the GameObject name is found just return the instance in the At_PlayerState List
-                // - If the GameObject name is not found, it try loud read a json file for this name.
-                //      - if the file is found, it's read, an instance is created and added to the list and is returned
-                //      - if the file is not found, create a new "empty" At_PlayerState"
-                playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObjectName);
-
-                // set all the
-
-                player.fileName = playerState.fileName;
-                player.gain = playerState.gain;
-                player.is3D = playerState.is3D;
-                player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
-                player.isLooping = playerState.isLooping;
-                player.isPlayingOnAwake = playerState.isPlayingOnAwake;
-                player.attenuation = playerState.attenuation;
-                player.omniBalance = playerState.omniBalance;
-                player.timeReversal = playerState.timeReversal;
-                player.minDistance = playerState.minDistance;
-                player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
+            player.externAssetsPath_audio = externAssetsPath_audio;
+            player.externAssetsPath_audio_standalone = externAssetsPath_audio_standalone;
 
 
-                At_OutputState outputState = At_AudioEngineUtils.getOutputState();
-                if (playerState.fileName != "")
-                {
-                    if (playerState.channelRouting == null || playerState.channelRouting.Length == 0)//|| player.outputChannelCount != outputState.outputChannelCount)
-                    {
-                        //currentOutputChannelCount = outputState.outputChannelCount;
-                        int numChannel = player.getNumChannelInAudioFile();
-                        playerState.channelRouting = new int[numChannel];
-                        for (int i = 0; i < numChannel; i++)
-                        {
-                            playerState.channelRouting[i] = i;
-                        }
+            horizontalLine = new GUIStyle();
+            horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
+            horizontalLine.margin = new RectOffset(0, 0, 4, 4);
+            horizontalLine.fixedHeight = 1;
 
-                    }
-                }
+            // get the name of the GameObject 
+            gameObjectName = player.gameObject.name;
 
 
-                //|| currentOutputChannelCount != outputState.outputChannelCount
-                player.outputChannelCount = outputState.outputChannelCount;
-                player.channelRouting = playerState.channelRouting;
-                //player.state = playerState;
+            // Get the state of the player
+            // - If the GameObject name is found just return the instance in the At_PlayerState List
+            // - If the GameObject name is not found, it try loud read a json file for this name.
+            //      - if the file is found, it's read, an instance is created and added to the list and is returned
+            //      - if the file is not found, create a new "empty" At_PlayerState"
+            playerState = At_AudioEngineUtils.getPlayerStateWithGuidAndName(player.guid, gameObjectName);
+
+            if (playerState == null)
+            {               
+                playerState = At_AudioEngineUtils.createNewPlayerStateWithGuidAndName(player.guid, gameObjectName);
             }
+
+            // set all the
+            player.fileName = playerState.fileName;
+            player.gain = playerState.gain;
+            player.is3D = playerState.is3D;
+            player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
+            player.isLooping = playerState.isLooping;
+            player.isPlayingOnAwake = playerState.isPlayingOnAwake;
+            player.attenuation = playerState.attenuation;
+            player.omniBalance = playerState.omniBalance;
+            player.timeReversal = playerState.timeReversal;
+            player.minDistance = playerState.minDistance;
+            player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
+
+
+            At_OutputState outputState = At_AudioEngineUtils.getOutputState();
+            if (playerState.fileName != "")
+            {
+                if (playerState.channelRouting == null || playerState.channelRouting.Length == 0)//|| player.outputChannelCount != outputState.outputChannelCount)
+                {
+                    //currentOutputChannelCount = outputState.outputChannelCount;
+                    int numChannel = player.getNumChannelInAudioFile();
+                    playerState.channelRouting = new int[numChannel];
+                    for (int i = 0; i < numChannel; i++)
+                    {
+                        playerState.channelRouting[i] = i;
+                    }
+
+                }
+            }
+
+
+            //|| currentOutputChannelCount != outputState.outputChannelCount
+            player.outputChannelCount = outputState.outputChannelCount;
+            player.channelRouting = playerState.channelRouting;
+            //player.state = playerState;
+            
         }
         
 
     }
 
-
+   
     public void OnDisable()
     {
 
@@ -133,31 +145,21 @@ public class At_PlayerEditor : Editor
             }
         }
 
-        if (player == null && !Application.isPlaying)
-        {
-            // BUG - THIS IS CALL WHEN PLAY MODE IS ACTIVE !!!
-            /*
-            Debug.Log("remove State !");
-            // the component has been removed or the GameObject has been destroyed
-            // so remove the PlayerState for this object
-            At_AudioEngineUtils.getPlayerState().removePlayerState(gameObjectName);
-            // save the Player State to be always updated !!
-            At_AudioEngineUtils.SavePlayerState();
-            */
-            
-
-        }
-        //Debug.Log("save players state on disable");
-        //At_AudioEngineUtils.SaveState("players");
     }
 
-
-    public void Start()
+    void OnDestroy()
     {
-        Debug.Log("Start Game");
+        Event e = Event.current;
+
+        if (e == null && mRunningInEditor && target == null)
+        {
+            Debug.Log("remove Player !");
+            At_AudioEngineUtils.removePlayerWithGuid(player.guid);
+        }
         
     }
 
+    
     // load ressources for the GUI (textures, etc.)
     private void AffirmResources()
     {
@@ -208,8 +210,8 @@ public class At_PlayerEditor : Editor
                         new ExtensionFilter("Sound Files", "mp3", "wav", "aiff", "aac", "mp4"),
                     };
                     string[] paths;
-                    paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsPath, extensions, false);
-                    string s = paths[0].Replace(externAssetsPath, "");
+                    paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsPath_audio, extensions, false);
+                    string s = paths[0].Replace(externAssetsPath_audio, "");
 
                     if (s != playerState.fileName)
                     {

@@ -45,8 +45,35 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public float spawnDistance;
     float time = 0;
     At_DynamicRandomPlayerState randomPlayerState;
-    const int maxInstance = 10;
+    const int maxInstance = 20;
     
+    
+    public string guid="";
+
+    void Reset()
+    {
+        setGuid();
+        
+    }
+    void OnValidate()
+    {
+        Event e = Event.current;
+
+        if (e != null)
+        {
+            if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
+            {
+                setGuid();
+            }
+        }
+    }
+
+    public void setGuid()
+    {
+        guid = System.Guid.NewGuid().ToString();
+        //Debug.Log("create player with guid : " + guid);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -63,20 +90,21 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             playerInstances[i].AddComponent<At_Player>();
             mo.addPlayerToList(playerInstances[i].GetComponent<At_Player>());
         }
-        externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
+        
+        //externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
 
     }
     private void Update()
     {
         // Auto-generate (Debug)
-        
+        /*
         time += Time.deltaTime;
         if (time > 0.1f)
         {
             AddOneShotInstanceAndRandomPlay();
             time = 0;
         }
-        
+        */
         
         //System.GC.Collect();
         //Resources.UnloadUnusedAssets();
@@ -128,7 +156,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             }
 
             playerInstancesCreationTime[indexinstance] = Time.realtimeSinceStartup;
-            Debug.Log("Inex Random =" + indexinstance);
+            //Debug.Log("Inex Random =" + indexinstance);
             At_Player p = playerInstances[indexinstance].GetComponent<At_Player>();
             p.StopPlaying();
             float r_angle = Random.Range(spawnMinAngle, spawnMaxAngle) * Mathf.PI / 180f;
@@ -141,11 +169,15 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             p.omniBalance = omniBalance;
             p.attenuation = attenuation;
             int r = Random.Range(0, fileNames.Length);
+
+            p.externAssetsPath_audio = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio;
+            p.externAssetsPath_audio_standalone = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio_standalone;
+
             p.fileName = fileNames[r];
             p.isDynamicInstance = true;
             p.channelRouting = channelRouting;
             p.minDistance = minDistance;
-            p.initAudioFile();            
+            p.initAudioFile(true);            
             p.StartPlaying();
 
         }
@@ -156,7 +188,16 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithName(gameObject.name);
+        randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithGuidAndName(guid, gameObject.name);//getRandomPlayerStateWithName(gameObject.name);
+
+        float spawnMinAngle = 0, spawnMaxAngle = 0, spawnDistance = 0;
+
+        if (randomPlayerState != null)
+        {
+            spawnMinAngle = randomPlayerState.spawnMinAngle;
+            spawnMaxAngle = randomPlayerState.spawnMaxAngle;
+            spawnDistance = randomPlayerState.spawnDistance;
+        }
 
         if (is3D)
         {
@@ -164,8 +205,8 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             //Debug.Log(angleOffset);
             const float numStepDrawCircle = 20;
            
-            float startAngle = randomPlayerState.spawnMinAngle * Mathf.PI / 180f;
-            float endAngle = randomPlayerState.spawnMaxAngle * Mathf.PI / 180f;
+            float startAngle = spawnMinAngle * Mathf.PI / 180f;
+            float endAngle = spawnMaxAngle * Mathf.PI / 180f;
             
 
             float angle = (endAngle - startAngle) / numStepDrawCircle;
@@ -175,8 +216,8 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             for (int i = 0; i < numStepDrawCircle; i++)
             {
                
-                Vector3 center = transform.position + new Vector3(randomPlayerState.spawnDistance * Mathf.Cos(startAngle + i * angle), 0, randomPlayerState.spawnDistance * Mathf.Sin(startAngle + i * angle));
-                Vector3 nextCenter = transform.position + new Vector3(randomPlayerState.spawnDistance * Mathf.Cos(startAngle + (i + 1) * angle), 0, randomPlayerState.spawnDistance * Mathf.Sin(startAngle + (i + 1) * angle));
+                Vector3 center = transform.position + new Vector3(spawnDistance * Mathf.Cos(startAngle + i * angle), 0, spawnDistance * Mathf.Sin(startAngle + i * angle));
+                Vector3 nextCenter = transform.position + new Vector3(spawnDistance * Mathf.Cos(startAngle + (i + 1) * angle), 0, spawnDistance * Mathf.Sin(startAngle + (i + 1) * angle));
                 
                 
                 if (i == 0) Gizmos.DrawLine(transform.position, center);

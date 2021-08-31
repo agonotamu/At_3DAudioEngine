@@ -8,7 +8,7 @@ using namespace std;
 
 //#define DEBUGLOG
 //#define RING_BUFFER
-#define DIRECTIVE_PLAYER
+//#define DIRECTIVE_PLAYER
 
 namespace Spatializer
 {

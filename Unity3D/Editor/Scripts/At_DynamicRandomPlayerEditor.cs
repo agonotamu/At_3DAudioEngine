@@ -22,14 +22,20 @@ public class At_DynamicRandomPlayerEditor : Editor
 
     bool shouldSave = false;
 
+    private bool mRunningInEditor;
+
     public void OnEnable()
     {
+        mRunningInEditor = Application.isEditor && !Application.isPlaying;
+        
+
 
         externAssetsPath = GameObject.FindObjectOfType<At_ExternAssets>().externAssetsPath_audio;
 
         fileNames = new List<string>();
         // get a reference to the At_Player isntance (core engine of the player)
         randomPlayer = (At_DynamicRandomPlayer)target;
+
         gameObjectName = randomPlayer.gameObject.name;
 
         horizontalLine = new GUIStyle();
@@ -37,7 +43,14 @@ public class At_DynamicRandomPlayerEditor : Editor
         horizontalLine.margin = new RectOffset(0, 0, 4, 4);
         horizontalLine.fixedHeight = 1;
 
-        randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithName(gameObjectName);
+        randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithGuidAndName(randomPlayer.guid, gameObjectName);//getRandomPlayerStateWithName(gameObjectName);
+        if (randomPlayerState ==null)
+        {
+           
+            randomPlayerState = At_AudioEngineUtils.createNewRandomPlayerStateWithGuidAndName(randomPlayer.guid, gameObjectName);
+
+        }
+        
         At_OutputState outputState = At_AudioEngineUtils.getOutputState();
         //randomPlayerState.numChannelInAudiofile = outputState.outputChannelCount;
 
@@ -48,6 +61,8 @@ public class At_DynamicRandomPlayerEditor : Editor
                 fileNames.Add(randomPlayerState.fileNames[i]);
             }
         }
+
+        randomPlayerState.guid = randomPlayer.guid; 
 
         randomPlayer.fileNames = randomPlayerState.fileNames;
         randomPlayer.gain = randomPlayerState.gain;
@@ -92,6 +107,24 @@ public class At_DynamicRandomPlayerEditor : Editor
             At_AudioEngineUtils.SaveAllState();
             shouldSave = false;
         }
+
+        if (randomPlayer == null)
+        {
+           
+
+        }
+    }
+
+    
+    void OnDestroy()
+    {
+        Event e = Event.current;
+        if (e == null && mRunningInEditor && target == null)
+        {
+            Debug.Log("remove Random Player !");
+            At_AudioEngineUtils.removeRandomPlayerWithGuid(randomPlayer.guid);
+        }
+
     }
 
     //============================================================================================================================

@@ -40,7 +40,7 @@ public class At_Player : MonoBehaviour
     /// constants used for array initialization 
     const int MAX_BUF_SIZE = 1024;
     const int MAX_OUTPUT_CHANNEL = 24; // very very very large !!
-    const int MAX_INPUT_CHANNEL = 4;
+    const int MAX_INPUT_CHANNEL = 16;
     /// array containing the all the samples of the audio file
     private float[] rawAudioData;
     /// array containing a single frame of the audio file
@@ -105,12 +105,42 @@ public class At_Player : MonoBehaviour
     /// rms value of the signal from each channel, used to display bargraph
     public float[] meters;
 
-    public string externAssetsPath;
+    public string externAssetsPath_audio, externAssetsPath_audio_standalone;
 
     bool mustBeDestroyedNow = false;
     bool mustBeDestroyedSafely = false;
     bool mustBeDestroyedOnNextFrame = false;
     public At_MasterOutput masterOutput;
+
+    public string guid = "";
+    
+    void Reset()
+    {        
+        setGuid();        
+    }
+
+    void OnValidate()
+    {
+        Event e = Event.current;
+
+        if (e != null)
+        {
+            Debug.Log(e.commandName);
+            if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
+            {
+                setGuid();
+            }
+            
+        }
+    }
+
+   
+    public void setGuid()
+    {
+        guid = System.Guid.NewGuid().ToString();
+        //Debug.Log("create player with guid : " + guid);
+    }
+
     //-----------------------------------------------------     
     // Awake, Disable, Get/Start/Stop playing 
     //-----------------------------------------------------
@@ -148,12 +178,16 @@ public class At_Player : MonoBehaviour
         mustBeDestroyedSafely = true;
     }
     public void OnDisable() { playerCount--; }
+
+    
+
     public void Awake() {
-        
+
+       
+
         playerCount++;
-        //if(!isDynamicInstance)
-            //playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObject.name);
-        initAudioFile();
+        
+        initAudioFile(false);
     }
 
     // for use from the outside without any instantiated At_Player
@@ -173,7 +207,13 @@ public class At_Player : MonoBehaviour
     public int getNumChannelInAudioFile()
     {
         //string path = Application.dataPath + "/StreamingAssets/" + fileName;
-        string path = externAssetsPath + fileName;
+        string path = "";
+#if UNITY_EDITOR
+    path = externAssetsPath_audio + fileName;
+#else 
+    path = externAssetsPath_audio_standalone + fileName;
+#endif
+
         //Parse the file with NAudio
         if (fileName != null)
         {
@@ -186,7 +226,13 @@ public class At_Player : MonoBehaviour
 
     public void initMeters() {
         //string path = Application.dataPath + "/StreamingAssets/" + fileName;
-        string path = externAssetsPath + fileName;
+        //string path = externAssetsPath_audio + fileName;
+        string path = "";
+#if UNITY_EDITOR
+        path = externAssetsPath_audio + fileName;
+#else 
+        path = externAssetsPath_audio_standalone + fileName;
+#endif
         //Parse the file with NAudio
         if (fileName != null) {
             aud = new AudioFileReader(path);
@@ -206,7 +252,7 @@ public class At_Player : MonoBehaviour
     * Initialize the inputFileBuffer and playerOutputBuffer arrays.
     * Get the number of channels of the audio file
     */
-    public void initAudioFile()
+    public void initAudioFile(bool isRandomDynamicPlayer)
     {
         /*
         if (is3D == false)
@@ -215,9 +261,25 @@ public class At_Player : MonoBehaviour
         }
         */
         //string path = Application.dataPath + "/StreamingAssets/" + fileName;
-        externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
-        string path = externAssetsPath + fileName;
+        //externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
+        Debug.Log("is dynamic ? " + isRandomDynamicPlayer);
+        if (!isRandomDynamicPlayer)
+        {
+            playerState = At_AudioEngineUtils.getPlayerStateWithGuidAndName(guid, gameObject.name);
+            if (playerState != null && playerState.fileName != null && playerState.fileName != "")
+                fileName = playerState.fileName;
+        }
 
+        string path = "";
+#if UNITY_EDITOR
+        path = externAssetsPath_audio + fileName;
+#else 
+        path = externAssetsPath_audio_standalone + fileName;
+        Debug.Log("init audio file with path : "+path);
+#endif
+        
+        //string path = externAssetsPath_audio + fileName;
+        //Debug.Log(path);
         //Parse the file with NAudio
         if (fileName != null)
         {
@@ -445,7 +507,7 @@ public class At_Player : MonoBehaviour
                         // Otherwise : this is the end of the audiofile
                         if (reachEndOfFile)
                         {
-                            Debug.Log("source " + spatID + "reach end");
+                            //Debug.Log("source " + spatID + "reach end");
                             for (int i = 0; i < audioFileReadOffset.Length; i++)
                             {
                                 audioFileReadOffset[i] = 0;
@@ -623,8 +685,17 @@ public class At_Player : MonoBehaviour
         float distance;
         if (!isDynamicInstance)
         {
-            playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObject.name);
-            distance = playerState.minDistance;
+            playerState = At_AudioEngineUtils.getPlayerStateWithGuidAndName(guid, gameObject.name);//getPlayerStateWithName(gameObject.name);
+
+            if (playerState != null)
+            {
+                distance = playerState.minDistance;
+            }
+            else
+            {
+                distance = 0;
+            }
+            
         }
         else
         {
@@ -657,7 +728,7 @@ public class At_Player : MonoBehaviour
                     Vector3 center = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - i * angle), 0, distance * Mathf.Sin(angleOffset - i * angle));
                     Vector3 nextCenter = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - (i + 1) * angle), 0, distance * Mathf.Sin(angleOffset - (i + 1) * angle));
                     
-                    Color c;
+                    //Color c;
                     if (i == 0) Gizmos.color = Color.red;
                     else if (i == 1) Gizmos.color = Color.green;
                     else Gizmos.color = Color.blue;
@@ -702,7 +773,7 @@ public class At_Player : MonoBehaviour
     /**
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)
      */
-    #region DllImport        
+#region DllImport        
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_setSourcePosition(int id, float[] position, float[] rotation, float[] forward); //modif mathias 06-14-2021
     [DllImport("AudioPlugin_AtSpatializer")]
@@ -716,6 +787,6 @@ public class At_Player : MonoBehaviour
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_process(int id, float[] inBuffer, float[] outBuffer, int bufferLength, int inChannelCount, int outChannelCount);
 
-    #endregion
+#endregion
 
 }
