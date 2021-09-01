@@ -71,8 +71,14 @@ public class At_AudioEngineUtils : MonoBehaviour
         */
         Debug.Log("load external asset state !");
 
-        string json = Resources.Load<TextAsset>("externalAssetsState").text;
-        if (json == null)
+        TextAsset ta = Resources.Load<TextAsset>("externalAssetsState");
+        string json = "";
+        if (ta)
+        {
+            json = ta.text;
+        }
+        
+        if (json == "")
         {
             Debug.LogWarning("External Asset State File not found!");
         }
@@ -522,8 +528,12 @@ public class At_AudioEngineUtils : MonoBehaviour
 
         string externAssetsPath = "";
 #if UNITY_EDITOR
-        externAssetsPath = externalAssetsStates.externAssetsPath_state;
-        Debug.Log("in editor !");
+        if (externalAssetsStates != null)
+        {
+            externAssetsPath = externalAssetsStates.externAssetsPath_state;
+            Debug.Log("in editor !");
+        }
+        
 #else
         Debug.Log("in standalone !");
         externAssetsPath = externalAssetsStates.externAssetsPath_state_standalone;
