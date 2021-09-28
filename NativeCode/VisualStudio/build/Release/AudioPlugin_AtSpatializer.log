@@ -1,0 +1,119 @@
+﻿cl : ligne de commande warning D9002: option '/arch:SSE2' inconnue ignorée
+  At_Effect.cpp
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_Effect.h(12,2): warning C4091: 'static ' : ignoré à gauche de 'At_Effect' quand aucune variable n'est déclarée
+  At_SpatializationEngine.cpp
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector(788,1): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector(747): message : voir la référence à l'instanciation de la fonction modèle 'Spatializer::At_WfsSpatializer *std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::_Emplace_reallocate<const _Ty&>(Spatializer::At_WfsSpatializer *const ,const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector(747): message : voir la référence à l'instanciation de la fonction modèle 'Spatializer::At_WfsSpatializer *std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::_Emplace_reallocate<const _Ty&>(Spatializer::At_WfsSpatializer *const ,const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector(756): message : voir la référence à l'instanciation de la fonction modèle 'void std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::emplace_back<const _Ty&>(const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vector(755): message : pendant la compilation de la fonction membre classe modèle 'void std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::push_back(const _Ty &)'
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_SpatializationEngine.cpp(47): message : voir la référence à l'instanciation de la fonction modèle 'void std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::push_back(const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_SpatializationEngine.h(30): message : voir la référence à l'instanciation classe modèle 'std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>' en cours de compilation
+  At_WfsSpatializer.cpp
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(64,97): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(71,102): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(89,29): warning C4244: '=' : conversion de 'double' en 'int', perte possible de données
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(111,29): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(116,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(118,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(143,90): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(344,23): warning C4553: '==' : résultat de l'expression non utilisé ; souhaitiez-vous utiliser '=' ?
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(368,26): warning C4101: 'wfsDelay' : variable locale non référencée
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(368,15): warning C4101: 'wfsVolume' : variable locale non référencée
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_WfsSpatializer.cpp(347,15): warning C4101: 'direction' : variable locale non référencée
+  AudioPluginUtil.cpp
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(9,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(18,5): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(29,18): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(96): message : voir la référence à l'instanciation de la fonction modèle 'void FFTProcess<double>(UnityComplexNumber *,int,bool)' en cours de compilation
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(40,36): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(53,36): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(61,32): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.h(75,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(84): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Sub<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(84): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Sub<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(96): message : voir la référence à l'instanciation de la fonction modèle 'void FFTProcess<double>(UnityComplexNumber *,int,bool)' en cours de compilation
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.h(76,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.h(68,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(85): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Add<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.cpp(85): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Add<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\AudioPluginUtil.h(69,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+  hrtftable.cpp
+  Plugin_At_Spatializer.cpp
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\At_Effect.h(12,2): warning C4091: 'static ' : ignoré à gauche de 'At_Effect' quand aucune variable n'est déclarée
+     Création de la bibliothèque D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.lib et de l'objet D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.exp
+  Génération de code en cours
+  Previous IPDB not found, fall back to full compilation.
+  All 154 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Fin de la génération du code
+  AudioPlugin_AtSpatializer.vcxproj -> D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+  Un sous-répertoire ou un fichier ..\..\Assets\Plugins\x86_64 existe déjà.
+          1 fichier(s) copié(s).

@@ -9,6 +9,13 @@
 namespace Spatializer
 {
 
+    At_WfsSpatializer::~At_WfsSpatializer() {
+
+        //std::cout << "In Destructor : Destroy Delay Buffer !" << " \n";
+        //delete[] m_pDelayBuffer;
+        //m_pDelayBuffer = NULL;
+    }
+
     /****************************************************************************
     *
     *           GET THE FIRST CHANNEL OHF THE MULTICHANNEL INPUT BUFFER              
@@ -185,17 +192,40 @@ namespace Spatializer
     *****************************************************************************/
 
     void At_WfsSpatializer::initDelayBuffer() {
-        for (int i = 0; i < MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY; i++) {
+
+        // 
+        
+        float maxDistanceForOneBuffer = 340 * MAX_BUFFER_SIZE / m_sampleRate;
+
+        //std::cout << "maxDistanceForOneBuffer = " << maxDistanceForOneBuffer << " \n";
+
+        int numBufferRequiredForUserMaxDistance = (int)(m_maxDistanceForDelay / maxDistanceForOneBuffer)+1;
+
+        m_delayBufferSize = (int)(MAX_BUFFER_SIZE * numBufferRequiredForUserMaxDistance);
+
+        m_pDelayBuffer = new float[m_delayBufferSize];
+
+        //std::cout << "Init Delay Buffer with " << m_delayBufferSize << " samples for distance = " << m_maxDistanceForDelay << " \n";
+
+        //for (int i = 0; i < MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY; i++) {
+        for (int i = 0; i < m_delayBufferSize; i++) {
             m_pDelayBuffer[i] = 0;
         }
 
+        //std::cout << "last sample of delay buffer is : " << m_pDelayBuffer[m_delayBufferSize-1] << " \n";
     }
 
     // Accummulation of the input buffers to a "mono delay buffer" used to apply delay of the WFS algotithm
     void At_WfsSpatializer::updateDelayBuffer(int bufferLength) {
 
-        int arrayLength = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
-        int numLengthInDelBuf = arrayLength / bufferLength;
+        // now i dynamicaly instanciated
+        //int arrayLength = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
+        
+        //std::cout << "delay buffer lenght is :" << arrayLength << "\n";
+
+        // int numLengthInDelBuf = arrayLength / bufferLength;
+        int numLengthInDelBuf = m_delayBufferSize / bufferLength;
+        //std::cout << "numLengthInDelBuf =" << numLengthInDelBuf << "\n";
 
         for (int count = 1; count < numLengthInDelBuf; count++) {
             int startTo = (count - 1) * bufferLength;
@@ -213,7 +243,8 @@ namespace Spatializer
 
     // Accummulation of the input buffers to a "multichannel delay buffer" used to apply delay of the WFS algotithm when the source is "Directive"
     void At_WfsSpatializer::updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount) {
-
+        // NO DIRECTIVE SOURCE
+        /*
         int arrayLength = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
         int numLengthInDelBuf = arrayLength / bufferLength;
 
@@ -229,6 +260,7 @@ namespace Spatializer
                 m_pDelayMultiChannelBuffer[InputChannel][(numLengthInDelBuf - 1) * bufferLength + sample] = inBuffer[inChannelCount * sample + InputChannel];
             }
         }
+        */
     }
 
     /****************************************************************************
@@ -253,16 +285,20 @@ namespace Spatializer
         float delaySample = m_sampleRate * delay / 1000.0f;
         float delaySample_prevFrame = m_sampleRate * delay_prevFrame / 1000.0f;
 
-        int delayBufferSize = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
+        //int delayBufferSize = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
 
         for (int i = 0; i < bufferLength; i++)
         {
             // Get the current index of the sample in the delay buffer
-            int idx = delayBufferSize - bufferLength - (int)delaySample + i;
+            //int idx = delayBufferSize - bufferLength - (int)delaySample + i;
+            int idx = m_delayBufferSize - bufferLength - (int)delaySample + i;
+            
             // Get the current index of the sample in the delay buffer corresponding to the previous value
-            int idx_prevFrame = delayBufferSize - bufferLength - (int)delaySample_prevFrame + i;
+            //int idx_prevFrame = delayBufferSize - bufferLength - (int)delaySample_prevFrame + i;
+            int idx_prevFrame = m_delayBufferSize - bufferLength - (int)delaySample_prevFrame + i;
 
-            if (idx >= 0 && idx < delayBufferSize && idx_prevFrame >= 0 && idx_prevFrame < delayBufferSize) {
+            //if (idx >= 0 && idx < delayBufferSize && idx_prevFrame >= 0 && idx_prevFrame < delayBufferSize) {
+            if (idx >= 0 && idx < m_delayBufferSize && idx_prevFrame >= 0 && idx_prevFrame < m_delayBufferSize) {
 
                 // Value of the fade
                 float fadeOut = ((float)bufferLength - (float)i) / (float)bufferLength;
@@ -270,10 +306,13 @@ namespace Spatializer
                 
                 // if the source is "Directive", we get a weighted sum of the two choosen input channel and apply smooth volume and delay
                 if (isDirective == true) {
+                    // NO DIRECTIVE SOURCE
+                    /*
                     sample_prevFrame = m_pWfsVolume_prevFrame[virtualMicIdx] * (m_ChannelWeight[virtualMicIdx][0][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][0][0]][idx_prevFrame]
                         + m_ChannelWeight[virtualMicIdx][1][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][1][0]][idx_prevFrame]);
                     sample_currFrame = m_pWfsVolume[virtualMicIdx] * (m_ChannelWeight[virtualMicIdx][0][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][0][0]][idx]
                         + m_ChannelWeight[virtualMicIdx][1][1] * m_pDelayMultiChannelBuffer[(int)m_ChannelWeight[virtualMicIdx][1][0]][idx]);
+                    */
                 }
                 // if the source is "Non Directive", we use directly the first channel of the input and apply smooth volume and delay
                 else {
@@ -300,7 +339,11 @@ namespace Spatializer
 
     int At_WfsSpatializer::process(float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount) {
 
- 
+        // NO DIRECTIVE SOURCE
+        // force no directive source
+        m_isDirective == false;
+        // -------------------
+
         float direction[3];
 
         m_virtualMicCount = outChannelCount;
@@ -309,8 +352,11 @@ namespace Spatializer
         updateMixMaxDelay();
 
         if (m_isDirective == true) {
+            // NO DIRECTIVE SOURCE
+            /*
             updateMixedDirectiveChannel(m_virtualMicCount, inChannelCount); 
             updateMultichannelDelayBuffer(inBuffer, bufferLength, inChannelCount);
+            */
         }
         else if (m_isDirective == false) {
             forceMonoInput(inBuffer, bufferLength, inChannelCount);
@@ -328,8 +374,7 @@ namespace Spatializer
 
             // m_virtualMicCount are supposed to be equal to outChannelCount !!!!! Why 2 differents variables !!!
             for (int sampleIndex = 0; sampleIndex < bufferLength; sampleIndex++) {
-                outBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pTmpMonoBuffer_in[sampleIndex];
-                
+                outBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pTmpMonoBuffer_in[sampleIndex];                
             }
 
             // save spatialization parameter for the next frame

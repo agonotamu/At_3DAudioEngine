@@ -28,7 +28,7 @@ namespace Spatializer
 		}
 
 		vector<At_WfsSpatializer> m_pWfsSpatializerList;	
-		void CreateWfsSpatializer(int* id, bool is3D, bool isDirective); //modif mathias 06-17-2021
+		void CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay); //modif mathias 06-17-2021
 		void DestroyWfsSpatializer(int id);
 
 		// One for all Spatializer ----------------------------------------------------------------------------------------

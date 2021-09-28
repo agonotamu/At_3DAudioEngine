@@ -33,10 +33,10 @@
 #include <iostream>
 #endif
 #include "AudioPluginUtil.h"
-#define MAX_BUFFER_SIZE 1024
-#define NUM_BUFFER_IN_DELAY 2
+#define MAX_BUFFER_SIZE 2048
+#define NUM_BUFFER_IN_DELAY 32
 #define MAX_OUTPUT_CHANNEL 24
-#define MAX_INPUT_CHANNEL 16
+#define MAX_INPUT_CHANNEL 4
 
 
 namespace Spatializer
@@ -47,6 +47,7 @@ namespace Spatializer
     {
 
     public:
+        ~At_WfsSpatializer(); // destructor
 
         int process(float* inBuffer, float* outBuffer, int bufferLength, int inChannel, int outChannel);
         int setSourcePosition(float* position, float* rotation, float* forward); 
@@ -66,6 +67,7 @@ namespace Spatializer
 
         bool m_is3D; 
         bool m_isDirective; 
+        float  m_maxDistanceForDelay;
 
     private:
         void setIs3DIsDirective(bool is3D, bool isDirective); //modif mathias 06-17-2021
@@ -83,10 +85,15 @@ namespace Spatializer
         void updateMixedDirectiveChannel(int virtualMicIdx, int inChannelCount);
 
         float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];
-        float m_pDelayBuffer[MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
+        
+        // This is now dynamically allocated
+        //float m_pDelayBuffer[MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
+        float* m_pDelayBuffer;
+        int m_delayBufferSize;
+        // NO DIRECTIVE SOURCE
+        //float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
 
-        float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
-
+        
 
         float m_sourcePosition[3];
         float m_sourceRotation[3]; 

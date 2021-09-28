@@ -5,14 +5,15 @@
 
 #include "At_WfsSpatializer.h"
 #include "At_SpatializationEngine.h"
+#include "At_Effect.h"
 
 using namespace Spatializer; 
 
 
 //One for each Spatializer
-extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_CreateWfsSpatializer(int* id, bool is3D, bool isDirective) //modif mathias 06-17-2021
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay) //modif mathias 06-17-2021
 {
-    At_SpatializationEngine::getInstance().CreateWfsSpatializer(id, is3D, isDirective); //modif mathias 06-17-2021
+    At_SpatializationEngine::getInstance().CreateWfsSpatializer(id, is3D, isDirective, maxDistanceForDelay); //modif mathias 06-17-2021
 }
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_DestroyWfsSpatializer(int id)
 {
@@ -62,10 +63,11 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_setSampleRate(float sampleRate
     Spatializer::At_SpatializationEngine::getInstance().WFS_setSampleRate(sampleRate);
 }
 
-
-
-
-
+// Effect
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_EFFECT_varySpeed(float speed, float previousSpeed, float* inBuffer, float* outBuffer, int bufferLength, int channelCount)
+{
+    At_Effect::AT_process_varySpeed(speed, previousSpeed, inBuffer, outBuffer, bufferLength,channelCount);
+}
 
 
 #endif

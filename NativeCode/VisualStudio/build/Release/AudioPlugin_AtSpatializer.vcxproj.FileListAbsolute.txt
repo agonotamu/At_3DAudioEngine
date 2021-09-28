@@ -1,0 +1,8 @@
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\_TestDev_Package\Test\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\_TestDev_Package\Test_3Daudioengine_v2\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\_TestDev_Package\Test_3Daudioengine\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\06-14-2021_3D_Audio_Engine\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+D:\mathi\MASTER-ICS\STAGE\3D_Audio_Engine\07-23-2021_3D_Audio_Engine\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_2020.2.0\NativeCode\VisualStudio\build\Release\AudioPlugin_AtSpatializer.dll

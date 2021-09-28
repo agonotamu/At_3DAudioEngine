@@ -1,1 +1,0 @@
-{"audioDeviceName":"none","outputChannelCount":2,"gain":0.0,"selectSpeakerConfig":0,"outputConfigDimension":1,"selectedSamplingRate":0,"samplingRate":44100,"isStartingEngineOnAwake":true}

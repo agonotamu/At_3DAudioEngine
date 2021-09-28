@@ -35,9 +35,10 @@ namespace Spatializer
 		incrementalUniqueID = 0;
 	}
 
-	void At_SpatializationEngine::CreateWfsSpatializer(int* id, bool is3D, bool isDirective) { //modif mathias 06-17-2021
+	void At_SpatializationEngine::CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay) { //modif mathias 06-17-2021
 
 		At_WfsSpatializer *s = new At_WfsSpatializer();	
+		s->m_maxDistanceForDelay = maxDistanceForDelay;
 		s->m_is3D = is3D; //modif mathias 06-17-2021
 		s->m_isDirective = isDirective; //modif mathias 06-17-2021
 		//s->spatID = m_pWfsSpatializerList.size() - 1;
