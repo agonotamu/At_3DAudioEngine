@@ -118,11 +118,13 @@ public class At_Player : MonoBehaviour
 
     public string guid = "";
     
+   
+
     void Reset()
     {        
         setGuid();        
     }
-
+    
     void OnValidate()
     {
         Event e = Event.current;
@@ -142,13 +144,14 @@ public class At_Player : MonoBehaviour
             
         }
     }
-
+    
    
     public void setGuid()
     {
         guid = System.Guid.NewGuid().ToString();
         //Debug.Log("create player with guid : " + guid);
     }
+    
 
     //-----------------------------------------------------     
     // Awake, Disable, Get/Start/Stop playing 
@@ -252,7 +255,7 @@ public class At_Player : MonoBehaviour
         path = externAssetsState.externAssetsPath_audio_standalone + fileName;
 #endif
         //Parse the file with NAudio
-        if (fileName != null) {
+        if (fileName != null && fileName !="") {
             aud = new AudioFileReader(path);
             // get the number of channel in audio file (should be =16)
             numChannelsInAudioFile = aud.WaveFormat.Channels;
@@ -787,7 +790,7 @@ public class At_Player : MonoBehaviour
                     Gizmos.color = Color.green;
                     Gizmos.DrawLine(center, nextCenter);
                 }
-
+                // Stuck inRepaintAll() - remove it
                 SceneView.RepaintAll();
 
             }

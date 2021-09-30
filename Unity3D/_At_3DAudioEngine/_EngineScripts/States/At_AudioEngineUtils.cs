@@ -139,9 +139,12 @@ public class At_AudioEngineUtils : MonoBehaviour
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
 
-        
-        At_Player[] players = GameObject.FindObjectsOfType<At_Player>();        
-        At_DynamicRandomPlayer[] randomPlayers = GameObject.FindObjectsOfType<At_DynamicRandomPlayer>();
+
+        //At_Player[] players = GameObject.FindObjectsOfType<At_Player>();
+        At_Player[] players = Resources.FindObjectsOfTypeAll(typeof(At_Player)) as At_Player[];
+
+        //At_DynamicRandomPlayer[] randomPlayers = GameObject.FindObjectsOfType<At_DynamicRandomPlayer>();
+        At_DynamicRandomPlayer[] randomPlayers = Resources.FindObjectsOfTypeAll(typeof(At_DynamicRandomPlayer)) as At_DynamicRandomPlayer[];
 
         bool isStateFileClean = false;
 

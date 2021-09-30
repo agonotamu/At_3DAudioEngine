@@ -34,7 +34,7 @@ public class At_VirtualMic : MonoBehaviour
                 //Debug.DrawLine(center, nextCenter, Color.green);            
                 Gizmos.DrawLine(center, nextCenter);
             }
-
+            // Stuck inRepaintAll() - remove it
             SceneView.RepaintAll();
         }
         

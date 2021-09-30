@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 public class At_DynamicRandomPlayerEditor : Editor
 {
     At_DynamicRandomPlayer randomPlayer;
-    List<string> fileNames;
+    List<string> fileNamesList;
     // create your style
     GUIStyle horizontalLine;
 
@@ -27,8 +27,34 @@ public class At_DynamicRandomPlayerEditor : Editor
     bool previousIsEditor;
     bool previousIsPlaying;
 
+    SerializedProperty serialized_fileNames;
+    SerializedProperty serialized_gain;
+    SerializedProperty serialized_is3D;
+    SerializedProperty serialized_isDirective; //modif mathias 06-17-2021
+    SerializedProperty serialized_omniBalance;
+    SerializedProperty serialized_attenuation;
+    // minimum distance above which the sound produced by the source is attenuated
+    SerializedProperty serialized_minDistance;
+    SerializedProperty serialized_channelRouting;
+    SerializedProperty serialized_spawnMinAngle;
+    SerializedProperty serialized_spawnMaxAngle;
+    SerializedProperty serialized_spawnDistance;
+
     public void OnEnable()
     {
+
+        serialized_fileNames = serializedObject.FindProperty("fileNames");
+        serialized_gain = serializedObject.FindProperty("gain");
+        serialized_is3D = serializedObject.FindProperty("is3D");
+        serialized_isDirective = serializedObject.FindProperty("isDirective"); //modif mathias 06-17-2021
+        serialized_omniBalance = serializedObject.FindProperty("omniBalance");
+        serialized_attenuation = serializedObject.FindProperty("attenuation");
+        // minimum distance above which the sound produced by the source is attenuated
+        serialized_minDistance = serializedObject.FindProperty("minDistance");
+        serialized_channelRouting = serializedObject.FindProperty("channelRouting");
+        serialized_spawnMinAngle = serializedObject.FindProperty("spawnMinAngle");
+        serialized_spawnMaxAngle = serializedObject.FindProperty("spawnMaxAngle");
+        serialized_spawnDistance = serializedObject.FindProperty("spawnDistance");
 
         previousIsEditor = Application.isEditor;
         previousIsPlaying = Application.isPlaying;
@@ -39,7 +65,7 @@ public class At_DynamicRandomPlayerEditor : Editor
 
         externAssetsPath = GameObject.FindObjectOfType<At_ExternAssets>().externAssetsPath_audio;
 
-        fileNames = new List<string>();
+        fileNamesList = new List<string>();
         // get a reference to the At_Player isntance (core engine of the player)
         randomPlayer = (At_DynamicRandomPlayer)target;
 
@@ -55,7 +81,38 @@ public class At_DynamicRandomPlayerEditor : Editor
         {
            
             randomPlayerState = At_AudioEngineUtils.createNewRandomPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, randomPlayer.guid, gameObjectName);
+            
+            randomPlayerState.gain = serialized_gain.floatValue;
+            randomPlayerState.is3D = serialized_is3D.boolValue;
+            randomPlayerState.isDirective = serialized_isDirective.boolValue; //modif mathias 06-17-2021
+            randomPlayerState.omniBalance = serialized_omniBalance.floatValue;
+            randomPlayerState.attenuation = serialized_attenuation.floatValue;
+            // minimum distance above which the sound produced by the source is attenuated
+            randomPlayerState.minDistance = serialized_minDistance.floatValue;            
+            randomPlayerState.spawnMinAngle = serialized_spawnMinAngle.floatValue;
+            randomPlayerState.spawnMaxAngle = serialized_spawnMaxAngle.floatValue;
+            randomPlayerState.spawnDistance = serialized_spawnDistance.floatValue;
 
+            //randomPlayerState.fileNames = serializedObject.FindProperty("fileNames");
+            randomPlayerState.fileNames = new string[serialized_fileNames.arraySize];
+            for (int i = 0; i < serialized_fileNames.arraySize; i++)
+            {
+                SerializedProperty property = serialized_fileNames.GetArrayElementAtIndex(i);
+                randomPlayerState.fileNames[i] = property.stringValue; // seems to be impossible
+
+            }
+            
+
+            randomPlayerState.channelRouting = new int[serialized_channelRouting.arraySize];
+            //randomPlayerState.channelRouting = serializedObject.FindProperty("channelRouting");
+            for (int i = 0; i < serialized_channelRouting.arraySize; i++)
+            {
+                SerializedProperty property = serialized_channelRouting.GetArrayElementAtIndex(i);
+                randomPlayerState.channelRouting[i] = property.intValue; // seems to be impossible
+
+            }
+
+            randomPlayerState.maxChannelInAudiofile = serialized_channelRouting.arraySize;
         }
         
         At_OutputState outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
@@ -65,7 +122,7 @@ public class At_DynamicRandomPlayerEditor : Editor
         {
             for (int i = 0; i < randomPlayerState.fileNames.Length; i++)
             {
-                fileNames.Add(randomPlayerState.fileNames[i]);
+                fileNamesList.Add(randomPlayerState.fileNames[i]);
             }
         }
 
@@ -104,6 +161,8 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.outputChannelCount = outputState.outputChannelCount;
         randomPlayer.channelRouting = randomPlayerState.channelRouting;
 
+        At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
+
     }
 
     public void OnDisable()
@@ -113,7 +172,7 @@ public class At_DynamicRandomPlayerEditor : Editor
             if (randomPlayer != null)
             {
                 //Debug.Log(playerState.name + " as changed to : " + player.name);
-                At_AudioEngineUtils.changePlayerName(SceneManager.GetActiveScene().name, randomPlayer.name, randomPlayer.name);
+                At_AudioEngineUtils.changeRandomPlayerName(SceneManager.GetActiveScene().name, randomPlayer.name, randomPlayer.name);
             }
         }
         if (shouldSave)
@@ -398,11 +457,11 @@ public class At_DynamicRandomPlayerEditor : Editor
                     {
                         randomPlayerState.maxChannelInAudiofile = numChannel;
                     }
-                    fileNames.Add(s.Replace(externAssetsPath, "")); 
+                    fileNamesList.Add(s.Replace(externAssetsPath, "")); 
                 }
-                if (fileNames[0] == "")
+                if (fileNamesList[0] == "")
                 {
-                    fileNames.RemoveAt(0);
+                    fileNamesList.RemoveAt(0);
                 }
                 randomPlayerState.channelRouting = new int[randomPlayerState.maxChannelInAudiofile];
                 for (int i = 0; i < randomPlayerState.maxChannelInAudiofile; i++)
@@ -434,7 +493,7 @@ public class At_DynamicRandomPlayerEditor : Editor
             if (GUILayout.Button("Clear All"))
             {
                 shouldSave = true;
-                fileNames.Clear();
+                fileNamesList.Clear();
                 UpdateFilenamesInState();
             }
         }
@@ -445,7 +504,7 @@ public class At_DynamicRandomPlayerEditor : Editor
         if (indexFileToRemove != -1)
         {
             shouldSave = true;
-            fileNames.RemoveAt(indexFileToRemove);
+            fileNamesList.RemoveAt(indexFileToRemove);
             UpdateFilenamesInState();
             DisplayFileNameWithClearButton();
         }
@@ -506,22 +565,53 @@ public class At_DynamicRandomPlayerEditor : Editor
 
         //randomPlayer.state = randomPlayerState; 
 
+        serialized_gain.floatValue = randomPlayerState.gain;
+        serialized_is3D.boolValue = randomPlayerState.is3D;
+        serialized_isDirective.boolValue = randomPlayerState.isDirective; //modif mathias 06-17-2021
+        serialized_omniBalance.floatValue = randomPlayerState.omniBalance;
+        serialized_attenuation.floatValue = randomPlayerState.attenuation;
+        // minimum distance above which the sound produced by the source is attenuated
+        serialized_minDistance.floatValue = randomPlayerState.minDistance;
+        
+        serialized_spawnMinAngle.floatValue = randomPlayerState.spawnMinAngle;
+        serialized_spawnMaxAngle.floatValue = randomPlayerState.spawnMaxAngle;
+        serialized_spawnDistance.floatValue = randomPlayerState.spawnDistance;
 
+        //serialized_fileNames = randomPlayerState.fileNames;
+        //serialized_channelRouting = randomPlayerState.channelRouting;
+        serialized_fileNames.ClearArray();
+        for (int i = 0; i < randomPlayerState.fileNames.Length; i++)
+        {
+            serialized_fileNames.InsertArrayElementAtIndex(i);
+            SerializedProperty property = serialized_fileNames.GetArrayElementAtIndex(i);
+            property.stringValue = randomPlayerState.fileNames[i];
+        }
+
+
+        serialized_channelRouting.ClearArray();
+        for (int i = 0; i < randomPlayerState.channelRouting.Length; i++)
+        {
+            serialized_channelRouting.InsertArrayElementAtIndex(i);
+            SerializedProperty property = serialized_channelRouting.GetArrayElementAtIndex(i);
+            property.intValue = randomPlayerState.channelRouting[i];
+        }
+
+        serializedObject.ApplyModifiedProperties();
 
     }
     void UpdateFilenamesInState()
     {
-        if (fileNames.Count == 0)
+        if (fileNamesList.Count == 0)
         {
             randomPlayerState.fileNames = new string[1];
             randomPlayerState.fileNames[0] = "";
         }
         else
         {
-            randomPlayerState.fileNames = new string[fileNames.Count];
-            for (int i = 0; i < fileNames.Count; i++)
+            randomPlayerState.fileNames = new string[fileNamesList.Count];
+            for (int i = 0; i < fileNamesList.Count; i++)
             {
-                randomPlayerState.fileNames[i] = fileNames[i];
+                randomPlayerState.fileNames[i] = fileNamesList[i];
             }
         }
 
@@ -531,13 +621,13 @@ public class At_DynamicRandomPlayerEditor : Editor
     {
         int indexFileToRemove = -1;
 
-        if (fileNames != null)
+        if (fileNamesList != null)
         {
-            for (int i = 0; i < fileNames.Count; i++)
+            for (int i = 0; i < fileNamesList.Count; i++)
             {
                 using (new GUILayout.VerticalScope())
                 {
-                    if (fileNames[i] != "")
+                    if (fileNamesList[i] != "")
                     {
                         using (new GUILayout.HorizontalScope())
                         {
@@ -545,7 +635,7 @@ public class At_DynamicRandomPlayerEditor : Editor
                             {
                                 indexFileToRemove = i;
                             }
-                            GUILayout.TextArea(fileNames[i]);
+                            GUILayout.TextArea(fileNamesList[i]);
                             // Display and test if the Button "Open" has been clicked
                             
                         }

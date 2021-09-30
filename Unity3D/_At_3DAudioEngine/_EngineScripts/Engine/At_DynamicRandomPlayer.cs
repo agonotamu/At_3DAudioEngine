@@ -21,29 +21,30 @@ using UnityEngine.SceneManagement;
 
 public class At_DynamicRandomPlayer : MonoBehaviour
 {
-
-    public bool is3D = false;
-    public bool isDirective = false; //modif mathias 06-17-2021
-    public float gain;
-    public string[] fileNames;
-    public float attenuation;
-    public float omniBalance;
     //List<GameObject> playerInstances;
     GameObject[] playerInstances;
     float[] playerInstancesCreationTime;
+    //--------------------------------------
+
+    public string[] fileNames;
+    public float gain;
+    public bool is3D = false;
+    public bool isDirective = false; //modif mathias 06-17-2021
+    public float omniBalance;
+    public float attenuation;
     // minimum distance above which the sound produced by the source is attenuated
     public float minDistance;
-
     public int[] channelRouting;
+    public float spawnMinAngle;
+    public float spawnMaxAngle;
+    public float spawnDistance;
 
     public string externAssetsPath;
     // max number of channel in the audio files
     public int maxChannelsInAudioFile = 0;
     /// number of channel of the output bus
     public int outputChannelCount;
-    public float spawnMinAngle;
-    public float spawnMaxAngle;
-    public float spawnDistance;
+    
     float time = 0;
     At_DynamicRandomPlayerState randomPlayerState;
     const int maxInstance = 20;
@@ -253,7 +254,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 
                 Gizmos.DrawLine(center, nextCenter);
             }
-
+            // Stuck inRepaintAll() - remove it
             SceneView.RepaintAll();
 
         }

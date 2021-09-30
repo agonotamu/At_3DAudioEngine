@@ -52,9 +52,52 @@ public class At_PlayerEditor : Editor
 
     bool previousIsEditor;
     bool previousIsPlaying;
+
+    //----------------------------------------------------
+    // To be serialize for prefab
+    /// name of the audio file to play (Supposed to be in "Assets\Streaming Asset")
+
+    SerializedProperty serialized_fileName;
+    /// gain applied to the audiofile
+    SerializedProperty serialized_gain;
+    /// boolean telling if the player is 2D (no spatialization applied) or 3D (spatialization applied)
+    SerializedProperty serialized_is3D;
+    /// boolean telling if the player 3D is omnidirectional(mono) or directional (multicanal)
+    SerializedProperty serialized_isDirective; //modif mathias 06-17-2021
+    /// boolean telling if the player start to play On Awake
+    SerializedProperty serialized_isPlayingOnAwake;
+    /// boolean telling if the player is looping the read audio file
+    SerializedProperty serialized_isLooping;
+    /// directivity balance of the virtual microphone used for this source : balance [0,1] between omnidirectionnal and cardiod
+    SerializedProperty serialized_omniBalance;
+    /// balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS
+    SerializedProperty serialized_timeReversal;
+    ///type of distance attenuation in the spatialize : 0 = none, 1 = linera, 2 = square
+    SerializedProperty serialized_attenuation;
+    /// minimum distance above which the sound produced by the source is attenuated
+    SerializedProperty serialized_minDistance;
+    
+    SerializedProperty serialized_channelRouting;
+    //----------------------------------------------------
+
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
+
+
+        serialized_fileName = serializedObject.FindProperty("fileName");
+        serialized_gain = serializedObject.FindProperty("gain");
+        serialized_is3D = serializedObject.FindProperty("is3D");
+        serialized_isDirective = serializedObject.FindProperty("isDirective");
+        serialized_isLooping = serializedObject.FindProperty("isLooping");
+        serialized_isPlayingOnAwake = serializedObject.FindProperty("isPlayingOnAwake");
+        serialized_attenuation = serializedObject.FindProperty("attenuation");
+        serialized_omniBalance = serializedObject.FindProperty("omniBalance");
+        serialized_timeReversal = serializedObject.FindProperty("timeReversal");
+        serialized_minDistance = serializedObject.FindProperty("minDistance");
+        serialized_channelRouting = serializedObject.FindProperty("channelRouting");
+
+
         previousIsEditor = Application.isEditor;
         previousIsPlaying = Application.isPlaying;
 
@@ -90,6 +133,27 @@ public class At_PlayerEditor : Editor
             if (playerState == null)
             {               
                 playerState = At_AudioEngineUtils.createNewPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, player.guid, gameObjectName);
+                playerState.fileName = serialized_fileName.stringValue;
+                playerState.gain = serialized_gain.floatValue;
+                playerState.is3D = serialized_is3D.boolValue;
+                playerState.isDirective = serialized_isDirective.boolValue; //modif mathias 06-17-2021
+                playerState.isLooping = serialized_isLooping.boolValue;
+                playerState.isPlayingOnAwake = serialized_isPlayingOnAwake.boolValue;
+                playerState.attenuation = serialized_attenuation.floatValue;
+                playerState.omniBalance = serialized_omniBalance.floatValue;
+                playerState.timeReversal = serialized_timeReversal.floatValue;
+                playerState.minDistance = serialized_minDistance.floatValue;
+                
+                playerState.channelRouting = new int[serialized_channelRouting.arraySize];
+                
+                for (int i = 0; i < serialized_channelRouting.arraySize; i++)
+                {
+                    SerializedProperty property = serialized_channelRouting.GetArrayElementAtIndex(i);
+                    playerState.channelRouting[i] = property.intValue; // seems to be impossible
+                    
+                }
+                playerState.numChannelInAudiofile = serialized_channelRouting.arraySize;
+                //playerState.channelRouting = channelRouting.;
             }
 
             // set all the
@@ -103,8 +167,16 @@ public class At_PlayerEditor : Editor
             player.omniBalance = playerState.omniBalance;
             player.timeReversal = playerState.timeReversal;
             player.minDistance = playerState.minDistance;
-            player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
 
+            if (!Application.isPlaying)
+            {
+                player.initMeters();
+            }
+            
+            player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
+            
+            
+            //playerState.numChannelInAudiofile = player.numChannelsInAudioFile;
 
             At_OutputState outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
             if (playerState.fileName != "")
@@ -129,8 +201,8 @@ public class At_PlayerEditor : Editor
             //player.state = playerState;
             
         }
-        
 
+        At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
     }
 
    
@@ -156,7 +228,32 @@ public class At_PlayerEditor : Editor
         At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
 
     }
+    /*
+    void OnValidate()
+    {
+        Event e = Event.current;
 
+        if (e != null)
+        {
+            //Debug.Log(e.commandName);
+            if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
+            {
+                setGuid();
+            }
+            // if the object has been draged... Then it should be prefab.
+            if (e.type == EventType.DragPerform)
+            {
+                setGuid();
+            }
+
+        }
+    }
+    public void setGuid()
+    {
+        player.guid = System.Guid.NewGuid().ToString();
+        //Debug.Log("create player with guid : " + guid);
+    }
+    */
     void OnDestroy()
     {
         
@@ -365,6 +462,7 @@ public class At_PlayerEditor : Editor
                         {
                             playerState.minDistance = dist;
                             shouldSave = true;
+                            // Stuck inRepaintAll() - remove it
                             SceneView.RepaintAll();
                         }
                         //GUILayout.Label("meter");
@@ -491,8 +589,33 @@ public class At_PlayerEditor : Editor
             player.timeReversal = playerState.timeReversal;
             player.minDistance = playerState.minDistance;
             player.channelRouting = playerState.channelRouting;
-            // save the Player State to be always updated !!
 
+
+            serialized_gain.floatValue = playerState.gain;
+            serialized_is3D.boolValue = playerState.is3D;
+            serialized_isDirective.boolValue = playerState.isDirective; //modif mathias 06-17-2021
+            serialized_isPlayingOnAwake.boolValue = playerState.isPlayingOnAwake;
+            serialized_fileName.stringValue = playerState.fileName;
+            serialized_isLooping.boolValue = playerState.isLooping;
+            serialized_attenuation.floatValue = playerState.attenuation;
+            serialized_omniBalance.floatValue = playerState.omniBalance;
+            serialized_timeReversal.floatValue = playerState.timeReversal;
+            serialized_minDistance.floatValue = playerState.minDistance;
+
+            //playerState.channelRouting = new int[channelRouting.arraySize];
+            serialized_channelRouting.ClearArray();
+            for (int i = 0; i < playerState.channelRouting.Length; i++)
+            {
+                serialized_channelRouting.InsertArrayElementAtIndex(i);
+                SerializedProperty property = serialized_channelRouting.GetArrayElementAtIndex(i);
+                property.intValue = playerState.channelRouting[i];
+                //.intValue = playerState.channelRouting[i];
+                //playerState.channelRouting[i] = property.intValue;
+
+            }
+
+            // save the Player State to be always updated !!
+            serializedObject.ApplyModifiedProperties();
         }
 
     }
