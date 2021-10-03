@@ -40,7 +40,7 @@ public class At_Player : MonoBehaviour
     // rawAudioData -> inputFileBuffer -> playerOutputBuffer
     //-----------------------------------------------------
     /// constants used for array initialization 
-    const int MAX_BUF_SIZE = 1024;
+    const int MAX_BUF_SIZE = 2048;
     const int MAX_OUTPUT_CHANNEL = 24; // very very very large !!
     const int MAX_INPUT_CHANNEL = 16;
     /// array containing the all the samples of the audio file
@@ -233,9 +233,10 @@ public class At_Player : MonoBehaviour
 #endif
 
         //Parse the file with NAudio
-        if (fileName != null)
+        if (fileName != null && fileName !="")
         {
-            aud = new AudioFileReader(path);
+            if (aud == null)
+                aud = new AudioFileReader(path);
             // get the number of channel in audio file (should be =16)
             return aud.WaveFormat.Channels;
         }
@@ -652,13 +653,16 @@ public class At_Player : MonoBehaviour
                     {
                         for (int sampleIndex = 0; sampleIndex < bufferSize; sampleIndex++)
                         {
+                            playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] = 0;
                             //if (indexInputChannel < numChannelsInAudioFile)
                             //{
-                            int indexInputChannel = getInputChannelForOutputchannelInrouting(outputChannelIndex);
+                            //int indexInputChannel = getInputChannelForOutputchannelInrouting(outputChannelIndex);
+
+                            int indexInputChannel = channelRouting[outputChannelIndex];
                             if (indexInputChannel != -1)
                             {
                                 //playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] = inputFileBuffer[numChannelsInAudioFile * sampleIndex + indexInputChannel];
-                                playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] = inputFileBuffer[numChannelsInAudioFile * sampleIndex + indexInputChannel];
+                                playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] += inputFileBuffer[numChannelsInAudioFile * sampleIndex + indexInputChannel];
                             }
                             else
                             {

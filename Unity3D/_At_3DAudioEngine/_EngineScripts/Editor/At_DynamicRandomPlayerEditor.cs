@@ -26,6 +26,9 @@ public class At_DynamicRandomPlayerEditor : Editor
     private bool mRunningInEditor;
     bool previousIsEditor;
     bool previousIsPlaying;
+    int currentOutputChannelCount;
+
+    At_OutputState outputState;
 
     SerializedProperty serialized_fileNames;
     SerializedProperty serialized_gain;
@@ -115,7 +118,7 @@ public class At_DynamicRandomPlayerEditor : Editor
             randomPlayerState.maxChannelInAudiofile = serialized_channelRouting.arraySize;
         }
         
-        At_OutputState outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
+        outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
         //randomPlayerState.numChannelInAudiofile = outputState.outputChannelCount;
 
         if (randomPlayerState.fileNames != null)
@@ -149,10 +152,22 @@ public class At_DynamicRandomPlayerEditor : Editor
             {
                 //currentOutputChannelCount = outputState.outputChannelCount;
                 //int numChannel = At_PL.getNumChannelInAudioFile();
+
+                // 03/10 - UPMIXING CHANGE -----
+                /*
                 randomPlayerState.channelRouting = new int[randomPlayerState.maxChannelInAudiofile];
                 for (int i = 0; i < randomPlayerState.maxChannelInAudiofile; i++)
                 {
                     randomPlayerState.channelRouting[i] = i;
+                }
+                */
+                // 03/10 - UPMIXING CHANGE -----
+                currentOutputChannelCount = outputState.outputChannelCount;
+                int numChannel = randomPlayerState.maxChannelInAudiofile;
+                randomPlayerState.channelRouting = new int[currentOutputChannelCount];
+                for (int i = 0; i < currentOutputChannelCount; i++)
+                {
+                    randomPlayerState.channelRouting[i] = i % numChannel;
                 }
 
             }
@@ -463,11 +478,30 @@ public class At_DynamicRandomPlayerEditor : Editor
                 {
                     fileNamesList.RemoveAt(0);
                 }
+                /*
                 randomPlayerState.channelRouting = new int[randomPlayerState.maxChannelInAudiofile];
                 for (int i = 0; i < randomPlayerState.maxChannelInAudiofile; i++)
                 {
                     randomPlayerState.channelRouting[i] = i;
                 }
+                */
+                // 03/10 - UPMIXING CHANGE -----
+                currentOutputChannelCount = outputState.outputChannelCount;
+                randomPlayerState.channelRouting = new int[currentOutputChannelCount];
+                for (int i = 0; i < currentOutputChannelCount; i++)
+                {
+                    randomPlayerState.channelRouting[i] = i % currentOutputChannelCount;
+                }
+                /*
+                currentOutputChannelCount = outputState.outputChannelCount;
+                int numChannel = randomPlayerState.maxChannelInAudiofile;
+                randomPlayerState.channelRouting = new int[currentOutputChannelCount];
+                for (int i = 0; i < currentOutputChannelCount; i++)
+                {
+                    randomPlayerState.channelRouting[i] = i % numChannel;
+                }
+                */
+
                 /*
                 string audioFilePath;
                 string[] filter = { "Audio File", "wav,aiff, mp3, aac, mp4" };
@@ -515,6 +549,7 @@ public class At_DynamicRandomPlayerEditor : Editor
             using (new GUILayout.VerticalScope())
             {
                 GUILayout.Label("File channel Routing ");
+                /*
                 if (randomPlayerState.channelRouting != null && randomPlayerState.channelRouting.Length == randomPlayerState.maxChannelInAudiofile)
                 {
                     string[] channelRouting = new string[randomPlayer.outputChannelCount];
@@ -545,7 +580,49 @@ public class At_DynamicRandomPlayerEditor : Editor
 
                     }
                 }
+                */
+                if (randomPlayerState.channelRouting != null && randomPlayerState.channelRouting.Length == currentOutputChannelCount)
+                {
+                    string[] channelRouting = new string[currentOutputChannelCount];
+                    for (int i = 0; i < channelRouting.Length; i++)
+                    {
+                        channelRouting[i] = (i% randomPlayerState.maxChannelInAudiofile).ToString();
+                    }
+                    int[] selectedChannelRouting = new int[currentOutputChannelCount];
+                    for (int i = 0; i < selectedChannelRouting.Length; i++)
+                    {
+                        selectedChannelRouting[i] = i;
+                    }
 
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label("-Output-");
+                        }
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label("-Input-");
+                        }
+
+                    }
+                    for (int c = 0; c < currentOutputChannelCount; c++)
+                    {
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label("channel " + c);
+                            int select = EditorGUILayout.Popup(randomPlayerState.channelRouting[c], channelRouting);
+
+                            if (select != randomPlayerState.channelRouting[c])
+                            {
+                                randomPlayerState.channelRouting[c] = select;
+                                shouldSave = true;
+                            }
+
+                        }
+
+                    }
+                }
             }
         }
 

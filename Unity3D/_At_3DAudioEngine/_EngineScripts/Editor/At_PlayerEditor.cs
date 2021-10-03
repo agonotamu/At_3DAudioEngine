@@ -80,6 +80,8 @@ public class At_PlayerEditor : Editor
     SerializedProperty serialized_channelRouting;
     //----------------------------------------------------
 
+    At_OutputState outputState;
+
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
@@ -178,17 +180,26 @@ public class At_PlayerEditor : Editor
             
             //playerState.numChannelInAudiofile = player.numChannelsInAudioFile;
 
-            At_OutputState outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
+            outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
             if (playerState.fileName != "")
             {
                 if (playerState.channelRouting == null || playerState.channelRouting.Length == 0)//|| player.outputChannelCount != outputState.outputChannelCount)
                 {
-                    //currentOutputChannelCount = outputState.outputChannelCount;
-                    int numChannel = player.getNumChannelInAudioFile();
+
+                    // 03/10 - UPMIXING CHANGE ----- 
+                    /*
                     playerState.channelRouting = new int[numChannel];
                     for (int i = 0; i < numChannel; i++)
                     {
                         playerState.channelRouting[i] = i;
+                    }
+                    */
+                    currentOutputChannelCount = outputState.outputChannelCount;
+                    int numChannel = player.getNumChannelInAudioFile();
+                    playerState.channelRouting = new int[currentOutputChannelCount];
+                    for (int i = 0; i < currentOutputChannelCount; i++)
+                    {
+                        playerState.channelRouting[i] = i%numChannel;
                     }
 
                 }
@@ -347,10 +358,19 @@ public class At_PlayerEditor : Editor
                     playerState.numChannelInAudiofile = player.numChannelsInAudioFile;
                     //currentOutputChannelCount = outputState.outputChannelCount;
                     int numChannel = player.getNumChannelInAudioFile();
+                    // 03/10 - UPMIXING CHANGE -----
+                    /*
                     playerState.channelRouting = new int[numChannel];
                     for (int i = 0; i < numChannel; i++)
                     {
                         playerState.channelRouting[i] = i;
+                    }
+                    */
+                    currentOutputChannelCount = outputState.outputChannelCount;                    
+                    playerState.channelRouting = new int[currentOutputChannelCount];
+                    for (int i = 0; i < currentOutputChannelCount; i++)
+                    {
+                        playerState.channelRouting[i] = i % numChannel;
                     }
                     GUIUtility.ExitGUI();
                 }
@@ -539,7 +559,19 @@ public class At_PlayerEditor : Editor
                 using (new GUILayout.VerticalScope())
                 {
                     GUILayout.Label("File channel Routing ");
-                    if (playerState.channelRouting != null && playerState.channelRouting.Length == player.numChannelsInAudioFile)
+                    /*
+                    currentOutputChannelCount = outputState.outputChannelCount;
+                    playerState.channelRouting = new int[currentOutputChannelCount];
+                    for (int i = 0; i < currentOutputChannelCount; i++)
+                    {
+                        playerState.channelRouting[i] = i % numChannel;
+                    }
+                    */
+
+
+                    // 03/10 - UPMIXING CHANGE -----
+                    /*
+                    if (playerState.channelRouting != null && playerState.channelRouting.Length == player.numChannelsInAudioFile)                    
                     {
                         string[] channelRouting = new string[player.outputChannelCount];
                         for (int i = 0; i < channelRouting.Length; i++)
@@ -569,7 +601,51 @@ public class At_PlayerEditor : Editor
 
                         }
                     }
+                    */
+                    int numChannel = player.getNumChannelInAudioFile();
+                    currentOutputChannelCount = outputState.outputChannelCount;
+                    if (playerState.channelRouting != null && playerState.channelRouting.Length == currentOutputChannelCount)
+                    {
+                        string[] channelRouting = new string[currentOutputChannelCount];
+                        for (int i = 0; i < channelRouting.Length; i++)
+                        {
+                            channelRouting[i] = (i% numChannel).ToString();
+                        }
+                        int[] selectedChannelRouting = new int[currentOutputChannelCount];
+                        for (int i = 0; i < selectedChannelRouting.Length; i++)
+                        {
+                            selectedChannelRouting[i] = i;
+                        }
 
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            using (new GUILayout.HorizontalScope())
+                            {
+                                GUILayout.Label("-Output-");
+                            }
+                            using (new GUILayout.HorizontalScope())
+                            {
+                                GUILayout.Label("-Input-");
+                            }
+
+                        }
+                        for (int c = 0; c < currentOutputChannelCount; c++)
+                        {
+                            using (new GUILayout.HorizontalScope())
+                            {
+                                GUILayout.Label("channel " + c);
+                                int select = EditorGUILayout.Popup(playerState.channelRouting[c], channelRouting);
+
+                                if (select != playerState.channelRouting[c])
+                                {
+                                    playerState.channelRouting[c] = select;
+                                    shouldSave = true;
+                                }
+
+                            }
+
+                        }
+                    }
                 }
             }
        

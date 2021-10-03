@@ -106,14 +106,14 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     private void Update()
     {
         // Auto-generate (Debug)
-        /*
+        
         time += Time.deltaTime;
         if (time > 0.5f)
         {
-            AddOneShotInstanceAndRandomPlay(false, new Vector3(10,0,0));
+            AddOneShotInstanceAndRandomPlay(true, Vector3.zero);
             time = 0;
         }
-        */
+        
 
 
         //System.GC.Collect();
