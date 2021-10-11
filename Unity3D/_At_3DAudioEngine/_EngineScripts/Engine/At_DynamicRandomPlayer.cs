@@ -22,7 +22,7 @@ using UnityEngine.SceneManagement;
 public class At_DynamicRandomPlayer : MonoBehaviour
 {
     //List<GameObject> playerInstances;
-    GameObject[] playerInstances;
+    public GameObject[] playerInstances;
     float[] playerInstancesCreationTime;
     //--------------------------------------
 
@@ -47,10 +47,12 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     
     float time = 0;
     At_DynamicRandomPlayerState randomPlayerState;
-    const int maxInstance = 20;
-    
-    
+    const int maxInstance = 2;
+
+    int r = 0;
     public string guid="";
+
+    At_MasterOutput masterOutput;
 
     void Reset()
     {
@@ -86,7 +88,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     {
         randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, guid, gameObject.name);
 
-        At_MasterOutput mo = GameObject.FindObjectOfType<At_MasterOutput>();//.
+            masterOutput = GameObject.FindObjectOfType<At_MasterOutput>();//.
         //playerInstances = new List<GameObject>();
         playerInstances = new GameObject[maxInstance];
         playerInstancesCreationTime = new float[maxInstance];
@@ -94,10 +96,17 @@ public class At_DynamicRandomPlayer : MonoBehaviour
         for (int i = 0;i< maxInstance; i++)
         {
             playerInstances[i] = new GameObject();
+            playerInstances[i].SetActive(false);
+            
             //playerInstances[i].name = randomPlayerState.name + "_" + i.ToString("00");
             playerInstances[i].transform.SetParent(gameObject.transform);
             playerInstances[i].AddComponent<At_Player>();
-            mo.addPlayerToList(playerInstances[i].GetComponent<At_Player>());
+            At_Player p = playerInstances[i].GetComponent<At_Player>();
+            //p.isPlayingOnAwake = true;
+            p.isDynamicInstance = true;
+            //p.isStreaming = false;
+            //p.guid = guid +"-"+ i.ToString();
+            masterOutput.addPlayerToList(p); 
         }
         //AddOneShotInstanceAndRandomPlay();
         //externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
@@ -106,14 +115,14 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     private void Update()
     {
         // Auto-generate (Debug)
-        
+        /*
         time += Time.deltaTime;
         if (time > 0.5f)
         {
             AddOneShotInstanceAndRandomPlay(true, Vector3.zero);
             time = 0;
         }
-        
+        */
 
 
         //System.GC.Collect();
@@ -136,7 +145,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 
             At_Player p = playerInstances[i].GetComponent<At_Player>();
 
-            if (!p.isPlaying)
+            if (!p.isAskedToPlay)
             {
                 freeSlotIndex = i;
                 break;
@@ -164,7 +173,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 
     public void AddOneShotInstanceAndRandomPlay(bool isRandomPosition, Vector3 position)
     {
-        if (randomPlayerState.fileNames != null && randomPlayerState.fileNames.Length != 0 && randomPlayerState.fileNames[0] !="")
+        if (randomPlayerState!=null && randomPlayerState.fileNames != null && randomPlayerState.fileNames.Length != 0 && randomPlayerState.fileNames[0] !="")
         {
            
             int indexinstance = getFreeSlot();
@@ -196,16 +205,28 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             p.isLooping = false;
             p.omniBalance = randomPlayerState.omniBalance;
             p.attenuation = randomPlayerState.attenuation;
+
+            // Debug - file name in list
             int r = Random.Range(0, fileNames.Length);
+            //r = (r + 1) % fileNames.Length;
+            //Debug.Log("Inex filename = " + r);
 
             p.externAssetsPath_audio = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio;
             p.externAssetsPath_audio_standalone = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio_standalone;
 
+            
+
             p.fileName = fileNames[r];
+
+
             p.isDynamicInstance = true;
             p.channelRouting = randomPlayerState.channelRouting;
             p.minDistance = randomPlayerState.minDistance;
+            //p.isStreaming = false;
+            //masterOutput.addPlayerToList(p);
+            //p.cleanSpatializerDelayBuffer();
             p.initAudioFile(true);            
+            p.gameObject.SetActive(true);
             p.StartPlaying();
 
         }

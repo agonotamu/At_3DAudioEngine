@@ -43,8 +43,14 @@ public class At_DynamicRandomPlayerEditor : Editor
     SerializedProperty serialized_spawnMaxAngle;
     SerializedProperty serialized_spawnDistance;
 
+
+    bool isSceneLoading = false;
+
+
     public void OnEnable()
     {
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         serialized_fileNames = serializedObject.FindProperty("fileNames");
         serialized_gain = serializedObject.FindProperty("gain");
@@ -146,6 +152,8 @@ public class At_DynamicRandomPlayerEditor : Editor
         //randomPlayer.numChannelInAudiofile = randomPlayerState.numChannelInAudiofile;
         //randomPlayer.state = randomPlayerState;
 
+        currentOutputChannelCount = outputState.outputChannelCount;
+
         if (randomPlayerState.fileNames != null && randomPlayerState.fileNames.Length != 0)
         {
             if (randomPlayerState.channelRouting == null || randomPlayerState.channelRouting.Length == 0)//|| player.outputChannelCount != outputState.outputChannelCount)
@@ -176,6 +184,21 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.outputChannelCount = outputState.outputChannelCount;
         randomPlayer.channelRouting = randomPlayerState.channelRouting;
 
+        if (outputState.outputChannelCount != randomPlayerState.channelRouting.Length)
+        {
+            currentOutputChannelCount = outputState.outputChannelCount;
+            int numChannel = randomPlayerState.maxChannelInAudiofile;
+            randomPlayerState.channelRouting = new int[currentOutputChannelCount];
+            if (numChannel > 0)
+            {
+                for (int i = 0; i < currentOutputChannelCount; i++)
+                {
+                    randomPlayerState.channelRouting[i] = i % numChannel;
+                }
+
+            }
+        }
+
         At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
 
     }
@@ -204,7 +227,10 @@ public class At_DynamicRandomPlayerEditor : Editor
         }
     }
 
-
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        isSceneLoading = true;
+    }
     void OnDestroy()
     {
         /*
@@ -219,8 +245,15 @@ public class At_DynamicRandomPlayerEditor : Editor
         {
             if (randomPlayer == null)
             {
-                //Debug.Log("remove Random Player !");
-                At_AudioEngineUtils.removeRandomPlayerWithGuid(SceneManager.GetActiveScene().name, randomPlayer.guid);
+                if (!isSceneLoading)
+                {
+                    //Debug.Log("remove Random Player !");
+                    At_AudioEngineUtils.removeRandomPlayerWithGuid(SceneManager.GetActiveScene().name, randomPlayer.guid);
+                }
+                else
+                {
+                    isSceneLoading = false;
+                }
             }
             previousIsEditor = Application.isEditor;
             previousIsPlaying = Application.isPlaying;

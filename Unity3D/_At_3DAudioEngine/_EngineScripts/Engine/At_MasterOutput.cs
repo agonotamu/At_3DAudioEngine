@@ -112,11 +112,13 @@ public class At_MasterOutput : MonoBehaviour
         mixer = gameObject.GetComponent<At_Mixer>();
 
         // get the reference of all the  At_Player instances and add it to the player list
+        /*
         playerList = new List<At_Player>();
         At_Player[] playerArray = GameObject.FindObjectsOfType<At_Player>();
         foreach (At_Player p in playerArray){
             playerList.Add(p);
         }
+        */
 
         // initialize the temp buffer
         tmpMonoBuffer = new float[MAX_BUF_SIZE];
@@ -167,7 +169,7 @@ public class At_MasterOutput : MonoBehaviour
 
             if (device == audioDeviceName)
             {
-                    running = true;
+                running = true;
                 if(At_AudioEngineUtils.asioOut == null)
                 {
                     At_AudioEngineUtils.asioOut = new AsioOut((string)device);
@@ -275,22 +277,43 @@ public class At_MasterOutput : MonoBehaviour
     * 
     * @param[in] p : At_Player instance to add
     */
+
+    
+
     public void addPlayerToList(At_Player p)
     {
-        int id = playerList.Count - 1;
-        playerList.Add(p);
-        AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay); //modif mathias 06-17-2021
-        playerList[playerList.Count - 1].masterOutput = this;
-        playerList[playerList.Count - 1].spatID = id;
-        playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
-        //Debug.Log("spat created with id : " + id);
-        mixer.setPlayerList(playerList);
-        if (playerList[playerList.Count - 1].is3D)
+        if (playerList == null)
+            playerList = new List<At_Player>();
+
+        bool isAlreadyInList = false;
+        foreach(At_Player at in playerList)
         {
-            playerList[playerList.Count - 1].UpdateSpatialParameters();
+            if(at.guid == p.guid)
+            {
+                isAlreadyInList = true;
+            }
         }
 
-        UpdateVirtualMicPosition();
+        if (!isAlreadyInList || p.isDynamicInstance)
+        {
+            int id = playerList.Count - 1;
+            playerList.Add(p);
+            AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay); //modif mathias 06-17-2021
+            //Debug.Log("create spat with name :" + p.name + " - dynamic = " + p.isDynamicInstance);
+            playerList[playerList.Count - 1].masterOutput = this;
+            playerList[playerList.Count - 1].spatID = id;
+            playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
+            //Debug.Log("spat created with id : " + id);
+            if (mixer == null) mixer = GetComponent<At_Mixer>();
+            mixer.setPlayerList(playerList);
+            if (playerList[playerList.Count - 1].is3D)
+            {
+                playerList[playerList.Count - 1].UpdateSpatialParameters();
+            }
+
+            UpdateVirtualMicPosition();
+
+        }
 
     }
 
@@ -328,9 +351,9 @@ public class At_MasterOutput : MonoBehaviour
 
     public void StopEngine() {
         isEngineStarted = false;
-        asioOut.Stop();
-        asioOut.Dispose();
-        asioOut = null;
+        At_AudioEngineUtils.asioOut.Stop();
+        At_AudioEngineUtils.asioOut.Dispose();
+        At_AudioEngineUtils.asioOut = null;
         running = false;
     }
     // Destroy all spatializer when the At_OutputMixer class is remove from the Game Object
@@ -342,11 +365,11 @@ public class At_MasterOutput : MonoBehaviour
     public void OnApplicationQuit(){
         //Debug.Log("OnDisable Output");
         AT_SPAT_WFS_destroyAllSpatializer();
-        if (asioOut != null)
+        if (At_AudioEngineUtils.asioOut != null)
         {
-            asioOut.Stop();
-            asioOut.Dispose();
-            asioOut = null;
+            At_AudioEngineUtils.asioOut.Stop();
+            At_AudioEngineUtils.asioOut.Dispose();
+            At_AudioEngineUtils.asioOut = null;
             running = false;
 
         }
@@ -359,7 +382,7 @@ public class At_MasterOutput : MonoBehaviour
         AT_SPAT_WFS_destroyAllSpatializer();
         if (asioOut != null)
         {
-            asioOut.Stop();
+            At_AudioEngineUtils.asioOut.Stop();
             //asioOut.Dispose();
             //asioOut = null;
             running = false;
@@ -521,7 +544,25 @@ public class At_MasterOutput : MonoBehaviour
     {
         At_VirtualMic[] vms = GameObject.FindObjectsOfType<At_VirtualMic>();
         At_VirtualSpeaker[] vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
-        
+
+        if (outputConfigDimension == 1)
+        {
+            if (vms != null && vms.Length != 0 && vms != null && vms.Length != 0)
+            {
+                At_VirtualMic currentMic = null;
+                At_VirtualMic nextMic = null;
+                At_VirtualSpeaker currentSpk = null;
+                for (int micCount = 0; micCount < vms.Length; micCount++)
+                {
+                    currentMic = micWithIndex(vms, micCount);
+                    currentSpk = speakerWithIndex(vss, micCount);
+                    currentMic.transform.position = currentSpk.transform.position;
+                    currentMic.transform.eulerAngles = currentSpk.transform.eulerAngles;
+                    currentMic.transform.Rotate(0f, 180f, 0f);
+
+                }
+            }
+        }
         if (outputConfigDimension == 2)
         {
             outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);

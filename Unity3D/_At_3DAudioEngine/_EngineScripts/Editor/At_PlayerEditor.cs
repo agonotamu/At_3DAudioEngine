@@ -82,10 +82,15 @@ public class At_PlayerEditor : Editor
 
     At_OutputState outputState;
 
+
+    bool isSceneLoading = false;
+
+
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
 
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         serialized_fileName = serializedObject.FindProperty("fileName");
         serialized_gain = serializedObject.FindProperty("gain");
@@ -105,7 +110,7 @@ public class At_PlayerEditor : Editor
 
         // get a reference to the At_Player isntance (core engine of the player)
         player = (At_Player)target;
-        
+
         if (!player.isDynamicInstance)
         {
             At_ExternAssets ea = GameObject.FindObjectOfType<At_ExternAssets>();
@@ -123,7 +128,6 @@ public class At_PlayerEditor : Editor
 
             // get the name of the GameObject 
             gameObjectName = player.gameObject.name;
-
 
             // Get the state of the player
             // - If the GameObject name is found just return the instance in the At_PlayerState List
@@ -154,7 +158,7 @@ public class At_PlayerEditor : Editor
                     playerState.channelRouting[i] = property.intValue; // seems to be impossible
                     
                 }
-                playerState.numChannelInAudiofile = serialized_channelRouting.arraySize;
+                //playerState.numChannelInAudiofile = serialized_channelRouting.arraySize;
                 //playerState.channelRouting = channelRouting.;
             }
 
@@ -174,10 +178,11 @@ public class At_PlayerEditor : Editor
             {
                 player.initMeters();
             }
-            
-            player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
-            
-            
+
+            // bug with init of numChannelsInAudioFile
+            //player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
+
+
             //playerState.numChannelInAudiofile = player.numChannelsInAudioFile;
 
             outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
@@ -212,6 +217,24 @@ public class At_PlayerEditor : Editor
             //player.state = playerState;
             
         }
+
+        //currentOutputChannelCount = outputState.outputChannelCount;
+        //if (playerState.channelRouting != null && playerState.channelRouting.Length == currentOutputChannelCount)
+        if (outputState.outputChannelCount != playerState.channelRouting.Length)
+        {
+            currentOutputChannelCount = outputState.outputChannelCount;
+            int numChannel = player.getNumChannelInAudioFile();
+            playerState.channelRouting = new int[currentOutputChannelCount];
+            if (numChannel > 0)
+            {
+                for (int i = 0; i < currentOutputChannelCount; i++)
+                {
+                    playerState.channelRouting[i] = i % numChannel;
+                }
+
+            }
+        }
+
 
         At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
     }
@@ -265,6 +288,12 @@ public class At_PlayerEditor : Editor
         //Debug.Log("create player with guid : " + guid);
     }
     */
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        isSceneLoading = true;
+    }
+
     void OnDestroy()
     {
         
@@ -272,8 +301,15 @@ public class At_PlayerEditor : Editor
         {
             if (player == null)
             {
-                Debug.Log("remove Player !");
-                At_AudioEngineUtils.removePlayerWithGuid(SceneManager.GetActiveScene().name, player.guid);
+                if (!isSceneLoading)
+                {
+                    Debug.Log("remove Player !");
+                    At_AudioEngineUtils.removePlayerWithGuid(SceneManager.GetActiveScene().name, player.guid);
+                }
+                else
+                {
+                    isSceneLoading = false;
+                }
             }
             previousIsEditor = Application.isEditor;
             previousIsPlaying = Application.isPlaying;
@@ -341,7 +377,12 @@ public class At_PlayerEditor : Editor
                     //paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsPath_audio, extensions, false);
                     paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsState.externAssetsPath_audio, extensions, false);
                     //string s = paths[0].Replace(externAssetsPath_audio, "");
-                    string s = paths[0].Replace(externAssetsState.externAssetsPath_audio, "");
+                    string s="";
+                    if (paths.Length != 0)
+                    {
+                        s = paths[0].Replace(externAssetsState.externAssetsPath_audio, "");
+                    }
+                        
 
                     if (s != playerState.fileName)
                     {
@@ -368,9 +409,13 @@ public class At_PlayerEditor : Editor
                     */
                     currentOutputChannelCount = outputState.outputChannelCount;                    
                     playerState.channelRouting = new int[currentOutputChannelCount];
-                    for (int i = 0; i < currentOutputChannelCount; i++)
+                    if (numChannel > 0)
                     {
-                        playerState.channelRouting[i] = i % numChannel;
+                        for (int i = 0; i < currentOutputChannelCount; i++)
+                        {
+                            playerState.channelRouting[i] = i % numChannel;
+                        }
+
                     }
                     GUIUtility.ExitGUI();
                 }
@@ -606,10 +651,17 @@ public class At_PlayerEditor : Editor
                     currentOutputChannelCount = outputState.outputChannelCount;
                     if (playerState.channelRouting != null && playerState.channelRouting.Length == currentOutputChannelCount)
                     {
-                        string[] channelRouting = new string[currentOutputChannelCount];
+                        /*
+                        string[] channelRouting = new string[currentOutputChannelCount];                       
                         for (int i = 0; i < channelRouting.Length; i++)
                         {
                             channelRouting[i] = (i% numChannel).ToString();
+                        }
+                        */
+                        string[] channelRouting = new string[numChannel];
+                        for (int i = 0; i < numChannel; i++)
+                        {
+                            channelRouting[i] = i.ToString();
                         }
                         int[] selectedChannelRouting = new int[currentOutputChannelCount];
                         for (int i = 0; i < selectedChannelRouting.Length; i++)

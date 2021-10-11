@@ -95,7 +95,7 @@ public class At_Player : MonoBehaviour
     /// boolean telling if the player is actually playing
     public bool isPlaying = false;
     /// boolean telling if the player is asked to play (not necesseraly true
-    bool isAskedToPlay = false;
+    public bool isAskedToPlay = false;
     /// number of player in the Unity scene - unused
     static public int playerCount;
     /// number of channel of the output bus
@@ -158,6 +158,12 @@ public class At_Player : MonoBehaviour
     //-----------------------------------------------------
     //public bool GetIsPlaying() { return isPlaying; }
     public void StartPlaying() {
+
+        if (!isDynamicInstance)
+        {
+            int a = 1;
+        }
+
         isAskedToPlay = true;
         playingCount++;
         // reset the read offset for each channel
@@ -183,8 +189,17 @@ public class At_Player : MonoBehaviour
         
         if (aud != null)
         {
-            audReadOffset = 0;
-            aud.Position = 0;
+            if (isDynamicInstance)
+            {
+                aud.Dispose();
+                aud = null;
+            }
+            else
+            {
+                audReadOffset = 0;
+                aud.Position = 0;
+            }
+            
         }
         //playingCount--;
     }
@@ -192,16 +207,16 @@ public class At_Player : MonoBehaviour
     {
         mustBeDestroyedSafely = true;
     }
-    public void OnDisable() { playerCount--; }
-
-    
+    public void OnDisable() {
+        
+        StopPlaying();
+    }
 
     public void Awake() {
 
-       
-
-        playerCount++;
-        
+        masterOutput = GameObject.FindObjectOfType<At_MasterOutput>();
+        if (!isDynamicInstance)
+            masterOutput.addPlayerToList(this);
         initAudioFile(false);
     }
 
@@ -409,6 +424,13 @@ public class At_Player : MonoBehaviour
     }
     private void Update()
     {
+        /*
+        if(isPlaying && gameObject.activeSelf == false)
+        {
+            StopPlaying();
+        }
+        */
+
         if (is3D)
         {
             UpdateSpatialParameters();
@@ -453,6 +475,13 @@ public class At_Player : MonoBehaviour
         
     }
 
+    public void cleanSpatializerDelayBuffer()
+    {
+        if (is3D)
+        {
+            AT_SPAT_WFS_cleanDelayBuffer(spatID);
+        }
+    }
 
     /**
      * 
@@ -468,7 +497,7 @@ public class At_Player : MonoBehaviour
     public bool extractInputBuffer(int bufferSize)
     {
         
-        if (isAskedToPlay)
+        if (isAskedToPlay && aud != null)
         {
             isPlaying = true;
             if (isStreaming)
@@ -556,6 +585,10 @@ public class At_Player : MonoBehaviour
                             
                             if (!isLooping)
                             {
+                                if (!isDynamicInstance)
+                                {
+                                    int a = 1;
+                                }
                                 isAskedToPlay = false;
                                 isPlaying = false;
                                 //playingCount--;
@@ -819,7 +852,8 @@ public class At_Player : MonoBehaviour
     private static extern void AT_SPAT_WFS_setMinDistance(int id, float minDistance);
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_process(int id, float[] inBuffer, float[] outBuffer, int bufferLength, int inChannelCount, int outChannelCount);
-
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern void AT_SPAT_WFS_cleanDelayBuffer(int id);
 #endregion
 
 }
