@@ -103,13 +103,10 @@ public class At_AudioEngineUtils : MonoBehaviour
             //JsonUtility.FromJsonOverwrite(json, eas);
             JsonUtility.FromJsonOverwrite(json_new, eas);
             
-
 #if UNITY_EDITOR
-            if (Directory.Exists(eas.externAssetsPath_state)){
-                
+            if (Directory.Exists(eas.externAssetsPath_state)){                
 #else
-            if (Directory.Exists(eas.externAssetsPath_state_standalone)){
-                Debug.Log(eas.externAssetsPath_state_standalone + "EXISTS !!");
+            if (Directory.Exists(eas.externAssetsPath_state_standalone)){                
 #endif
 
                 //Debug.Log("asset path exists");
