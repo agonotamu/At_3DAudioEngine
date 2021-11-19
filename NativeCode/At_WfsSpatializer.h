@@ -35,8 +35,8 @@
 #include "AudioPluginUtil.h"
 #define MAX_BUFFER_SIZE 2048
 #define NUM_BUFFER_IN_DELAY 32
-#define MAX_OUTPUT_CHANNEL 24
-#define MAX_INPUT_CHANNEL 4
+#define MAX_OUTPUT_CHANNEL 48
+#define MAX_INPUT_CHANNEL 16
 
 
 namespace Spatializer
@@ -60,6 +60,8 @@ namespace Spatializer
         int setListenerPosition(float* position, float* rotation);
         
         void setSampleRate(float sampleRate);
+
+        void cleanDelayBuffer();
 
         void initDelayBuffer();
 

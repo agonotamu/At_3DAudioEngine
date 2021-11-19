@@ -169,7 +169,7 @@ public class At_MasterOutput : MonoBehaviour
 
             if (device == audioDeviceName)
             {
-                running = true;
+                    running = true;
                 if(At_AudioEngineUtils.asioOut == null)
                 {
                     At_AudioEngineUtils.asioOut = new AsioOut((string)device);
@@ -299,7 +299,7 @@ public class At_MasterOutput : MonoBehaviour
             int id = playerList.Count - 1;
             playerList.Add(p);
             AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay); //modif mathias 06-17-2021
-            //Debug.Log("create spat with name :" + p.name + " - dynamic = " + p.isDynamicInstance);
+            Debug.Log("create spat with name :" + p.name + " - dynamic = " + p.isDynamicInstance);
             playerList[playerList.Count - 1].masterOutput = this;
             playerList[playerList.Count - 1].spatID = id;
             playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;

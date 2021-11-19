@@ -47,7 +47,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     
     float time = 0;
     At_DynamicRandomPlayerState randomPlayerState;
-    const int maxInstance = 2;
+    const int maxInstance = 10;
 
     int r = 0;
     public string guid="";

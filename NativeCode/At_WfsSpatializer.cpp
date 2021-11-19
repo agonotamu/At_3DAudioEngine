@@ -6,12 +6,14 @@
 
 #include "At_SpatializationEngine.h"
 
+//#define DEBUG_LOAD
+
 namespace Spatializer
 {
 
     At_WfsSpatializer::~At_WfsSpatializer() {
 
-        //std::cout << "In Destructor : Destroy Delay Buffer !" << " \n";
+        std::cout << "Spatializer " << spatID << " destroyed !" << " \n";
         //delete[] m_pDelayBuffer;
         //m_pDelayBuffer = NULL;
     }
@@ -147,7 +149,7 @@ namespace Spatializer
             normalizedDirection[2] = direction[2] / virtualMicDistance;
 
             m_pWfsDelay[virtualMicIdx] = (virtualMicDistance / 340.0f) * 1000.0f; // time in milliseconds;
-
+            
             float rolloff;
             
             if (virtualMicDistance < m_minDistance || m_attenuation == 0) {
@@ -190,11 +192,18 @@ namespace Spatializer
     *                            DELAY BUFFERS UPDATE (EACH FRAME)
     *
     *****************************************************************************/
+    
+    void At_WfsSpatializer::cleanDelayBuffer() {
+        for (int i = 0; i < m_delayBufferSize; i++) {
+            m_pDelayBuffer[i] = 0;
+        }
+    }
 
     void At_WfsSpatializer::initDelayBuffer() {
 
         // 
-        
+#ifdef DEBUG_LOAD        
+#else
         float maxDistanceForOneBuffer = 340 * MAX_BUFFER_SIZE / m_sampleRate;
 
         //std::cout << "maxDistanceForOneBuffer = " << maxDistanceForOneBuffer << " \n";
@@ -211,7 +220,7 @@ namespace Spatializer
         for (int i = 0; i < m_delayBufferSize; i++) {
             m_pDelayBuffer[i] = 0;
         }
-
+#endif
         //std::cout << "last sample of delay buffer is : " << m_pDelayBuffer[m_delayBufferSize-1] << " \n";
     }
 
@@ -227,6 +236,7 @@ namespace Spatializer
         int numLengthInDelBuf = m_delayBufferSize / bufferLength;
         //std::cout << "numLengthInDelBuf =" << numLengthInDelBuf << "\n";
 
+        
         for (int count = 1; count < numLengthInDelBuf; count++) {
             int startTo = (count - 1) * bufferLength;
             int startFrom = count * bufferLength;
@@ -234,7 +244,8 @@ namespace Spatializer
                 m_pDelayBuffer[startTo + sample] = m_pDelayBuffer[startFrom + sample];
             }
         }
-
+        
+        
         for (int sample = 0; sample < bufferLength; sample++) {
             m_pDelayBuffer[(numLengthInDelBuf - 1) * bufferLength + sample] = m_pTmpMonoBuffer_in[sample];
         }  
@@ -339,6 +350,15 @@ namespace Spatializer
 
     int At_WfsSpatializer::process(float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount) {
 
+#ifdef DEBUG_LOAD
+
+        for (int virtualMicIndex = 0; virtualMicIndex < outChannelCount; virtualMicIndex++) {
+            for (int sampleIndex = 0; sampleIndex < bufferLength; sampleIndex++) {
+                outBuffer[outChannelCount * sampleIndex + virtualMicIndex] = inBuffer[inChannelCount * sampleIndex];
+            }
+        }
+#else 
+
         // NO DIRECTIVE SOURCE
         // force no directive source
         m_isDirective == false;
@@ -359,9 +379,10 @@ namespace Spatializer
             */
         }
         else if (m_isDirective == false) {
-            forceMonoInput(inBuffer, bufferLength, inChannelCount);
+            forceMonoInput(inBuffer, bufferLength, inChannelCount);            
             updateDelayBuffer(bufferLength);
         }     
+
 
         float* inBufferInit = inBuffer;
         float volumeSum = 0;
@@ -383,7 +404,9 @@ namespace Spatializer
         }
         m_minDelay_prevFrame = m_minDelay;
         m_maxDelay_prevFrame = m_maxDelay;
-      
+ 
+#endif
+
         return 0;
     }
 

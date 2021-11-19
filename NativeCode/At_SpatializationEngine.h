@@ -38,7 +38,7 @@ namespace Spatializer
 		void WFS_destroyAllSpatializer();
 
 		// One for each Spatializer ---------------------------------------------------------------------------------------
-
+		
 		void WFS_setSourcePosition(int id, float* position, float* rotation, float* forward); //modif mathias 06-14-2021
 		void WFS_setAttenuation(int id, float attenuation);
 		void WFS_setSourceOmniBalance(int id, float omniBalance);
@@ -47,6 +47,8 @@ namespace Spatializer
 		
 
 		void WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount);
+		
+		void WFS_cleanDelayBuffer(int id);
 
 	private:
 		At_WfsSpatializer *findSpatializerWithSpatID(int id);

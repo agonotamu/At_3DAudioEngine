@@ -41,8 +41,8 @@ public class At_Player : MonoBehaviour
     //-----------------------------------------------------
     /// constants used for array initialization 
     const int MAX_BUF_SIZE = 2048;
-    const int MAX_OUTPUT_CHANNEL = 24; // very very very large !!
-    const int MAX_INPUT_CHANNEL = 16;
+    const int MAX_OUTPUT_CHANNEL = 48; 
+    const int MAX_INPUT_CHANNEL = 48;
     /// array containing the all the samples of the audio file
     private float[] rawAudioData;
     /// array containing a single frame of the audio file
@@ -158,12 +158,6 @@ public class At_Player : MonoBehaviour
     //-----------------------------------------------------
     //public bool GetIsPlaying() { return isPlaying; }
     public void StartPlaying() {
-
-        if (!isDynamicInstance)
-        {
-            int a = 1;
-        }
-
         isAskedToPlay = true;
         playingCount++;
         // reset the read offset for each channel
@@ -585,10 +579,6 @@ public class At_Player : MonoBehaviour
                             
                             if (!isLooping)
                             {
-                                if (!isDynamicInstance)
-                                {
-                                    int a = 1;
-                                }
                                 isAskedToPlay = false;
                                 isPlaying = false;
                                 //playingCount--;

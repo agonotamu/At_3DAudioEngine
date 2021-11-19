@@ -21,7 +21,6 @@ using UnityEngine.SceneManagement;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using NAudioAsioPatchBay;
-using System.Collections;
 
 public class At_AudioEngineUtils : MonoBehaviour
 {
@@ -68,11 +67,10 @@ public class At_AudioEngineUtils : MonoBehaviour
         TextAsset jsonTextAsset = Resources.Load<TextAsset>("externalAssetsState");
         string path = GetFilePathForExternalAssets(fileName);
         string json_new = "";//= ReadFromFile(path);
-       
-        
+        Debug.Log("try to open extern data at path : "+ path);
+
         if (File.Exists(path))
         {
-            
             using (StreamReader reader = new StreamReader(path))
             {
                 json_new = reader.ReadToEnd();
@@ -96,20 +94,19 @@ public class At_AudioEngineUtils : MonoBehaviour
         */
         if(json_new != "")
         {
-            
             //string json = jsonTextAsset.text;
-
+            
             At_ExternAssetsState eas = new At_ExternAssetsState();
             //JsonUtility.FromJsonOverwrite(json, eas);
             JsonUtility.FromJsonOverwrite(json_new, eas);
-            
+
+            string path_to_test = "";
 #if UNITY_EDITOR
-            if (Directory.Exists(eas.externAssetsPath_state)){                
+            if (Directory.Exists(eas.externAssetsPath_state))
+            {
 #else
             if (Directory.Exists(eas.externAssetsPath_state_standalone)){                
 #endif
-
-                //Debug.Log("asset path exists");
                 externalAssetsStates = eas;
                 return true;
             }
@@ -137,13 +134,11 @@ public class At_AudioEngineUtils : MonoBehaviour
      * SAVE AND LOAD VIRTUAL SPEAKERS AND VIRTUAL MICROPHONE CONFIGURATION
      * 
      **************************************************************************/
-    
+
     static At_AudioEngineUtils()
     {
-       
-
+        //Debug.Log("opening !");
         bool isExternAssetsLoaded = loadExternAssetsState();
-
         
 
         if(isExternAssetsLoaded) LoadAll();
@@ -302,6 +297,7 @@ public class At_AudioEngineUtils : MonoBehaviour
         return hasChanged;
     }
     
+    
     public static void saveSpeakerState(string sceneName)
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
@@ -419,60 +415,116 @@ public class At_AudioEngineUtils : MonoBehaviour
         string statesPath = GetFilePathForStates("");
 
         string[] stateFilesPath = Directory.GetFiles(statesPath);
-        
+
         foreach (string stateFilePath in stateFilesPath)
         {
             
+
             string stateFileName = stateFilePath.Replace(statesPath, "");
-
-            String sceneName = stateFileName.Replace("_States.txt", "");
             
-            audioEngineStates = new At_3DAudioEngineState();
+            if (stateFileName.Contains("_States")) {
+                String sceneName = stateFileName.Replace("_States.txt", "");
 
-            //Scene scene = SceneManager.GetActiveScene();
-            //string json = ReadFromFile(scene.name + "_States.txt");
-            string json = ReadFromFile(stateFileName);
-            
-
-            string[] lines = json.Split('\n');
-            for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
-            {
-                // OutputState
-                if (lineIndex == 0)
+                if(audioEngineStates == null)
                 {
-                    
-                    At_OutputState os = new At_OutputState();
-                    JsonUtility.FromJsonOverwrite(lines[lineIndex], os);
-                    audioEngineStates.outputState = os;
+                    audioEngineStates = new At_3DAudioEngineState();
                 }
-                // At_Player or At_DynamicRandomPlayer
+
+                if (!audioEngineStatesDictionary.ContainsKey(sceneName))
+                {
+                    audioEngineStatesDictionary.Add(sceneName, audioEngineStates);
+                }
+
+
+                string json = ReadFromFile(stateFileName);
+
+
+                string[] lines = json.Split('\n');
+                for (int lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+                {
+                    // OutputState
+                    if (lineIndex == 0)
+                    {
+                        At_OutputState os = new At_OutputState();
+                        JsonUtility.FromJsonOverwrite(lines[lineIndex], os);
+                        audioEngineStatesDictionary[sceneName].outputState = os;
+                    }
+                    // At_Player or At_DynamicRandomPlayer
+                    else
+                    {   // this is an At_player
+                        if (lines[lineIndex].Contains("\"type\":0"))
+                        {
+                            At_PlayerState ps = new At_PlayerState();
+                            JsonUtility.FromJsonOverwrite(lines[lineIndex], ps);
+                            audioEngineStatesDictionary[sceneName].playerStates.Add(ps);
+                            //Debug.Log("load At_Player with name : " + ps.name);
+                        }
+                        // this is an At_DynamicRandomPlayer
+                        else if (lines[lineIndex].Contains("\"type\":1"))
+                        {
+                            At_DynamicRandomPlayerState drps = new At_DynamicRandomPlayerState();
+                            JsonUtility.FromJsonOverwrite(lines[lineIndex], drps);
+                            audioEngineStatesDictionary[sceneName].randomPlayerStates.Add(drps);
+                            /*
+                            foreach (string fileName in drps.fileNames)
+                            {
+                                //Debug.Log(fileName);
+                            }
+                            Debug.Log("load At_DynamicRandomPlayer with name : " + drps.name);
+                            */
+                        }
+
+                    }
+
+
+                }
+                
+
+                /*
+                if (audioEngineStatesDictionary.ContainsKey(sceneName))
+                {
+                }
                 else
-                {   // this is an At_player
-                    if (lines[lineIndex].Contains("\"type\":0"))
-                    {
-                        
-                        At_PlayerState ps = new At_PlayerState();
-                        JsonUtility.FromJsonOverwrite(lines[lineIndex], ps);
-                        
+                {
 
-                        audioEngineStates.playerStates.Add(ps);
-                        
-                    }
-                    // this is an At_DynamicRandomPlayer
-                    else if (lines[lineIndex].Contains("\"type\":1"))
-                    {
-                        At_DynamicRandomPlayerState drps = new At_DynamicRandomPlayerState();
-                        JsonUtility.FromJsonOverwrite(lines[lineIndex], drps);
-                        
-                        audioEngineStates.randomPlayerStates.Add(drps);
-                        
-                    }
+                }
+                */
+                //audioEngineStatesDictionary.Add(sceneName, audioEngineStates);
+            }
+            else if (stateFileName.Contains("_VirtualSpeakerState")) {
 
+                String sceneName = stateFileName.Replace("_VirtualSpeakerState.txt", "");
+               
+                if (audioEngineStates == null)
+                {
+                    audioEngineStates = new At_3DAudioEngineState();
+                }
+
+                if (!audioEngineStatesDictionary.ContainsKey(sceneName))
+                {
+                    audioEngineStatesDictionary.Add(sceneName, audioEngineStates);
                 }
 
 
+                string json = ReadFromFile(stateFileName);
+                At_VirtualSpeakerState vss = new At_VirtualSpeakerState();
+                JsonUtility.FromJsonOverwrite(json, vss);
+                audioEngineStatesDictionary[sceneName].virtualSpeakerState = vss;
+                /*
+                if (audioEngineStatesDictionary.ContainsKey(sceneName))
+                {
+                    audioEngineStatesDictionary[sceneName].virtualSpeakerState = vss;
+                }
+                else
+                {
+                    audioEngineStates.virtualSpeakerState = vss;
+                    audioEngineStatesDictionary.Add(sceneName, audioEngineStates);
+
+                }
+                */
             }
-            audioEngineStatesDictionary.Add(sceneName, audioEngineStates);
+
+
         }
         
     }
@@ -726,7 +778,7 @@ public class At_AudioEngineUtils : MonoBehaviour
             }
         }
         else
-            Debug.LogError("File not found!");
+            Debug.LogWarning("File not found!");
             return "";       
     }
 
@@ -743,23 +795,17 @@ public class At_AudioEngineUtils : MonoBehaviour
         if (externalAssetsStates != null)
         {
             externAssetsPath = externalAssetsStates.externAssetsPath_state;
-        }
+        }                    
 #else
-        
-        if (externalAssetsStates != null)
-        {
-            externAssetsPath = externalAssetsStates.externAssetsPath_state_standalone;
-        }
-        else {
-            Debug.LogError("externalAssetsStates is null");
-        }
-       
+        Debug.Log("in standalone !");
+        externAssetsPath = externalAssetsStates.externAssetsPath_state_standalone;
+        Debug.Log("state path :"+externAssetsPath);
 #endif
 
 
         //Debug.Log("At startup read json at :"+externAssetsPath);
         //return Application.persistentDataPath + "/" + fileName;
-
+        
         return (externAssetsPath + "/"+fileName);//Application.dataPath+ "/At_3DAudioEngine/States/"+ fileName;
     }
 

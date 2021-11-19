@@ -542,7 +542,7 @@ public class At_PlayerEditor : Editor
             }
 
             
-            /*
+            
             using (new GUILayout.VerticalScope())
             {
 
@@ -553,7 +553,7 @@ public class At_PlayerEditor : Editor
 
                     float timeReversal = GUILayout.HorizontalSlider(playerState.timeReversal, 1f, 0);
 
-                    if (timeReversal != playerState.omniBalance)
+                    if (timeReversal != playerState.timeReversal)
                     {
                         playerState.timeReversal = timeReversal;
                         shouldSave = true;
@@ -567,7 +567,7 @@ public class At_PlayerEditor : Editor
 
                 HorizontalLine(Color.grey);
             }
-            */
+            
 
             if (playerState.fileName != "")
             {

@@ -30,7 +30,7 @@ public class At_MasterOutputEditor : Editor
 
     At_OutputState outputState = new At_OutputState();
     At_MasterOutput masterOutput;
-    string[] outputConfigSelection = { "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]"};
+    string[] outputConfigSelection = { "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "1D [48]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]"};
     int selectSpeakerConfig = 0;
     int outputConfigDimension = 1;
     public GameObject[] virtualMic;
@@ -42,11 +42,11 @@ public class At_MasterOutputEditor : Editor
     // create your style
     GUIStyle horizontalLine;
         
-    float speakerRigSize = 10;
+    float speakerRigSize = 100;
 
+    
 
-
-    private GUIContent spkButtonContent, cleanButtonContent;
+    private GUIContent spkButtonContent, cleanButtonContent, saveSpkButtonContent;
 
     bool isEngineStarted = false;
     // DRAWING
@@ -63,11 +63,7 @@ public class At_MasterOutputEditor : Editor
     private void AffirmResources()
     {
         if (meterOn == null)
-        {
-            /*
-            meterOn = EditorGUIUtility.Load("/At_3DAudioEngine/LevelMeter.png") as Texture;
-            meterOff = EditorGUIUtility.Load("/At_3DAudioEngine/LevelMeterOff.png") as Texture;
-            */
+        {           
             meterOn = (Texture)AssetDatabase.LoadAssetAtPath("Assets/At_3DAudioEngine/Other/Resources/At_3DAudioEngine/LevelMeter.png", typeof(Texture));
             meterOff = (Texture)AssetDatabase.LoadAssetAtPath("Assets/At_3DAudioEngine/Other/Resources/At_3DAudioEngine/LevelMeterOff.png", typeof(Texture));
         }
@@ -327,9 +323,9 @@ public class At_MasterOutputEditor : Editor
         }
 
         HorizontalLine(Color.grey);
-        
+
         using (new GUILayout.HorizontalScope())
-        {            
+        {
             //-----------------------------------------------------------------
             // VIRTUAL SPEAKERS/MICS ADD TO SCENE BUTON
             //----------------------------------------------------------------
@@ -343,7 +339,7 @@ public class At_MasterOutputEditor : Editor
                 GUILayout.Label("Initialize\nSpeaker config");
                 //GUILayout.BeginHorizontal();
                 //GUILayout.Label("--------------------------|");
-                if (speakerConfigHasChanged || GUILayout.Button(spkButtonContent,GUILayout.Width(70), GUILayout.Height(70)))
+                if (speakerConfigHasChanged || GUILayout.Button(spkButtonContent, GUILayout.Width(70), GUILayout.Height(70)))
                 {
                     speakerConfigHasChanged = false;
                     At_VirtualMic[] vms;
@@ -365,12 +361,24 @@ public class At_MasterOutputEditor : Editor
                     virtualSpkParent.transform.parent = masterOutput.gameObject.transform;
                     At_SpeakerConfig.addSpeakerConfigToScene(ref virtualMic, outputState.virtualMicRigSize, ref speakers, speakerRigSize,
                         outputState.outputChannelCount, outputState.outputConfigDimension, virtualMicParent, virtualSpkParent);
+                    
 
-                    for (int i = 0; i < virtualMic.Length; i++)
-                    {
-                        //UnityEditor.PrefabUtility.UnpackPrefabInstance(virtualMic[i], PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-                        //UnityEditor.PrefabUtility.UnpackPrefabInstance(speakers[i], PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-                    }
+                }
+            }
+            using (new GUILayout.VerticalScope())
+            {
+                if (saveSpkButtonContent == null)
+                    saveSpkButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/SavespeakerPosition")); // file name in the resources folder without the (.png) extension
+
+                GUILayout.Label("Save\nSpeakers position");
+                if (GUILayout.Button(saveSpkButtonContent, GUILayout.Width(70), GUILayout.Height(70)))
+                {
+                    At_VirtualMic[] vms = GameObject.FindObjectsOfType<At_VirtualMic>();
+                    At_VirtualSpeaker[] vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
+
+                    if (At_AudioEngineUtils.setSpeakerState(SceneManager.GetActiveScene().name, vms, vss))
+                        At_AudioEngineUtils.saveSpeakerState(SceneManager.GetActiveScene().name);
+
 
                 }
             }
@@ -386,7 +394,7 @@ public class At_MasterOutputEditor : Editor
 
             GUILayout.Label("Mic Rig Size");
 
-            float size = GUILayout.HorizontalSlider(outputState.virtualMicRigSize, 0, 20);
+            float size = GUILayout.HorizontalSlider(outputState.virtualMicRigSize, 0, 100);
 
             if (size != outputState.virtualMicRigSize)
             {

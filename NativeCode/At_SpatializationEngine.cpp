@@ -18,7 +18,8 @@ namespace Spatializer
 	At_SpatializationEngine::~At_SpatializationEngine() {
 
 #ifdef DEBUGLOG
-		std::cout << "Clear all Spatializer !\n";
+		std::cout << "Clear all Spatializer from destructor !\n";
+		std::cout << "m_pWfsSpatializerList is size : " << m_pWfsSpatializerList.size() << "\n";
 #endif
 		for (int i = 0; i < m_pWfsSpatializerList.size(); i++) {
 			delete &m_pWfsSpatializerList[i];
@@ -28,13 +29,16 @@ namespace Spatializer
 	 
 	void At_SpatializationEngine::WFS_destroyAllSpatializer() {
 #ifdef DEBUGLOG
-		std::cout << "Clear all Spatializer !\n";
+		std::cout << "Clear all Spatializer from destroy all !\n";
+		std::cout << "m_pWfsSpatializerList is size : " << m_pWfsSpatializerList.size() << "\n";
 #endif
+
 		m_pWfsSpatializerList.clear();
 		//delete& m_pWfsSpatializerList;
 		incrementalUniqueID = 0;
 	}
 
+	
 	void At_SpatializationEngine::CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay) { //modif mathias 06-17-2021
 
 		At_WfsSpatializer *s = new At_WfsSpatializer();	
@@ -112,6 +116,17 @@ namespace Spatializer
 		return NULL;
 	}
 	// One for each Spatializer ---------------------------------------------------------------------------------------
+	
+	void At_SpatializationEngine::WFS_cleanDelayBuffer(int id) { 
+
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->cleanDelayBuffer();
+		}
+		
+	}
+	
+
 	void At_SpatializationEngine::WFS_setSourcePosition(int id, float* position, float* rotation, float* forward) { //modif mathias 06-14-2021
 		
 		At_WfsSpatializer *ws = findSpatializerWithSpatID(id);
