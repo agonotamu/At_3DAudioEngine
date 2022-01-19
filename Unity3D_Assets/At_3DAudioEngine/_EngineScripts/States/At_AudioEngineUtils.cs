@@ -32,6 +32,9 @@ public class At_AudioEngineUtils : MonoBehaviour
     
     static public AsioOut asioOut;
 
+    static public int unityOutputBufferSize, asioOutputBufferSize;
+
+
     public static At_ExternAssetsState getExternalAssetsState()
     {
 
@@ -67,7 +70,7 @@ public class At_AudioEngineUtils : MonoBehaviour
         TextAsset jsonTextAsset = Resources.Load<TextAsset>("externalAssetsState");
         string path = GetFilePathForExternalAssets(fileName);
         string json_new = "";//= ReadFromFile(path);
-        Debug.Log("try to open extern data at path : "+ path);
+        //Debug.Log("try to open extern data at path : "+ path);
 
         if (File.Exists(path))
         {
@@ -99,8 +102,7 @@ public class At_AudioEngineUtils : MonoBehaviour
             At_ExternAssetsState eas = new At_ExternAssetsState();
             //JsonUtility.FromJsonOverwrite(json, eas);
             JsonUtility.FromJsonOverwrite(json_new, eas);
-
-            string path_to_test = "";
+            
 #if UNITY_EDITOR
             if (Directory.Exists(eas.externAssetsPath_state))
             {
@@ -135,13 +137,33 @@ public class At_AudioEngineUtils : MonoBehaviour
      * 
      **************************************************************************/
 
+    static void getBuffersSize()
+    {
+        
+        At_OutputState outputState = getOutputState(SceneManager.GetActiveScene().name);
+        AsioOut ao = new AsioOut((string)outputState.audioDeviceName);
+        asioOutputBufferSize = ao.PlaybackLatency / 2;
+        ao.Dispose();
+        ao = null;
+        int unityNumBuffer;
+        AudioSettings.GetDSPBufferSize(out unityOutputBufferSize, out unityNumBuffer);
+        Debug.LogWarning("Unity Output Buffer size : " + unityOutputBufferSize + " samples");
+        Debug.LogWarning("ASIO Output Buffer size : " + asioOutputBufferSize + " samples");
+    }
+
     static At_AudioEngineUtils()
     {
+
+        // Get Unity and ASIO output buffer size for intializing AT_Player
+
+
         //Debug.Log("opening !");
         bool isExternAssetsLoaded = loadExternAssetsState();
         
 
         if(isExternAssetsLoaded) LoadAll();
+
+        //getBuffersSize();
     }
 
     

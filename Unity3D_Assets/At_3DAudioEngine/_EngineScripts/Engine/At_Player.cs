@@ -405,29 +405,34 @@ public class At_Player : MonoBehaviour
 
         if (isUnityAudioSource)
         {
+            
             if (At_AudioEngineUtils.asioOut == null)
             {
                 At_OutputState outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
                 AsioOut ao = new AsioOut((string)outputState.audioDeviceName);
-                asioOutputBufferSize = ao.PlaybackLatency/2;
+                asioOutputBufferSize = ao.PlaybackLatency / 2;
                 ao.Dispose();
                 ao = null;
             }
             else
             {
-                asioOutputBufferSize = At_AudioEngineUtils.asioOut.PlaybackLatency/2;
+                asioOutputBufferSize = At_AudioEngineUtils.asioOut.PlaybackLatency / 2;
             }
             AudioSettings.GetDSPBufferSize(out unityOutputBufferSize, out unityNumBuffer);
-            int q = gcd(unityOutputBufferSize, asioOutputBufferSize);
-            inputFileBufferSize = 4 * unityOutputBufferSize * asioOutputBufferSize / q;
             
+            int q = gcd(unityOutputBufferSize, asioOutputBufferSize);
+            inputFileBufferSize = 10 * unityOutputBufferSize * asioOutputBufferSize / q;
+            /*
+            int q = gcd(At_AudioEngineUtils.unityOutputBufferSize, At_AudioEngineUtils.asioOutputBufferSize);
+            inputFileBufferSize = 10 * At_AudioEngineUtils.unityOutputBufferSize * At_AudioEngineUtils.asioOutputBufferSize / q;
+            */
 
         }
         else
         {
             inputFileBufferSize = MAX_BUF_SIZE * MAX_OUTPUT_CHANNEL;
         }
-        
+
         inputFileBuffer = new float[inputFileBufferSize];
         // - if player is 3D this buffer is used to copy the processed inputFileBuffer by spatialization algorithm (using C++ dll)
         // - if player is 2D this buffer is used to downmix/upmix and/or apply routing matrix to conform input channel order to output channel order.
