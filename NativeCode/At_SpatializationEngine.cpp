@@ -190,11 +190,11 @@ namespace Spatializer
 	}
 
 
-	void At_SpatializationEngine::WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount) {
+	void At_SpatializationEngine::WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount) {
 		
 		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
 		if (ws != NULL) {
-			ws->process(inBuffer, outBuffer, bufferLength, inChannelCount, outChannelCount);
+			ws->process(inBuffer, outBuffer, bufferLength, offset, inChannelCount, outChannelCount);
 		}
 		/*
 		if (id < m_pWfsSpatializerList.size()) {

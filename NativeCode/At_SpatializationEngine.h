@@ -46,7 +46,7 @@ namespace Spatializer
 		void WFS_setMinDistance(int id, float minDistance);
 		
 
-		void WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount);
+		void WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount);
 		
 		void WFS_cleanDelayBuffer(int id);
 

@@ -39,10 +39,17 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setMinDistance(int id, flo
 {
     At_SpatializationEngine::getInstance().WFS_setMinDistance(id, minDistance);
 }
-extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount)
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount)
 {
-    At_SpatializationEngine::getInstance().WFS_process(id, inBuffer, outBuffer, bufferLength, inChannelCount, outChannelCount);
+    At_SpatializationEngine::getInstance().WFS_process(id, inBuffer, outBuffer, bufferLength, offset, inChannelCount, outChannelCount);
 }
+
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_cleanDelayBuffer(int id)
+{
+    At_SpatializationEngine::getInstance().WFS_cleanDelayBuffer(id);
+}
+
+
 
 // One for all Spatializer
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setListenerPosition(float* position, float* rotation, float* forward)
@@ -62,12 +69,5 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_setSampleRate(float sampleRate
 {
     Spatializer::At_SpatializationEngine::getInstance().WFS_setSampleRate(sampleRate);
 }
-
-// Effect
-extern "C" UNITY_AUDIODSP_EXPORT_API void AT_EFFECT_varySpeed(float speed, float previousSpeed, float* inBuffer, float* outBuffer, int bufferLength, int channelCount)
-{
-    At_Effect::AT_process_varySpeed(speed, previousSpeed, inBuffer, outBuffer, bufferLength,channelCount);
-}
-
 
 #endif

@@ -24,11 +24,11 @@ namespace Spatializer
     *                       (FOR NON-DIRECTIVE SOURCE ONLY)
     *
     *****************************************************************************/
-    void At_WfsSpatializer::forceMonoInput(float* inBuffer, int bufferLength, int inchannels) {
+    void At_WfsSpatializer::forceMonoInput(float* inBuffer, int bufferLength, int offset, int inchannels) {
 
         int count = 0;
         for (int i = 0; i < bufferLength * inchannels; i += inchannels) {
-            m_pTmpMonoBuffer_in[count] = inBuffer[i];
+            m_pTmpMonoBuffer_in[count] = inBuffer[i+ offset];
             count++;
         }
 
@@ -348,7 +348,7 @@ namespace Spatializer
     * 
     *****************************************************************************/
 
-    int At_WfsSpatializer::process(float* inBuffer, float* outBuffer, int bufferLength, int inChannelCount, int outChannelCount) {
+    int At_WfsSpatializer::process(float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount) {
 
 #ifdef DEBUG_LOAD
 
@@ -379,7 +379,7 @@ namespace Spatializer
             */
         }
         else if (m_isDirective == false) {
-            forceMonoInput(inBuffer, bufferLength, inChannelCount);            
+            forceMonoInput(inBuffer, bufferLength, offset, inChannelCount);
             updateDelayBuffer(bufferLength);
         }     
 

@@ -49,7 +49,7 @@ namespace Spatializer
     public:
         ~At_WfsSpatializer(); // destructor
 
-        int process(float* inBuffer, float* outBuffer, int bufferLength, int inChannel, int outChannel);
+        int process(float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannel, int outChannel);
         int setSourcePosition(float* position, float* rotation, float* forward); 
         int setSourceAttenuation(float attenuation);
         int setSourceOmniBalance(float omniBalance);
@@ -73,7 +73,7 @@ namespace Spatializer
 
     private:
         void setIs3DIsDirective(bool is3D, bool isDirective); //modif mathias 06-17-2021
-        void forceMonoInput(float* inBuffer, int bufferLength, int inchannels);
+        void forceMonoInput(float* inBuffer, int bufferLength, int offset, int inchannels);
         void updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount);
 
         
