@@ -44,12 +44,10 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public int maxChannelsInAudioFile = 0;
     /// number of channel of the output bus
     public int outputChannelCount;
-    
-    float time = 0;
+
     At_DynamicRandomPlayerState randomPlayerState;
     const int maxInstance = 10;
 
-    int r = 0;
     public string guid="";
 
     At_MasterOutput masterOutput;

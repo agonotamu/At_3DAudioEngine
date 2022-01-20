@@ -76,8 +76,6 @@ public class At_MasterOutput : MonoBehaviour
 
     public float maxDistanceForDelay;
 
-    // unused
-    float defaultMaxDistanceForDelay = 100.0f;
 
     
 
@@ -180,7 +178,7 @@ public class At_MasterOutput : MonoBehaviour
                     // Initialize a Patcher with the correct sample rate and number of intput and outputs 
                     inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);
                     // Initialize Record and Playback for the device
-                    At_AudioEngineUtils.asioOut.InitRecordAndPlayback(new SampleToWaveProvider(inputPatcher), inputChannels, samplingRate);
+                    At_AudioEngineUtils.asioOut.InitRecordAndPlayback(new SampleToWaveProvider(inputPatcher), inputChannels, samplingRate);                    
                 }
                 else
                 {
@@ -191,7 +189,13 @@ public class At_MasterOutput : MonoBehaviour
                     // Initialize a Patcher with the correct sample rate and number of intput and outputs 
                     inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);                    
                 }
-                
+
+
+                for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
+                {
+                    playerList[playerIndex].initAudioBuffer();
+                }
+
                 // Add a callback method to proccess the sample in the in/out buffer
                 At_AudioEngineUtils.asioOut.AudioAvailable += OnAsioOutAudioAvailable;
                 // Start processing (i.e. calling the callback method)
@@ -299,7 +303,7 @@ public class At_MasterOutput : MonoBehaviour
             int id = playerList.Count - 1;
             playerList.Add(p);
             AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay); //modif mathias 06-17-2021
-            Debug.Log("create spat with name :" + p.name + " - dynamic = " + p.isDynamicInstance);
+            //Debug.Log("create spat with name :" + p.name + " - dynamic = " + p.isDynamicInstance);
             playerList[playerList.Count - 1].masterOutput = this;
             playerList[playerList.Count - 1].spatID = id;
             playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;

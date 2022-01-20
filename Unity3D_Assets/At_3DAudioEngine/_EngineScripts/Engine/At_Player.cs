@@ -47,6 +47,7 @@ public class At_Player : MonoBehaviour
     int currentIndexInputBufferWrite_AudioSource = 0;
     int currentIndexInputBufferRead_AudioSource = 0;
     int unityOutputBufferSize, asioOutputBufferSize;
+    bool isInputBufferInitialized = false;
 
     const int maxIndexBufferRW_AudioSource = 4;
     /// array containing the all the samples of the audio file
@@ -226,7 +227,7 @@ public class At_Player : MonoBehaviour
         else
         {
             // Make some init to get the buffer from Unity AudioSource Component
-            initAudioBuffer();
+            //initAudioBuffer();
             isPlaying = true;
             isAskedToPlay = true;
             numChannelsInAudioFile = 1;
@@ -405,7 +406,7 @@ public class At_Player : MonoBehaviour
 
         if (isUnityAudioSource)
         {
-            
+            /*
             if (At_AudioEngineUtils.asioOut == null)
             {
                 At_OutputState outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
@@ -422,10 +423,13 @@ public class At_Player : MonoBehaviour
             
             int q = gcd(unityOutputBufferSize, asioOutputBufferSize);
             inputFileBufferSize = 10 * unityOutputBufferSize * asioOutputBufferSize / q;
-            /*
-            int q = gcd(At_AudioEngineUtils.unityOutputBufferSize, At_AudioEngineUtils.asioOutputBufferSize);
-            inputFileBufferSize = 10 * At_AudioEngineUtils.unityOutputBufferSize * At_AudioEngineUtils.asioOutputBufferSize / q;
             */
+
+            AudioSettings.GetDSPBufferSize(out unityOutputBufferSize, out unityNumBuffer);
+            asioOutputBufferSize = At_AudioEngineUtils.asioOut.FramesPerBuffer;
+            int q = gcd(unityOutputBufferSize, At_AudioEngineUtils.asioOutputBufferSize);
+            inputFileBufferSize = 4 * unityOutputBufferSize * asioOutputBufferSize / q;
+            
 
         }
         else
@@ -438,6 +442,8 @@ public class At_Player : MonoBehaviour
         // - if player is 2D this buffer is used to downmix/upmix and/or apply routing matrix to conform input channel order to output channel order.
         // WARNING : THIS HAS TO BE DONE - FOR NOW IT IS A SIMPLE COPY
         playerOutputBuffer = new float[MAX_BUF_SIZE * MAX_OUTPUT_CHANNEL];
+
+        isInputBufferInitialized = true;
     }
 
     /**
@@ -709,7 +715,7 @@ public class At_Player : MonoBehaviour
 
     private void OnAudioFilterRead(float[] data, int channels)
     {
-        if (isUnityAudioSource)
+        if (isUnityAudioSource && isInputBufferInitialized == true)
         {
             //UNITY_AUDIOSOURCE_READOFFSET
             /*
