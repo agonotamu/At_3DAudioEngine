@@ -117,9 +117,7 @@ public class At_Player : MonoBehaviour
     public float[] meters;
 
     public bool isUnityAudioSource;
-
-    public string externAssetsPath_audio, externAssetsPath_audio_standalone;
-
+  
     bool mustBeDestroyedNow = false;
     bool mustBeDestroyedSafely = false;
     bool mustBeDestroyedOnNextFrame = false;
@@ -251,17 +249,7 @@ public class At_Player : MonoBehaviour
 
     public int getNumChannelInAudioFile()
     {
-        //string path = Application.dataPath + "/StreamingAssets/" + fileName;
-        string path = "";
-        At_ExternAssetsState externAssetsState = At_AudioEngineUtils.getExternalAssetsState();
-#if UNITY_EDITOR
-        //path = externAssetsPath_audio + fileName;
-        path = externAssetsState.externAssetsPath_audio + fileName;
-#else
-    //path = externAssetsPath_audio_standalone + fileName;
-    path = externAssetsState.externAssetsPath_audio_standalone + fileName;
-#endif
-
+        string path = At_AudioEngineUtils.GetFilePathForStates(fileName);
         //Parse the file with NAudio
         if (fileName != null && fileName !="")
         {
@@ -274,17 +262,9 @@ public class At_Player : MonoBehaviour
     }
 
     public void initMeters() {
-        //string path = Application.dataPath + "/StreamingAssets/" + fileName;
-        //string path = externAssetsPath_audio + fileName;
-        string path = "";
-        At_ExternAssetsState externAssetsState = At_AudioEngineUtils.getExternalAssetsState();
-#if UNITY_EDITOR
-        //path = externAssetsPath_audio + fileName;
-        path = externAssetsState.externAssetsPath_audio + fileName;
-#else 
-        //path = externAssetsPath_audio_standalone + fileName;
-        path = externAssetsState.externAssetsPath_audio_standalone + fileName;
-#endif
+
+        string path = At_AudioEngineUtils.GetFilePathForStates(fileName);
+        
         //Parse the file with NAudio
         if (fileName != null && fileName !="") {
             aud = new AudioFileReader(path);
@@ -329,22 +309,8 @@ public class At_Player : MonoBehaviour
             
         }
 
-        
+        string path = At_AudioEngineUtils.GetFilePathForStates(fileName);
 
-
-        string path = "";
-        At_ExternAssetsState externAssetsState = At_AudioEngineUtils.getExternalAssetsState();
-#if UNITY_EDITOR
-        //path = externAssetsPath_audio + fileName;
-        path = externAssetsState.externAssetsPath_audio + fileName;
-#else
-        path = externAssetsPath_audio_standalone + fileName;
-        path = externAssetsState.externAssetsPath_audio_standalone + fileName; 
-        //Debug.Log("init audio file with path : "+path);
-#endif
-
-        //string path = externAssetsPath_audio + fileName;
-        //Debug.Log(path);
         //Parse the file with NAudio
         if (fileName != null)
         {
@@ -405,30 +371,11 @@ public class At_Player : MonoBehaviour
         int inputFileBufferSize = 0, unityNumBuffer;
 
         if (isUnityAudioSource)
-        {
-            /*
-            if (At_AudioEngineUtils.asioOut == null)
-            {
-                At_OutputState outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
-                AsioOut ao = new AsioOut((string)outputState.audioDeviceName);
-                asioOutputBufferSize = ao.PlaybackLatency / 2;
-                ao.Dispose();
-                ao = null;
-            }
-            else
-            {
-                asioOutputBufferSize = At_AudioEngineUtils.asioOut.PlaybackLatency / 2;
-            }
-            AudioSettings.GetDSPBufferSize(out unityOutputBufferSize, out unityNumBuffer);
-            
-            int q = gcd(unityOutputBufferSize, asioOutputBufferSize);
-            inputFileBufferSize = 10 * unityOutputBufferSize * asioOutputBufferSize / q;
-            */
-
+        {            
             AudioSettings.GetDSPBufferSize(out unityOutputBufferSize, out unityNumBuffer);
             asioOutputBufferSize = At_AudioEngineUtils.asioOut.FramesPerBuffer;
-            int q = gcd(unityOutputBufferSize, At_AudioEngineUtils.asioOutputBufferSize);
-            inputFileBufferSize = 4 * unityOutputBufferSize * asioOutputBufferSize / q;
+            int q = gcd(unityOutputBufferSize, asioOutputBufferSize);
+            inputFileBufferSize = 10 * unityOutputBufferSize * asioOutputBufferSize / q;
             
 
         }

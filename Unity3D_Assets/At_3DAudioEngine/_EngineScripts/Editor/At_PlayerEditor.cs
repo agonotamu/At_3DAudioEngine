@@ -115,13 +115,6 @@ public class At_PlayerEditor : Editor
 
         if (!player.isDynamicInstance)
         {
-            At_ExternAssets ea = GameObject.FindObjectOfType<At_ExternAssets>();
-            externAssetsPath_audio = ea.externAssetsPath_audio;
-            externAssetsPath_audio_standalone = ea.externAssetsPath_audio_standalone;
-
-            player.externAssetsPath_audio = externAssetsPath_audio;
-            player.externAssetsPath_audio_standalone = externAssetsPath_audio_standalone;
-
 
             horizontalLine = new GUIStyle();
             horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
@@ -343,6 +336,7 @@ public class At_PlayerEditor : Editor
     //============================================================================================================================
     public override void OnInspectorGUI()
     {
+       
         using (new GUILayout.HorizontalScope())
         {
             bool b = GUILayout.Toggle(playerState.isUnityAudioSource, "Unity 3D Audio Source");
@@ -390,15 +384,17 @@ public class At_PlayerEditor : Editor
                         var extensions = new[] {
                         new ExtensionFilter("Sound Files", "mp3", "wav", "aiff", "aac", "mp4"),
                     };
-                        string[] paths;
-                        At_ExternAssetsState externAssetsState = At_AudioEngineUtils.getExternalAssetsState();
+                        string[] paths;                        
                         //paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsPath_audio, extensions, false);
-                        paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsState.externAssetsPath_audio, extensions, false);
+                        paths = StandaloneFileBrowser.OpenFilePanel("Open File", At_AudioEngineUtils.GetFilePathForStates(""), extensions, false);
                         //string s = paths[0].Replace(externAssetsPath_audio, "");
                         string s = "";
                         if (paths.Length != 0)
                         {
-                            s = paths[0].Replace(externAssetsState.externAssetsPath_audio, "");
+                            string rootPath = At_AudioEngineUtils.GetFilePathForStates("");
+                            s = paths[0].Replace("\\", "/");
+                            s = s.Replace(rootPath, "");
+                            //s = Path.GetFileName(paths[0]);
                         }
 
 

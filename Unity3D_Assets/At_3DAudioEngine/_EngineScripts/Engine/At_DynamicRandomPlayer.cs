@@ -208,10 +208,10 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             int r = Random.Range(0, fileNames.Length);
             //r = (r + 1) % fileNames.Length;
             //Debug.Log("Inex filename = " + r);
-
+            /*
             p.externAssetsPath_audio = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio;
             p.externAssetsPath_audio_standalone = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio_standalone;
-
+            */
             
 
             p.fileName = fileNames[r];

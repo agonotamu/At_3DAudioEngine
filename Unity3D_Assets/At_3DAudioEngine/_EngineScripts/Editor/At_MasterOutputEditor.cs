@@ -91,12 +91,7 @@ public class At_MasterOutputEditor : Editor
         {
             masterOutput.gameObject.AddComponent<At_Mixer>();
         }
-        
-        if (masterOutput.gameObject.GetComponent<At_ExternAssets>() == null)
-        {
-            masterOutput.gameObject.AddComponent<At_ExternAssets>();
-        }
-        
+                
         outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
 
         if (outputState == null)
