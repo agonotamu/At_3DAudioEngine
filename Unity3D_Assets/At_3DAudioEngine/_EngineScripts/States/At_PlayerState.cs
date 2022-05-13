@@ -38,9 +38,9 @@ public class At_PlayerState
     /// balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS
     public float timeReversal = 0;
     ///type of distance attenuation in the spatialize : 0 = none, 1 = linear, 2 = square
-    public float attenuation = 2f;
+    public float attenuation = 0;
     /// Selected attenuation type in the popup menu of the AT_Player Component GUI
-    public int selectedAttenuation = 2;
+    public int selectedAttenuation = 0;
     /// minimum distance above which the sound produced by the source is attenuated
     public float minDistance = 1;
 

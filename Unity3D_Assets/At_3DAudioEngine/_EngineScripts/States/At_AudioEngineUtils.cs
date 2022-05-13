@@ -43,11 +43,7 @@ public class At_AudioEngineUtils : MonoBehaviour
         LoadAll();
     }
 
-    /***************************************************************************
-     * 
-     * SAVE AND LOAD VIRTUAL SPEAKERS AND VIRTUAL MICROPHONE CONFIGURATION
-     * 
-     **************************************************************************/
+   
 
     static bool findGuidOfPlayerdInScene(string guid, At_Player[] players)
     {
@@ -130,22 +126,21 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     }
 
+    /***************************************************************************
+    * 
+    * SAVE AND LOAD VIRTUAL SPEAKERS AND VIRTUAL MICROPHONE CONFIGURATION
+    * 
+    **************************************************************************/
     public static bool setSpeakerState(string sceneName, At_VirtualMic[] virtualMics, At_VirtualSpeaker[] virtualSpeakers)
     {
         bool hasChanged = false;
 
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
-
-        if (audioEngineStatesForScene.virtualSpeakerState == null)
-            audioEngineStatesForScene.virtualSpeakerState = new At_VirtualSpeakerState();
-        if(audioEngineStatesForScene.virtualSpeakerState.virtualSpeakerId == null)
-            audioEngineStatesForScene.virtualSpeakerState.virtualSpeakerId = new int[virtualMics.Length];
-        if (audioEngineStatesForScene.virtualSpeakerState.virtualMicId == null)
-            audioEngineStatesForScene.virtualSpeakerState.virtualMicId = new int[virtualMics.Length];
-        if (audioEngineStatesForScene.virtualSpeakerState.virtualMicPositions == null)
-            audioEngineStatesForScene.virtualSpeakerState.virtualMicPositions = new float [3*virtualMics.Length];
-        if (audioEngineStatesForScene.virtualSpeakerState.virtualSpeakerPositions == null)
-            audioEngineStatesForScene.virtualSpeakerState.virtualSpeakerPositions = new float[3* virtualSpeakers.Length];
+        audioEngineStatesForScene.virtualSpeakerState = new At_VirtualSpeakerState();
+        audioEngineStatesForScene.virtualSpeakerState.virtualSpeakerId = new int[virtualMics.Length];
+        audioEngineStatesForScene.virtualSpeakerState.virtualMicId = new int[virtualMics.Length];
+        audioEngineStatesForScene.virtualSpeakerState.virtualMicPositions = new float[3 * virtualMics.Length];
+        audioEngineStatesForScene.virtualSpeakerState.virtualSpeakerPositions = new float[3 * virtualSpeakers.Length];
 
         for (int i = 0; i< virtualMics.Length; i++)
         {
@@ -184,6 +179,7 @@ public class At_AudioEngineUtils : MonoBehaviour
         WriteToFile(sceneName + "_VirtualSpeakerState.txt", json);
     }
 
+    // UNUSED !!! -----------------------------------
     public static At_VirtualSpeakerState getVirtualSpeakerState(string sceneName)
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
@@ -191,6 +187,7 @@ public class At_AudioEngineUtils : MonoBehaviour
         At_VirtualSpeakerState vss = null;
         if (audioEngineStatesForScene == null)
         {
+            
             audioEngineStatesForScene = new At_3DAudioEngineState();
         }
 
@@ -301,10 +298,8 @@ public class At_AudioEngineUtils : MonoBehaviour
             if (stateFileName.Contains("_States") && Path.GetExtension(stateFileName) != ".meta") {
                 String sceneName = stateFileName.Replace("_States.txt", "");
 
-                if(audioEngineStates == null)
-                {
-                    audioEngineStates = new At_3DAudioEngineState();
-                }
+               
+                audioEngineStates = new At_3DAudioEngineState();
 
                 if (!audioEngineStatesDictionary.ContainsKey(sceneName))
                 {
@@ -331,7 +326,7 @@ public class At_AudioEngineUtils : MonoBehaviour
                             At_PlayerState ps = new At_PlayerState();
                             JsonUtility.FromJsonOverwrite(lines[lineIndex], ps);
                             audioEngineStatesDictionary[sceneName].playerStates.Add(ps);
-                            //Debug.Log("load At_Player with name : " + ps.name);
+                           
                         }
                         // this is an At_DynamicRandomPlayer
                         else if (lines[lineIndex].Contains("\"type\":1"))
@@ -343,12 +338,9 @@ public class At_AudioEngineUtils : MonoBehaviour
                         }
 
                     }
-
-
-                }
-                
+                } 
             }
-            else if (stateFileName.Contains("_VirtualSpeakerState")) {
+            else if (stateFileName.Contains("_VirtualSpeakerState") && Path.GetExtension(stateFileName) != ".meta") {
 
                 String sceneName = stateFileName.Replace("_VirtualSpeakerState.txt", "");
                
@@ -362,7 +354,6 @@ public class At_AudioEngineUtils : MonoBehaviour
                     audioEngineStatesDictionary.Add(sceneName, audioEngineStates);
                 }
 
-
                 string json = ReadFromFile(stateFileName);
                 At_VirtualSpeakerState vss = new At_VirtualSpeakerState();
                 JsonUtility.FromJsonOverwrite(json, vss);
@@ -375,7 +366,6 @@ public class At_AudioEngineUtils : MonoBehaviour
         
     }
 
-   
 
     /***************************************************************************
      * 
@@ -399,7 +389,10 @@ public class At_AudioEngineUtils : MonoBehaviour
         }        
         WriteToFile(sceneName + "_States.txt", jsonAllState);
     }
-    //modif mathias 07-01-2021
+
+    // ------------------------------------------------------
+    // get outputState
+    // ------------------------------------------------------
     static string readOutputState(string jsonAllStates)
     {        
         return (jsonAllStates.Split('\n'))[0];        
@@ -419,7 +412,7 @@ public class At_AudioEngineUtils : MonoBehaviour
             if (audioEngineStatesForScene.outputState == null)
             {
                 At_OutputState os = new At_OutputState();
-                //Scene scene = SceneManager.GetActiveScene();
+                
                 string json = ReadFromFile(sceneName + "_States.txt");
                 string Firstline = readOutputState(json);
                 JsonUtility.FromJsonOverwrite(Firstline, os);
@@ -458,22 +451,9 @@ public class At_AudioEngineUtils : MonoBehaviour
         return audioEngineStatesForScene.outputState;
     }
 
-    //modif mathias 07-01-2021
-    static string readPlayerState(string jsonAllStates, string guid)
-    {
-        string foundLine = null;
-        string[] lines = jsonAllStates.Split('\n');
-        foreach (string line in lines)
-        {
-            if (line.IndexOf(guid) != -1)
-            {
-                foundLine = line;
-                break;
-            }
-        }
-        return foundLine;  
-    }
-
+    // ------------------------------------------------------
+    // create and add a PlayerState in the audioEngineStatesForScene class when a new At_Player is added in the scene
+    // ------------------------------------------------------
     public static At_PlayerState createNewPlayerStateWithGuidAndName(string sceneName, string guid, string name)
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
@@ -490,6 +470,9 @@ public class At_AudioEngineUtils : MonoBehaviour
         return audioEngineStatesForScene.playerStates[audioEngineStatesForScene.playerStates.Count - 1];
     }
 
+    // ------------------------------------------------------
+    // get the state of an instance of At_Player in the scene
+    // ------------------------------------------------------
     public static At_PlayerState getPlayerStateWithGuidAndName(string sceneName, string guid, string name)
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
@@ -505,22 +488,9 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     }
 
-    //modif mathias 07-01-2021
-    static string readRandomPlayerState(string jsonAllStates, string guid)
-    {
-        string foundLine = null;
-        string[] lines = jsonAllStates.Split('\n');
-        foreach (string line in lines)
-        {
-            if (line.IndexOf(guid) != -1)
-            {
-                foundLine = line;
-                break;
-            }
-        }
-        return foundLine;
-    }
-
+    // ------------------------------------------------------
+    // create and add a DynamicRandomPlayerState in the audioEngineStatesForScene class when a new At_DynamicRandomPlayer is added in the scene
+    // ------------------------------------------------------
     public static At_DynamicRandomPlayerState createNewRandomPlayerStateWithGuidAndName(string sceneName, string guid, string name)
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
@@ -536,7 +506,9 @@ public class At_AudioEngineUtils : MonoBehaviour
         audioEngineStatesForScene.randomPlayerStates.Add(rps);
         return audioEngineStatesForScene.randomPlayerStates[audioEngineStatesForScene.randomPlayerStates.Count - 1];
     }
-
+    // ------------------------------------------------------
+    // get the state of an instance of At_DynamicRandomPlayer in the scene
+    // ------------------------------------------------------
     public static At_DynamicRandomPlayerState getRandomPlayerStateWithGuidAndName(string sceneName, string guid, string name)
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
@@ -551,6 +523,11 @@ public class At_AudioEngineUtils : MonoBehaviour
         }        
     }
 
+    /**************************************************************************
+     * 
+     *              UTILITY FOR READ/WRITE a string in a json file
+     * 
+    **************************************************************************/
     private static void WriteToFile(string fileName, string json)
     {
 
@@ -580,6 +557,11 @@ public class At_AudioEngineUtils : MonoBehaviour
             return "";       
     }
 
+    /**************************************************************************
+    * 
+    *              set the path for state files
+    * 
+   **************************************************************************/
     public static string GetFilePathForStates(string fileName)
     {
         

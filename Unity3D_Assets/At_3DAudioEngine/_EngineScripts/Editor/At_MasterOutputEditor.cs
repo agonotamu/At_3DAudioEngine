@@ -17,8 +17,10 @@ using NAudio.Wave.SampleProviders;
 using NAudioAsioPatchBay;
 using SFB;
 using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 using System.Text.RegularExpressions;
 using System.Globalization;
+
 
 [ExecuteInEditMode]
 [CanEditMultipleObjects]
@@ -33,7 +35,7 @@ public class At_MasterOutputEditor : Editor
 
     At_OutputState outputState = new At_OutputState();
     At_MasterOutput masterOutput;
-    string[] outputConfigSelection = { "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "1D [48]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]"};
+    string[] outputConfigSelection = { "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "1D [48]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]", "3D [42]"};
     int selectSpeakerConfig = 0;
     int outputConfigDimension = 1;
     public GameObject[] virtualMic;
@@ -71,15 +73,11 @@ public class At_MasterOutputEditor : Editor
             meterOff = (Texture)AssetDatabase.LoadAssetAtPath("Assets/At_3DAudioEngine/Other/Resources/At_3DAudioEngine/LevelMeterOff.png", typeof(Texture));
         }
     }
-
     
 
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
-        
-        //SceneView.duringSceneGui += OnSceneGUI;
-
         horizontalLine = new GUIStyle();
         horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
         horizontalLine.margin = new RectOffset(0, 0, 4, 4);
@@ -107,8 +105,7 @@ public class At_MasterOutputEditor : Editor
             outputState.virtualMicRigSize = 3.0f;
             isStartingEngineOnAwake = true;
             samplingRate = 44100;
-            outputState.maxDistanceForDelay = 10.0f;
-            //At_AudioEngineUtils.getState().setOutputState(outputState);
+            outputState.maxDistanceForDelay = 10.0f;            
             outputConfigDimension = 1;
         }
         else
@@ -128,12 +125,7 @@ public class At_MasterOutputEditor : Editor
 
         }
         At_Player[] players = GameObject.FindObjectsOfType<At_Player>();
-        /*
-        foreach(At_Player p in players)
-        {
-            p.outputChannelCount = outputState.outputChannelCount;
-        }
-        */
+       
 
         deviceList = new List<string>();
         deviceList.Add("none");
@@ -151,11 +143,8 @@ public class At_MasterOutputEditor : Editor
     
     public void OnDisable()
     {
-        //Debug.Log("save output state on disable");
-        //At_AudioEngineUtils.SaveState();
-
+       
         if (shouldSave == true) {
-            // At_AudioEngineUtils.SaveOutputState(); modif mathias 30-06-202
             At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
             shouldSave = false;
         }
@@ -189,9 +178,6 @@ public class At_MasterOutputEditor : Editor
         // laod ressources if needed
         AffirmResources();
 
-        //bool shouldSave = false;
-        bool shouldInitOutputMatrix = false;
-
         bool speakerConfigHasChanged = false;
 
         //-----------------------------------------------------------------
@@ -221,9 +207,7 @@ public class At_MasterOutputEditor : Editor
                     shouldSave = true;
                 }
 
-
                 outputState.audioDeviceName = devices[selectedDeviceIndex];
-                //At_AudioEngineUtils.getState().addAudioDeviceName(outputState.audioDeviceName);
 
             }
         }
@@ -241,8 +225,7 @@ public class At_MasterOutputEditor : Editor
                 shouldSave = true;
                 outputState.samplingRate = samplingRate;
                 outputState.selectedSamplingRate = selectedSamplingRate;
-                //At_AudioEngineUtils.getState().addSelectedSamplingRate(selectedSamplingRate);
-                //At_AudioEngineUtils.getState().addSamplingRate(samplingRate);
+
             }
         }
         HorizontalLine(Color.grey);
@@ -272,15 +255,11 @@ public class At_MasterOutputEditor : Editor
 
                 outputState.selectSpeakerConfig = selectSpeakerConfig;
                 meters = new float[outputState.outputChannelCount];
-                shouldInitOutputMatrix = true;
-                /*
-                At_AudioEngineUtils.getState().addOutputChannelCount(channelCount);
-                At_AudioEngineUtils.getState().addOutputSelectedSpeakerConfig(selectSpeakerConfig);
-                At_AudioEngineUtils.getState().addOutputSelectedOutputDimension(outputConfigDimension);
-                */
+               
             }
         }
 
+        
 
         //-----------------------------------------------------------------
         // MASTER METERING AND GAIN
@@ -305,7 +284,6 @@ public class At_MasterOutputEditor : Editor
                 shouldSave = true;
             }
 
-
             GUI.Label(new Rect(baseX - 30, 130  , 80, sliederHeight), ((int)outputState.gain).ToString() + " dB");
 
             
@@ -314,7 +292,7 @@ public class At_MasterOutputEditor : Editor
         //-----------------------------------------------------------------
         // START/STOP ENGINE BUTTONS
         //----------------------------------------------------------------
-
+        
         using (new GUILayout.HorizontalScope())
         {
             if (GUILayout.Button("START ENGINE"))
@@ -335,74 +313,12 @@ public class At_MasterOutputEditor : Editor
             if (isStartingEngineOnAwake != outputState.isStartingEngineOnAwake)
             {
                 outputState.isStartingEngineOnAwake = isStartingEngineOnAwake;
-                //At_AudioEngineUtils.getState().addIsStartingEngineOnAwake(isStartingEngineOnAwake);
                 shouldSave = true;
             }
         }
 
         HorizontalLine(Color.grey);
-
-        using (new GUILayout.HorizontalScope())
-        {
-            //-----------------------------------------------------------------
-            // VIRTUAL SPEAKERS/MICS ADD TO SCENE BUTON
-            //----------------------------------------------------------------
-
-            GUILayout.Label("                 ");
-            if (spkButtonContent == null)
-                spkButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/SpeakerIcon")); // file name in the resources folder without the (.png) extension
-
-            using (new GUILayout.VerticalScope())
-            {
-                GUILayout.Label("Initialize\nSpeaker config");
-                //GUILayout.BeginHorizontal();
-                //GUILayout.Label("--------------------------|");
-                if (speakerConfigHasChanged || GUILayout.Button(spkButtonContent, GUILayout.Width(70), GUILayout.Height(70)))
-                {
-                    speakerConfigHasChanged = false;
-                    At_VirtualMic[] vms;
-                    vms = GameObject.FindObjectsOfType<At_VirtualMic>();
-                    GameObject parent = null;
-                    if (vms != null && vms.Length != 0) parent = vms[0].transform.parent.gameObject;
-                    foreach (At_VirtualMic vm in vms) DestroyImmediate(vm.gameObject);
-                    if (parent != null) DestroyImmediate(parent);
-
-                    At_VirtualSpeaker[] vss;
-                    vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
-                    if (vss != null && vss.Length != 0) parent = vss[0].transform.parent.gameObject;
-                    foreach (At_VirtualSpeaker vs in vss) DestroyImmediate(vs.gameObject);
-                    if (parent != null) DestroyImmediate(parent);
-
-                    GameObject virtualMicParent = new GameObject("VirtualMics");
-                    virtualMicParent.transform.parent = masterOutput.gameObject.transform;
-                    GameObject virtualSpkParent = new GameObject("VirtualSpeakers");
-                    virtualSpkParent.transform.parent = masterOutput.gameObject.transform;
-                    At_SpeakerConfig.addSpeakerConfigToScene(ref virtualMic, outputState.virtualMicRigSize, ref speakers, speakerRigSize,
-                        outputState.outputChannelCount, outputState.outputConfigDimension, virtualMicParent, virtualSpkParent);
-                    
-
-                }
-            }
-            using (new GUILayout.VerticalScope())
-            {
-                if (saveSpkButtonContent == null)
-                    saveSpkButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/SavespeakerPosition")); // file name in the resources folder without the (.png) extension
-
-                GUILayout.Label("Save\nSpeakers position");
-                if (GUILayout.Button(saveSpkButtonContent, GUILayout.Width(70), GUILayout.Height(70)))
-                {
-                    At_VirtualMic[] vms = GameObject.FindObjectsOfType<At_VirtualMic>();
-                    At_VirtualSpeaker[] vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
-
-                    if (At_AudioEngineUtils.setSpeakerState(SceneManager.GetActiveScene().name, vms, vss))
-                        At_AudioEngineUtils.saveSpeakerState(SceneManager.GetActiveScene().name);
-
-
-                }
-            }
-        }
-
-
+        
         using (new GUILayout.HorizontalScope())
         {
             GUILayout.Label("");
@@ -412,28 +328,46 @@ public class At_MasterOutputEditor : Editor
 
             GUILayout.Label("Mic Rig Size");
 
-            //float size = GUILayout.HorizontalSlider(outputState.virtualMicRigSize, 0, 100);
-            // "00.0"
             float size = CUSTOM_GUILayout.FloatField(outputState.virtualMicRigSize);
            
             if (size != outputState.virtualMicRigSize)
             {
-                //Debug.Log(size);
                 outputState.virtualMicRigSize = size;
                 masterOutput.virtualMicRigSize = size;
                 shouldSave = true;
+                speakerConfigHasChanged = true;
             }
-            //GUILayout.Label("Size");
+           
+        }
+
+        if (speakerConfigHasChanged)
+        {
+            speakerConfigHasChanged = false;
+            At_VirtualMic[] vms;
+            vms = GameObject.FindObjectsOfType<At_VirtualMic>();
+            GameObject parent = null;
+            if (vms != null && vms.Length != 0) parent = vms[0].transform.parent.gameObject;
+            foreach (At_VirtualMic vm in vms) DestroyImmediate(vm.gameObject);
+            if (parent != null) DestroyImmediate(parent);
+
+            At_VirtualSpeaker[] vss;
+            vss = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
+            if (vss != null && vss.Length != 0) parent = vss[0].transform.parent.gameObject;
+            foreach (At_VirtualSpeaker vs in vss) DestroyImmediate(vs.gameObject);
+            if (parent != null) DestroyImmediate(parent);
+
+            GameObject virtualMicParent = new GameObject("VirtualMics");
+            virtualMicParent.transform.parent = masterOutput.gameObject.transform;
+            GameObject virtualSpkParent = new GameObject("VirtualSpeakers");
+            virtualSpkParent.transform.parent = masterOutput.gameObject.transform;
+            At_SpeakerConfig.addSpeakerConfigToScene(ref virtualMic, outputState.virtualMicRigSize, ref speakers, speakerRigSize,
+                outputState.outputChannelCount, outputState.outputConfigDimension, virtualMicParent, virtualSpkParent);
+
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
 
         }
 
-
-        //GUILayout.TextField((outputState.virtualMicRigSize).ToString("00.0"));
-
         HorizontalLine(Color.grey);
-
-        //GUILayout.Label("");
-        //string audioFilePath = "";
 
         using (new GUILayout.HorizontalScope())
         {
@@ -444,7 +378,6 @@ public class At_MasterOutputEditor : Editor
 
             if (distance != outputState.maxDistanceForDelay)
             {
-                //Debug.Log(size);
                 outputState.maxDistanceForDelay = distance;
                 masterOutput.maxDistanceForDelay = distance;
                 At_VirtualMic[] virtualMics = GameObject.FindObjectsOfType<At_VirtualMic>();
@@ -454,7 +387,6 @@ public class At_MasterOutputEditor : Editor
                 }
                 shouldSave = true;
             }
-            //GUILayout.Label("Size");
 
         }
 
@@ -470,18 +402,13 @@ public class At_MasterOutputEditor : Editor
         {
             GUILayout.Label("                 ");
             if (cleanButtonContent == null)
-                cleanButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/CleanStates_icn")); // file name in the resources folder without the (.png) extension
-
-            using (new GUILayout.VerticalScope())
+                cleanButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/CleanStates_icn_transp")); // file name in the resources folder without the (.png) extension
+          
+            if (GUILayout.Button(cleanButtonContent, GUILayout.Width(120), GUILayout.Height(30)))
             {
-                GUILayout.Label("Clean\nStates file");
-                //GUILayout.BeginHorizontal();
-                //GUILayout.Label("--------------------------|");
-                if (GUILayout.Button(cleanButtonContent, GUILayout.Width(60), GUILayout.Height(60)))
-                {
-                    At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
-                }
+                At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
             }
+          
         }
 
 

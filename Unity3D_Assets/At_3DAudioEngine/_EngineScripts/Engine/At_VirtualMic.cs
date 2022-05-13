@@ -19,14 +19,16 @@ public class At_VirtualMic : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
+        
         At_OutputState os = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
 
         const float numStepDrawCircle = 20;
         float angle = 2 * Mathf.PI / numStepDrawCircle;
 
-        Gizmos.color = new Color(1, 0, 0, 0.1f);
+        
         if (os != null)
         {
+            Gizmos.color = new Color(1, 0, 0, 0.5f);
             for (int i = 0; i < numStepDrawCircle; i++)
             {
                 Vector3 center = transform.position + new Vector3(os.maxDistanceForDelay * Mathf.Cos(i * angle), 0, os.maxDistanceForDelay * Mathf.Sin(i * angle));
@@ -34,6 +36,7 @@ public class At_VirtualMic : MonoBehaviour
                 //Debug.DrawLine(center, nextCenter, Color.green);            
                 Gizmos.DrawLine(center, nextCenter);
             }
+         
             // Stuck inRepaintAll() - remove it
             SceneView.RepaintAll();
         }

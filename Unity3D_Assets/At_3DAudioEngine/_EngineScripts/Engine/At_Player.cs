@@ -84,19 +84,15 @@ public class At_Player : MonoBehaviour
     public float attenuation;
     /// minimum distance above which the sound produced by the source is attenuated
     public float minDistance;
-
+    // routing of the audiofile channels in the output channels for 2D player
     public int[] channelRouting;
-
+    // copy of the saved player state
     At_PlayerState playerState;
-
-    public bool isStreaming = true;
-    int numSampleReadForStream = 0;
-    int audReadOffset = 0;
     
-    bool reachEndOfFile = false;
     //-----------------------------------------------------------------
     // data used at runtime
     // ----------------------------------------------------------------
+
     /// id of this player in the spatialization engine
     public int spatID;
     /// boolean telling if the player is actually playing
@@ -115,8 +111,19 @@ public class At_Player : MonoBehaviour
     int[] audioFileReadOffset;
     /// rms value of the signal from each channel, used to display bargraph
     public float[] meters;
-
+    // boolean telling if the player use Unity AudioSource or the native NAudio API to read audio file
     public bool isUnityAudioSource;
+
+    // true if the file is streamed from disk or if it is entirely laoded in RAM at startup
+    public bool isStreaming = true;
+    // current sample index of the stream
+    int numSampleReadForStream = 0;
+
+    int audReadOffset = 0;
+
+    bool reachEndOfFile = false;
+
+    
   
     bool mustBeDestroyedNow = false;
     bool mustBeDestroyedSafely = false;
@@ -138,7 +145,6 @@ public class At_Player : MonoBehaviour
 
         if (e != null)
         {
-            //Debug.Log(e.commandName);
             if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
             {
                 setGuid();
@@ -156,7 +162,6 @@ public class At_Player : MonoBehaviour
     public void setGuid()
     {
         guid = System.Guid.NewGuid().ToString();
-        //Debug.Log("create player with guid : " + guid);
     }
     
 
@@ -202,7 +207,6 @@ public class At_Player : MonoBehaviour
             }
             
         }
-        //playingCount--;
     }
     public void SafeDestroy()
     {
@@ -225,7 +229,6 @@ public class At_Player : MonoBehaviour
         else
         {
             // Make some init to get the buffer from Unity AudioSource Component
-            //initAudioBuffer();
             isPlaying = true;
             isAskedToPlay = true;
             numChannelsInAudioFile = 1;
@@ -336,11 +339,7 @@ public class At_Player : MonoBehaviour
             else
             {
                 // init the buffer for streaming from disk
-                // Raw Data are in Bytes !! And we read 32bit float -> 4 bytes per sample
-                //rawAudioData = new float[MAX_BUF_SIZE*MAX_INPUT_CHANNEL * 4];
                 rawAudioData = new float[MAX_BUF_SIZE * MAX_INPUT_CHANNEL];
-                //rawAudioData = new float[768];
-
             }
 
             // if the player is set to play on awake, start playing
@@ -377,7 +376,6 @@ public class At_Player : MonoBehaviour
             int q = gcd(unityOutputBufferSize, asioOutputBufferSize);
             inputFileBufferSize = 10 * unityOutputBufferSize * asioOutputBufferSize / q;
             
-
         }
         else
         {
@@ -403,7 +401,6 @@ public class At_Player : MonoBehaviour
     * @details - balance [0,1] between "normal delay" and "reverse delay" for focalised source (see Time Reversal technic used for WFS)
     * 
         */
-
     public void UpdateSpatialParameters()
     {
         // Get the position of the GameObject
@@ -552,10 +549,9 @@ public class At_Player : MonoBehaviour
                         // write index : calculate the index in the inputFileBuffer buffer
                         int indexInInputFileBuffer = numChannelsInAudioFile * sampleIndex + channelIndex;
 
-                        // while the index in raw data is less than the size of the raw data, copy the data. 
-                        // WARNING : I DO NOT UNDERSTANT WHY THIS SHOULD BE "aud.Length / 4.0f"
+
                         // Apply gain set in the custom inspector editor of the player
-                        float volume = Mathf.Pow(10.0f, gain / 20.0f);// Mathf.Sqrt(2.0f);
+                        float volume = Mathf.Pow(10.0f, gain / 20.0f);
                         if (isStreaming)
                         {
                             if (sampleIndex < numSampleReadForStream)
@@ -601,12 +597,7 @@ public class At_Player : MonoBehaviour
                             {
                                 isAskedToPlay = false;
                                 isPlaying = false;
-                                //playingCount--;
-                                if (isDynamicInstance)
-                                {
-                                    // We do not need to destroy the GameObject because we use a static pool
-                                    //mustBeDestroyedSafely = true;
-                                }
+
                             }
                             reachEndOfFile = false;
                             break;
@@ -626,33 +617,7 @@ public class At_Player : MonoBehaviour
         return false;
     }
 
-    /**
-     * @brief private method used to get the output channel of the input channel in the audio file 
-     */
-    int getInputChannelForOutputchannelInrouting(int outputChannel)
-    {
-        /*
-        int[] routing;
-        
-        if (isDynamicInstance)
-        {
-            routing = channelRouting;
-        }
-        else
-        {
-            playerState = At_AudioEngineUtils.getPlayerStateWithName(gameObject.name);
-            routing = playerState.channelRouting;
-        }
-        */
-        for (int i = 0; i< channelRouting.Length; i++)
-        {
-            if (outputChannel == channelRouting[i])
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
+    
 
     int mod(int x, int m)
     {
@@ -660,26 +625,31 @@ public class At_Player : MonoBehaviour
         return r < 0 ? r + m : r;
     }
 
+    /**
+     * @brief Unity Callback function to read/write samples for it audio graph. 
+     * 
+     * @details This is where we get the sample from the AudioSource componennt to feed the At_PLayer component
+     * 
+     * @param[in] data : multiplexed unity sample audio buffer
+     * 
+     * @param[in] channels : number of channels in the audio graph
+     * 
+     */
     private void OnAudioFilterRead(float[] data, int channels)
     {
         if (isUnityAudioSource && isInputBufferInitialized == true)
         {
-            //UNITY_AUDIOSOURCE_READOFFSET
-            /*
-            for (int sample = UNITY_AUDIOSOURCE_READOFFSET-1; sample >= 0; sample--)
-            {
-                inputFileBuffer[UNITY_AUDIOSOURCE_READOFFSET + sample] = inputFileBuffer[sample];
-            }
-            */
+            // asynchrone copy of the unity buffer (data) into At_Player buffer (inputFileBuffer)
             for (int sample = 0; sample < data.Length; sample += channels)
             {
                 inputFileBuffer[sample / channels + currentIndexInputBufferWrite_AudioSource * unityOutputBufferSize] = data[sample];
             }
 
-            //currentIndexInputBufferWrite_AudioSource = mod((currentIndexInputBufferWrite_AudioSource + 1), maxIndexBufferRW_AudioSource);
+            // udpate write index
             currentIndexInputBufferWrite_AudioSource++;
             if (currentIndexInputBufferWrite_AudioSource * unityOutputBufferSize >= inputFileBuffer.Length) currentIndexInputBufferWrite_AudioSource = 0;
         }
+        // clear the unity buffer to avoid audio output in the system device
         System.Array.Clear(data, 0, data.Length);
 
     }
@@ -734,29 +704,21 @@ public class At_Player : MonoBehaviour
                         for (int sampleIndex = 0; sampleIndex < bufferSize; sampleIndex++)
                         {
                             playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] = 0;
-                            //if (indexInputChannel < numChannelsInAudioFile)
-                            //{
-                            //int indexInputChannel = getInputChannelForOutputchannelInrouting(outputChannelIndex);
+                           
 
                             int indexInputChannel = channelRouting[outputChannelIndex];
-                            if (indexInputChannel != -1)
-                            {
-                                //playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] = inputFileBuffer[numChannelsInAudioFile * sampleIndex + indexInputChannel];
+
+                            // if indexInputChannel >= numChannelsInAudioFile, it means that the user have selected "none" for this channel in the "channel routing" of the 2D player
+                            if (indexInputChannel != -1 && indexInputChannel < numChannelsInAudioFile)
+                            {                               
                                 playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] += inputFileBuffer[numChannelsInAudioFile * sampleIndex + indexInputChannel];
                             }
                             else
                             {
                                 playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] = 0;
                             }
-                                
-                            //}
-                            // if the input buffer has less channel than required by the master bus, the extra channels are feed with zeros...
-                            //else
-                            //{
-                            //    playerOutputBuffer[outputChannelCount * sampleIndex + outputChannelIndex] = 0;
-                            //}
-                        }
-                        //indexInputChannel++;
+                             
+                        }                        
                     }
                 }
                 return true;
@@ -791,6 +753,11 @@ public class At_Player : MonoBehaviour
             }
         }
     }
+
+    /**
+      * @brief Method used to display properties of the At_Player in the Scene View.    
+      */
+
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
@@ -798,7 +765,7 @@ public class At_Player : MonoBehaviour
         float distance;
         if (!isDynamicInstance)
         {
-            playerState = At_AudioEngineUtils.getPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, guid, gameObject.name);//getPlayerStateWithName(gameObject.name);
+            playerState = At_AudioEngineUtils.getPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, guid, gameObject.name);
 
             if (playerState != null)
             {
@@ -823,7 +790,7 @@ public class At_Player : MonoBehaviour
         if (is3D)
         {
 
-
+            // Directive Source are not supported anymore.....
             if (isDirective)
             {
 
@@ -831,13 +798,10 @@ public class At_Player : MonoBehaviour
                 float angleOffset = transform.eulerAngles.y * Mathf.PI / 180.0f + Mathf.PI / 2.0f + angle / 2f;
                 float squareSize = 0.5f;
 
-               
-
+                
                 for (int i = 0; i < numChannelsInAudioFile; i++)
                 {
-                    
-                    
-
+                  
                     Vector3 center = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - i * angle), 0, distance * Mathf.Sin(angleOffset - i * angle));
                     Vector3 nextCenter = gameObject.transform.position + new Vector3(distance * Mathf.Cos(angleOffset - (i + 1) * angle), 0, distance * Mathf.Sin(angleOffset - (i + 1) * angle));
                     
@@ -863,6 +827,8 @@ public class At_Player : MonoBehaviour
             }
             else
             {
+
+                // DRAW A CIRLE GIVEN SHOWING THE "min_distance" parameter of the At_Player
                 const float numStepDrawCircle = 20;
                 float angle = 2 * Mathf.PI / numStepDrawCircle;
 
@@ -870,7 +836,6 @@ public class At_Player : MonoBehaviour
                 {
                     Vector3 center = transform.position + new Vector3(distance * Mathf.Cos(i * angle), 0, distance * Mathf.Sin(i * angle));
                     Vector3 nextCenter = transform.position + new Vector3(distance * Mathf.Cos((i + 1) * angle), 0, distance * Mathf.Sin((i + 1) * angle)); ;
-                    //Debug.DrawLine(center, nextCenter, Color.green);
                     Gizmos.color = Color.green;
                     Gizmos.DrawLine(center, nextCenter);
                 }

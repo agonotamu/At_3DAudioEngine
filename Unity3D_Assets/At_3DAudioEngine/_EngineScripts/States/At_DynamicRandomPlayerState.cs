@@ -29,8 +29,8 @@ public class At_DynamicRandomPlayerState
     public bool is3D = false;
     public bool isDirective = false; //modif mathias 06-17-2021
     public float omniBalance = 0f;
-    public float attenuation = 2f;
-    public int selectedAttenuation = 2;
+    public float attenuation = 0f;
+    public int selectedAttenuation = 0;
     
     public float minDistance = 1;
 
@@ -42,6 +42,9 @@ public class At_DynamicRandomPlayerState
 
     public float spawnMinAngle = 0;
     public float spawnMaxAngle = 0;
+    
     public float spawnDistance = 1;
+
+
 
 }

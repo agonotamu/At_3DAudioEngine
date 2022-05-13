@@ -94,6 +94,7 @@ public class At_PlayerEditor : Editor
 
         SceneManager.sceneLoaded += OnSceneLoaded;
 
+        // get the serialized property (in case the At_Player has been added in a prefab)
         serialized_fileName = serializedObject.FindProperty("fileName");
         serialized_gain = serializedObject.FindProperty("gain");
         serialized_is3D = serializedObject.FindProperty("is3D");
@@ -137,7 +138,7 @@ public class At_PlayerEditor : Editor
                 playerState.fileName = serialized_fileName.stringValue;
                 playerState.gain = serialized_gain.floatValue;
                 playerState.is3D = serialized_is3D.boolValue;
-                playerState.isDirective = serialized_isDirective.boolValue; //modif mathias 06-17-2021
+                playerState.isDirective = serialized_isDirective.boolValue;
                 playerState.isLooping = serialized_isLooping.boolValue;
                 playerState.isPlayingOnAwake = serialized_isPlayingOnAwake.boolValue;
                 playerState.attenuation = serialized_attenuation.floatValue;
@@ -154,15 +155,14 @@ public class At_PlayerEditor : Editor
                     playerState.channelRouting[i] = property.intValue; // seems to be impossible
                     
                 }
-                //playerState.numChannelInAudiofile = serialized_channelRouting.arraySize;
-                //playerState.channelRouting = channelRouting.;
+                
             }
 
-            // set all the
+            // set all the parameter of the At_Player Component from the loaded playerState (or the newly created one)
             player.fileName = playerState.fileName;
             player.gain = playerState.gain;
             player.is3D = playerState.is3D;
-            player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
+            player.isDirective = playerState.isDirective;
             player.isLooping = playerState.isLooping;
             player.isPlayingOnAwake = playerState.isPlayingOnAwake;
             player.attenuation = playerState.attenuation;
@@ -171,31 +171,20 @@ public class At_PlayerEditor : Editor
             player.minDistance = playerState.minDistance;
             player.isUnityAudioSource = playerState.isUnityAudioSource;
 
+            // init the bargraphs for displaying meters
             if (!Application.isPlaying)
             {
                 player.initMeters();
             }
+           
 
-            // bug with init of numChannelsInAudioFile
-            //player.numChannelsInAudioFile = playerState.numChannelInAudiofile;
-
-
-            //playerState.numChannelInAudiofile = player.numChannelsInAudioFile;
-
+            // init channel routing data for if the player is 2D
             outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
             if (playerState.fileName != "")
             {
-                if (playerState.channelRouting == null || playerState.channelRouting.Length == 0)//|| player.outputChannelCount != outputState.outputChannelCount)
+                if (playerState.channelRouting == null || playerState.channelRouting.Length == 0)
                 {
 
-                    // 03/10 - UPMIXING CHANGE ----- 
-                    /*
-                    playerState.channelRouting = new int[numChannel];
-                    for (int i = 0; i < numChannel; i++)
-                    {
-                        playerState.channelRouting[i] = i;
-                    }
-                    */
                     currentOutputChannelCount = outputState.outputChannelCount;
                     int numChannel = player.getNumChannelInAudioFile();
                     playerState.channelRouting = new int[currentOutputChannelCount];
@@ -207,16 +196,11 @@ public class At_PlayerEditor : Editor
                 }
             }
 
-
-            //|| currentOutputChannelCount != outputState.outputChannelCount
             player.outputChannelCount = outputState.outputChannelCount;
             player.channelRouting = playerState.channelRouting;
-            //player.state = playerState;
             
         }
 
-        //currentOutputChannelCount = outputState.outputChannelCount;
-        //if (playerState.channelRouting != null && playerState.channelRouting.Length == currentOutputChannelCount)
         if (outputState.outputChannelCount != playerState.channelRouting.Length)
         {
             currentOutputChannelCount = outputState.outputChannelCount;
@@ -231,8 +215,6 @@ public class At_PlayerEditor : Editor
 
             }
         }
-
-
         At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
     }
 
@@ -243,13 +225,12 @@ public class At_PlayerEditor : Editor
         {
             if(player != null)
             {
-                //Debug.Log(playerState.name + " as changed to : " + player.name);
                 At_AudioEngineUtils.changePlayerName(SceneManager.GetActiveScene().name, playerState.name, player.name);
             }
         }
+        // SAVE ALL THE PROPERTIES OF THE PLAYER WHEN THE GUI IS DISABLED (i.e. the GameObject is not in focus anymore : quit, play, another object selected...)
         if (shouldSave)
-        {
-            //At_AudioEngineUtils.SavePlayerStateWithName(playerState.name); modif mathias 30-06-202
+        {            
             if (!player.isDynamicInstance)
             {
                 At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
@@ -259,32 +240,7 @@ public class At_PlayerEditor : Editor
         At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
 
     }
-    /*
-    void OnValidate()
-    {
-        Event e = Event.current;
-
-        if (e != null)
-        {
-            //Debug.Log(e.commandName);
-            if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
-            {
-                setGuid();
-            }
-            // if the object has been draged... Then it should be prefab.
-            if (e.type == EventType.DragPerform)
-            {
-                setGuid();
-            }
-
-        }
-    }
-    public void setGuid()
-    {
-        player.guid = System.Guid.NewGuid().ToString();
-        //Debug.Log("create player with guid : " + guid);
-    }
-    */
+    
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
@@ -300,7 +256,6 @@ public class At_PlayerEditor : Editor
             {
                 if (!isSceneLoading)
                 {
-                    Debug.Log("remove Player !");
                     At_AudioEngineUtils.removePlayerWithGuid(SceneManager.GetActiveScene().name, player.guid);
                 }
                 else
@@ -320,10 +275,6 @@ public class At_PlayerEditor : Editor
     {
         if (meterOn == null)
         {
-            /*
-            meterOn = EditorGUIUtility.Load("/At_3DAudioEngine/LevelMeter.png") as Texture;
-            meterOff = EditorGUIUtility.Load("/At_3DAudioEngine/LevelMeterOff.png") as Texture;
-            */
             meterOn = (Texture)AssetDatabase.LoadAssetAtPath("Assets/At_3DAudioEngine/Other/Resources/At_3DAudioEngine/LevelMeter.png", typeof(Texture));
             meterOff = (Texture)AssetDatabase.LoadAssetAtPath("Assets/At_3DAudioEngine/Other/Resources/At_3DAudioEngine/LevelMeterOff.png", typeof(Texture));
 
@@ -332,7 +283,7 @@ public class At_PlayerEditor : Editor
    
 
     //============================================================================================================================
-    //                                                       DRAWING
+    //                                                    GUI  DRAWING
     //============================================================================================================================
     public override void OnInspectorGUI()
     {
@@ -357,44 +308,34 @@ public class At_PlayerEditor : Editor
             {
                 if (player.name != playerState.name)
                 {
-                    //Debug.Log(playerState.name + " as changed to : " + player.name);
+                    
                     At_AudioEngineUtils.changePlayerName(SceneManager.GetActiveScene().name, playerState.name, player.name);
 
 
                 }
 
-                //bool shouldSave = false;
-
-                // laod ressources if needed
                 AffirmResources();
-
-                //string audioFilePath = "";
+          
                 using (new GUILayout.HorizontalScope())
                 {
                     // Display and test if the Button "Open" has been clicked
                     if (GUILayout.Button("Open"))
                     {
-                        /*
-                        string[] filter = { "Audio File", "wav,aiff, mp3, aac, mp4" };
-                        // if it is, open the panel for choosing an audio file
-                        audioFilePath = EditorUtility.OpenFilePanelWithFilters("Open Audio File", Application.dataPath + "/StreamingAssets/", filter);
-
-                        string s = audioFilePath.Replace(Application.dataPath + "/StreamingAssets/", "");
-                        */
+                        
                         var extensions = new[] {
                         new ExtensionFilter("Sound Files", "mp3", "wav", "aiff", "aac", "mp4"),
                     };
                         string[] paths;                        
-                        //paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsPath_audio, extensions, false);
+                        
                         paths = StandaloneFileBrowser.OpenFilePanel("Open File", At_AudioEngineUtils.GetFilePathForStates(""), extensions, false);
-                        //string s = paths[0].Replace(externAssetsPath_audio, "");
+                        
                         string s = "";
                         if (paths.Length != 0)
                         {
                             string rootPath = At_AudioEngineUtils.GetFilePathForStates("");
                             s = paths[0].Replace("\\", "/");
                             s = s.Replace(rootPath, "");
-                            //s = Path.GetFileName(paths[0]);
+                            
                         }
 
 
@@ -404,23 +345,14 @@ public class At_PlayerEditor : Editor
                             playerState.fileName = s;
                             shouldSave = true;
                         }
-                        // update the Player State in the list with the file name
-                        //At_AudioEngineUtils.getState().addFileNameToPlayerState(gameObjectName, playerState.fileName);
+                        
                         // update the Player Engine the file name
-
                         player.fileName = playerState.fileName;
                         player.initMeters();
                         playerState.numChannelInAudiofile = player.numChannelsInAudioFile;
-                        //currentOutputChannelCount = outputState.outputChannelCount;
+                       
                         int numChannel = player.getNumChannelInAudioFile();
-                        // 03/10 - UPMIXING CHANGE -----
-                        /*
-                        playerState.channelRouting = new int[numChannel];
-                        for (int i = 0; i < numChannel; i++)
-                        {
-                            playerState.channelRouting[i] = i;
-                        }
-                        */
+                        
                         currentOutputChannelCount = outputState.outputChannelCount;
                         playerState.channelRouting = new int[currentOutputChannelCount];
                         if (numChannel > 0)
@@ -467,22 +399,7 @@ public class At_PlayerEditor : Editor
 
                     }
                 }
-                //modif mathias 06-17-2021
-                /*
-                if (playerState.is3D == true)
-                {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        bool b = GUILayout.Toggle(playerState.isDirective, "Directive");
-                        if (b != playerState.isDirective)
-                        {
-                            shouldSave = true;
-                            playerState.isDirective = b;
-
-                        }
-                    }
-                }
-                */
+                
             }
 
             if (playerState.is3D == true)
@@ -543,10 +460,10 @@ public class At_PlayerEditor : Editor
                         {
                             playerState.minDistance = dist;
                             shouldSave = true;
-                            // Stuck inRepaintAll() - remove it
+                            
                             SceneView.RepaintAll();
                         }
-                        //GUILayout.Label("meter");
+                        
 
                     }
 
@@ -611,7 +528,7 @@ public class At_PlayerEditor : Editor
                 }
                 GUILayout.Label("");
                 HorizontalLine(Color.grey);
-                //GUILayout.Label("");
+                
             }
 
 
@@ -620,65 +537,18 @@ public class At_PlayerEditor : Editor
                 using (new GUILayout.VerticalScope())
                 {
                     GUILayout.Label("File channel Routing ");
-                    /*
-                    currentOutputChannelCount = outputState.outputChannelCount;
-                    playerState.channelRouting = new int[currentOutputChannelCount];
-                    for (int i = 0; i < currentOutputChannelCount; i++)
-                    {
-                        playerState.channelRouting[i] = i % numChannel;
-                    }
-                    */
-
-
-                    // 03/10 - UPMIXING CHANGE -----
-                    /*
-                    if (playerState.channelRouting != null && playerState.channelRouting.Length == player.numChannelsInAudioFile)                    
-                    {
-                        string[] channelRouting = new string[player.outputChannelCount];
-                        for (int i = 0; i < channelRouting.Length; i++)
-                        {
-                            channelRouting[i] = i.ToString();
-                        }
-                        int[] selectedChannelRouting = new int[player.numChannelsInAudioFile];
-                        for (int i = 0; i < selectedChannelRouting.Length; i++)
-                        {
-                            selectedChannelRouting[i] = i;
-                        }
-
-                        for (int c = 0; c < player.numChannelsInAudioFile; c++)
-                        {
-                            using (new GUILayout.HorizontalScope())
-                            {
-                                GUILayout.Label("channel " + c);
-                                int select = EditorGUILayout.Popup(playerState.channelRouting[c], channelRouting);
-
-                                if (select != playerState.channelRouting[c])
-                                {
-                                    playerState.channelRouting[c] = select;
-                                    shouldSave = true;
-                                }
-
-                            }
-
-                        }
-                    }
-                    */
+                    
                     int numChannel = player.getNumChannelInAudioFile();
                     currentOutputChannelCount = outputState.outputChannelCount;
                     if (playerState.channelRouting != null && playerState.channelRouting.Length == currentOutputChannelCount)
                     {
-                        /*
-                        string[] channelRouting = new string[currentOutputChannelCount];                       
-                        for (int i = 0; i < channelRouting.Length; i++)
-                        {
-                            channelRouting[i] = (i% numChannel).ToString();
-                        }
-                        */
-                        string[] channelRouting = new string[numChannel];
+                       
+                        string[] channelRouting = new string[numChannel+1];
                         for (int i = 0; i < numChannel; i++)
                         {
                             channelRouting[i] = i.ToString();
                         }
+                        channelRouting[numChannel] = "none";
                         int[] selectedChannelRouting = new int[currentOutputChannelCount];
                         for (int i = 0; i < selectedChannelRouting.Length; i++)
                         {
@@ -716,15 +586,12 @@ public class At_PlayerEditor : Editor
                     }
                 }
             }
-       
 
 
-
-
-
+            // update the parameters in the At_Player component
             player.gain = playerState.gain;
             player.is3D = playerState.is3D;
-            player.isDirective = playerState.isDirective; //modif mathias 06-17-2021
+            player.isDirective = playerState.isDirective; 
             player.isPlayingOnAwake = playerState.isPlayingOnAwake;
             player.fileName = playerState.fileName;
             player.isLooping = playerState.isLooping;
@@ -735,9 +602,10 @@ public class At_PlayerEditor : Editor
             player.channelRouting = playerState.channelRouting;
             player.isUnityAudioSource = playerState.isUnityAudioSource;
 
+            // serialize the parameters for use in Prefab
             serialized_gain.floatValue = playerState.gain;
             serialized_is3D.boolValue = playerState.is3D;
-            serialized_isDirective.boolValue = playerState.isDirective; //modif mathias 06-17-2021
+            serialized_isDirective.boolValue = playerState.isDirective; 
             serialized_isPlayingOnAwake.boolValue = playerState.isPlayingOnAwake;
             serialized_fileName.stringValue = playerState.fileName;
             serialized_isLooping.boolValue = playerState.isLooping;
@@ -745,18 +613,13 @@ public class At_PlayerEditor : Editor
             serialized_omniBalance.floatValue = playerState.omniBalance;
             serialized_timeReversal.floatValue = playerState.timeReversal;
             serialized_minDistance.floatValue = playerState.minDistance;
-            serialized_isUnityAudioSource.boolValue = playerState.isUnityAudioSource;
-
-            //playerState.channelRouting = new int[channelRouting.arraySize];
+            serialized_isUnityAudioSource.boolValue = playerState.isUnityAudioSource;          
             serialized_channelRouting.ClearArray();
             for (int i = 0; i < playerState.channelRouting.Length; i++)
             {
                 serialized_channelRouting.InsertArrayElementAtIndex(i);
                 SerializedProperty property = serialized_channelRouting.GetArrayElementAtIndex(i);
                 property.intValue = playerState.channelRouting[i];
-                //.intValue = playerState.channelRouting[i];
-                //playerState.channelRouting[i] = property.intValue;
-
             }
 
             // save the Player State to be always updated !!

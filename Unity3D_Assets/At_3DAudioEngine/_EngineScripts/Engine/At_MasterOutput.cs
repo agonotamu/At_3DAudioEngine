@@ -98,25 +98,14 @@ public class At_MasterOutput : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        //At_AudioEngineUtils.LoadAllStates();
 
         spatIDToDestroy = new List<int>();
         playerObjectToDestroy = new List<At_Player>();
-        
-        
+                
         outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
         samplingRate = outputState.samplingRate;
         // get the reference of the At_Mixer instance
         mixer = gameObject.GetComponent<At_Mixer>();
-
-        // get the reference of all the  At_Player instances and add it to the player list
-        /*
-        playerList = new List<At_Player>();
-        At_Player[] playerArray = GameObject.FindObjectsOfType<At_Player>();
-        foreach (At_Player p in playerArray){
-            playerList.Add(p);
-        }
-        */
 
         // initialize the temp buffer
         tmpMonoBuffer = new float[MAX_BUF_SIZE];
@@ -259,7 +248,7 @@ public class At_MasterOutput : MonoBehaviour
         {
             int id = -1;            
 
-            AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerIndex].is3D, playerList[playerIndex].isDirective, maxDistanceForDelay); //modif mathias 06-17-2021
+            AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerIndex].is3D, playerList[playerIndex].isDirective, maxDistanceForDelay);
             playerList[playerIndex].masterOutput = this;
             playerList[playerIndex].spatID = id;
             playerList[playerIndex].outputChannelCount = outputChannelCount;
@@ -267,7 +256,6 @@ public class At_MasterOutput : MonoBehaviour
             {
                 playerList[playerIndex].UpdateSpatialParameters();
             }
-            //Debug.Log("spat created with id : " + id);
 
         }
         UpdateVirtualMicPosition();
@@ -281,9 +269,6 @@ public class At_MasterOutput : MonoBehaviour
     * 
     * @param[in] p : At_Player instance to add
     */
-
-    
-
     public void addPlayerToList(At_Player p)
     {
         if (playerList == null)
@@ -302,12 +287,12 @@ public class At_MasterOutput : MonoBehaviour
         {
             int id = playerList.Count - 1;
             playerList.Add(p);
-            AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay); //modif mathias 06-17-2021
-            //Debug.Log("create spat with name :" + p.name + " - dynamic = " + p.isDynamicInstance);
+            AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay);
+
             playerList[playerList.Count - 1].masterOutput = this;
             playerList[playerList.Count - 1].spatID = id;
             playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
-            //Debug.Log("spat created with id : " + id);
+
             if (mixer == null) mixer = GetComponent<At_Mixer>();
             mixer.setPlayerList(playerList);
             if (playerList[playerList.Count - 1].is3D)
@@ -321,27 +306,14 @@ public class At_MasterOutput : MonoBehaviour
 
     }
 
-
-
     public void destroyPlayerSafely(At_Player player)
     {
         spatIDToDestroy.Add(player.spatID);
     }
 
     public void destroyPlayerNow(At_Player player)
-    {
-       
-        //AT_SPAT_DestroyWfsSpatializer(player.spatID);
+    {  
         player.DestroyNow();
-        /*
-        for (int i = 0; i < spatIDToDestroy.Count; i++)
-        {
-            if (spatIDToDestroy[i] == player.spatID)
-            {
-                spatIDToDestroy.RemoveAt(i);
-            }
-        } 
-        */
 
     }
 
@@ -408,16 +380,7 @@ public class At_MasterOutput : MonoBehaviour
     }
 
 
-    /**
-    * @brief /!\ Callback method called by NAudio to provide the output buffer to the ASIO driver.
-    * 
-    * @details (1) It asks all the At_PLayer instances to extract a multichannel buffer from the raw data read in the audiofile.
-    * (2) It asks all the At_Player instances to conform this "input" bufer to the format of the output bus (processing spatialization, or down/upmix, etc.)
-    * (3) It asks the At_Mixer instance to sum for one channel the processed buffers of each At_Player instance and to copy the result in its temporaty mono buffer.
-    * (4) It processes metering to display the bargraph in the editor
-    * (5) It uses the sample provider to convert the audio samples to the format required by the audio device (Int32LSB, Int16LSB, Int24LSB, Float32LSB).  
-    * 
-    */
+   
 
     bool playerIsDestroyedOnNextFrame(At_Player player)
     {
@@ -454,6 +417,16 @@ public class At_MasterOutput : MonoBehaviour
         }
     }
 
+    /**
+   * @brief /!\ Callback method called by NAudio to provide the output buffer to the ASIO driver.
+   * 
+   * @details (1) It asks all the At_PLayer instances to extract a multichannel buffer from the raw data read in the audiofile.
+   * (2) It asks all the At_Player instances to conform this "input" bufer to the format of the output bus (processing spatialization, or down/upmix, etc.)
+   * (3) It asks the At_Mixer instance to sum for one channel the processed buffers of each At_Player instance and to copy the result in its temporaty mono buffer.
+   * (4) It processes metering to display the bargraph in the editor
+   * (5) It uses the sample provider to convert the audio samples to the format required by the audio device (Int32LSB, Int16LSB, Int24LSB, Float32LSB).  
+   * 
+   */
     void OnAsioOutAudioAvailable(object sender, AsioAudioAvailableEventArgs e)
     {
 
@@ -468,8 +441,7 @@ public class At_MasterOutput : MonoBehaviour
                 
                 if (!playerIsDestroyedOnNextFrame(playerList[playerIndex]) && playerIndex < playerList.Count && playerList[playerIndex] != null)
                 {
-                    //Debug.Log("size =" + playerList.Count);
-                    //Debug.Log("index =" +playerIndex);
+
                     // tell each player to extract a buffer from their audio file if it is in "play" mode
                     result = playerList[playerIndex].extractInputBuffer(e.SamplesPerBuffer);
                     // conform the input buffer to the output bus format (including spatialization if 3D player)
@@ -520,23 +492,21 @@ public class At_MasterOutput : MonoBehaviour
 
         }
 
+        // check for player to destroy
         for (int i = 0;i< spatIDToDestroy.Count;i++)
         {
             
             At_Player p = FindPlayerWithSpatID(spatIDToDestroy[i]);
             playerObjectToDestroy.Add(p);
             AT_SPAT_DestroyWfsSpatializer(spatIDToDestroy[i]);
-            //playerList.RemoveAt(indexPlayerToDestroy[i]);
+
             RemovePlayerFromListWithSpatID(spatIDToDestroy[i]);
             mixer.setPlayerList(playerList);
-            //indexPlayerToDestroy.RemoveAt(i);
+
             p.DestroyOnNextFrame();
             spatIDToDestroy.RemoveAt(i);
         }
-        //spatToDestroy.Clear();
-        //spatIDtoDestroy.Add(spatID);
 
-        //
     }
 
 
@@ -554,7 +524,6 @@ public class At_MasterOutput : MonoBehaviour
             if (vms != null && vms.Length != 0 && vms != null && vms.Length != 0)
             {
                 At_VirtualMic currentMic = null;
-                At_VirtualMic nextMic = null;
                 At_VirtualSpeaker currentSpk = null;
                 for (int micCount = 0; micCount < vms.Length; micCount++)
                 {
@@ -567,45 +536,46 @@ public class At_MasterOutput : MonoBehaviour
                 }
             }
         }
-        if (outputConfigDimension == 2)
+        
+        outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
+
+        if (vms != null && vms.Length != 0 && vms != null && vms.Length != 0)
         {
-            outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
-
-            if (vms != null && vms.Length != 0 && vms != null && vms.Length != 0)
+            At_VirtualMic currentMic = null;
+            At_VirtualMic nextMic = null;
+            At_VirtualSpeaker currentSpk = null;
+            for (int micCount = 0; micCount < vms.Length; micCount++)
             {
-                At_VirtualMic currentMic = null;
-                At_VirtualMic nextMic = null;
-                At_VirtualSpeaker currentSpk = null;
-                for (int micCount = 0; micCount < vms.Length; micCount++)
+                currentMic = micWithIndex(vms, micCount);
+                currentSpk = speakerWithIndex(vss, micCount);
+                //currentMic.transform.position = currentMic.transform.position.normalized * virtualMicRigSize * 0.5f * currentSpk.transform.position.magnitude / currentSpk.distance ;                 
+                //At_SpeakerConfig.updateVirtualMicPosition(currentMic, currentSpk, virtualMicRigSize, virtualMicWidth, speakerRigSize);
+                if (currentSpk.gameObject.transform.position.magnitude != 0 && currentSpk.distance != 0)
                 {
-                    currentMic = micWithIndex(vms, micCount);
-                    currentSpk = speakerWithIndex(vss, micCount);
-                    //currentMic.transform.position = currentMic.transform.position.normalized * virtualMicRigSize * 0.5f * currentSpk.transform.position.magnitude / currentSpk.distance ;                 
-                    //At_SpeakerConfig.updateVirtualMicPosition(currentMic, currentSpk, virtualMicRigSize, virtualMicWidth, speakerRigSize);
-                    if (currentSpk.gameObject.transform.position.magnitude != 0 && currentSpk.distance != 0)
-                    {
-                        float ratio = currentSpk.distance / currentSpk.gameObject.transform.position.magnitude;
+                    /*
+                    float ratio = currentSpk.distance / currentSpk.gameObject.transform.position.magnitude;
                         
-                        currentMic.transform.position = currentMic.transform.parent.transform.position + currentSpk.transform.position.normalized * outputState.virtualMicRigSize / ratio;
-
-                    }
-                }
-
-                for (int micCount = 0; micCount < vms.Length; micCount++)
-                {
-
-                    currentMic.gameObject.transform.LookAt(currentSpk.gameObject.transform);
-                    currentSpk.gameObject.transform.LookAt(currentMic.gameObject.transform);
-                    currentMic = micWithIndex(vms, micCount);
-                    nextMic = micWithIndex(vms, (micCount + 1) % vms.Length);
-                    currentSpk = speakerWithIndex(vss, micCount);
-                    Gizmos.color = Color.green;
-                    Gizmos.DrawLine(currentMic.gameObject.transform.position, currentSpk.gameObject.transform.position);
-                    Gizmos.DrawLine(currentMic.gameObject.transform.position, nextMic.gameObject.transform.position);
+                    currentMic.transform.position = currentMic.transform.parent.transform.position + currentSpk.transform.position.normalized * outputState.virtualMicRigSize / ratio;
+                    */
                 }
             }
 
+            for (int micCount = 0; micCount < vms.Length; micCount++)
+            {
+
+                currentMic.gameObject.transform.LookAt(currentSpk.gameObject.transform);
+                currentSpk.gameObject.transform.LookAt(currentMic.gameObject.transform);
+                currentMic = micWithIndex(vms, micCount);
+                nextMic = micWithIndex(vms, (micCount + 1) % vms.Length);
+                currentSpk = speakerWithIndex(vss, micCount);
+                Gizmos.color = new Color(0, 1, 1, 0.1f);
+                Gizmos.DrawLine(currentMic.gameObject.transform.position, currentSpk.gameObject.transform.position);
+                Gizmos.color = new Color(0, 1, 1, 1f);
+                Gizmos.DrawLine(currentMic.gameObject.transform.position, nextMic.gameObject.transform.position);
+            }
         }
+
+        
         /*
         if (At_AudioEngineUtils.setSpeakerState(vms, vss))
             At_AudioEngineUtils.saveSpeakerState();

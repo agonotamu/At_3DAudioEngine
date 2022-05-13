@@ -21,7 +21,6 @@ using UnityEngine.SceneManagement;
 
 public class At_DynamicRandomPlayer : MonoBehaviour
 {
-    //List<GameObject> playerInstances;
     public GameObject[] playerInstances;
     float[] playerInstancesCreationTime;
     //--------------------------------------
@@ -52,6 +51,8 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 
     At_MasterOutput masterOutput;
 
+    float time = 0;
+
     void Reset()
     {
         setGuid();
@@ -78,16 +79,14 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public void setGuid()
     {
         guid = System.Guid.NewGuid().ToString();
-        //Debug.Log("create player with guid : " + guid);
+
     }
 
     // Start is called before the first frame update
     void Start()
     {
         randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, guid, gameObject.name);
-
-            masterOutput = GameObject.FindObjectOfType<At_MasterOutput>();//.
-        //playerInstances = new List<GameObject>();
+        masterOutput = GameObject.FindObjectOfType<At_MasterOutput>();//.
         playerInstances = new GameObject[maxInstance];
         playerInstancesCreationTime = new float[maxInstance];
 
@@ -96,35 +95,29 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             playerInstances[i] = new GameObject();
             playerInstances[i].SetActive(false);
             
-            //playerInstances[i].name = randomPlayerState.name + "_" + i.ToString("00");
+            
             playerInstances[i].transform.SetParent(gameObject.transform);
             playerInstances[i].AddComponent<At_Player>();
             At_Player p = playerInstances[i].GetComponent<At_Player>();
-            //p.isPlayingOnAwake = true;
+            
             p.isDynamicInstance = true;
-            //p.isStreaming = false;
-            //p.guid = guid +"-"+ i.ToString();
+
             masterOutput.addPlayerToList(p); 
         }
-        //AddOneShotInstanceAndRandomPlay();
-        //externAssetsPath = PlayerPrefs.GetString("externAssetsPath_audio");
+       
 
     }
     private void Update()
     {
         // Auto-generate (Debug)
-        /*
+        
         time += Time.deltaTime;
         if (time > 0.5f)
         {
             AddOneShotInstanceAndRandomPlay(true, Vector3.zero);
             time = 0;
-        }
-        */
+        }        
 
-
-        //System.GC.Collect();
-        //Resources.UnloadUnusedAssets();
         int numberOfInstancePlaying = 0;
         for (int i = 0; i< playerInstances.Length; i++)
         {
@@ -133,7 +126,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
                 numberOfInstancePlaying++;
             }
         }
-        //Debug.Log("number of instance playing in " +gameObject.name + " = " + numberOfInstancePlaying);
+        
     }
     int getFreeSlot()
     {
@@ -183,7 +176,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             }
 
             playerInstancesCreationTime[indexinstance] = Time.realtimeSinceStartup;
-            //Debug.Log("Inex Random =" + indexinstance);
+
             At_Player p = playerInstances[indexinstance].GetComponent<At_Player>();
             p.StopPlaying();
             if (isRandomPosition)
@@ -198,21 +191,13 @@ public class At_DynamicRandomPlayer : MonoBehaviour
                 playerInstances[indexinstance].transform.position = position;
             }
             p.is3D = randomPlayerState.is3D;
-            p.isDirective = randomPlayerState.isDirective;//modif mathias 06-17-2021
+            p.isDirective = randomPlayerState.isDirective;
             p.gain = randomPlayerState.gain;
             p.isLooping = false;
             p.omniBalance = randomPlayerState.omniBalance;
             p.attenuation = randomPlayerState.attenuation;
 
-            // Debug - file name in list
             int r = Random.Range(0, fileNames.Length);
-            //r = (r + 1) % fileNames.Length;
-            //Debug.Log("Inex filename = " + r);
-            /*
-            p.externAssetsPath_audio = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio;
-            p.externAssetsPath_audio_standalone = At_AudioEngineUtils.getExternalAssetsState().externAssetsPath_audio_standalone;
-            */
-            
 
             p.fileName = fileNames[r];
 
@@ -220,9 +205,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
             p.isDynamicInstance = true;
             p.channelRouting = randomPlayerState.channelRouting;
             p.minDistance = randomPlayerState.minDistance;
-            //p.isStreaming = false;
-            //masterOutput.addPlayerToList(p);
-            //p.cleanSpatializerDelayBuffer();
+
             p.initAudioFile(true);            
             p.gameObject.SetActive(true);
             p.StartPlaying();
@@ -248,8 +231,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
 
         if (is3D)
         {
-            //float angleOffset = gameObject.transform.eulerAngles.y;
-            //Debug.Log(angleOffset);
+ 
             const float numStepDrawCircle = 20;
            
             float startAngle = spawnMinAngle * Mathf.PI / 180f;
@@ -269,11 +251,9 @@ public class At_DynamicRandomPlayer : MonoBehaviour
                 
                 if (i == 0) Gizmos.DrawLine(transform.position, center);
                 else if (i == numStepDrawCircle-1) Gizmos.DrawLine(nextCenter, transform.position);
-                //Debug.DrawLine(center, nextCenter, Color.green);
-
+                
                 Gizmos.DrawLine(center, nextCenter);
             }
-            // Stuck inRepaintAll() - remove it
             SceneView.RepaintAll();
 
         }

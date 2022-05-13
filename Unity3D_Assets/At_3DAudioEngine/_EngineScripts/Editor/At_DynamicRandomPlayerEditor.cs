@@ -72,7 +72,7 @@ public class At_DynamicRandomPlayerEditor : Editor
         
 
 
-        externAssetsPath = GameObject.FindObjectOfType<At_ExternAssets>().externAssetsPath_audio;
+        //externAssetsPath = GameObject.FindObjectOfType<At_ExternAssets>().externAssetsPath_audio;
 
         fileNamesList = new List<string>();
         // get a reference to the At_Player isntance (core engine of the player)
@@ -113,7 +113,7 @@ public class At_DynamicRandomPlayerEditor : Editor
             
 
             randomPlayerState.channelRouting = new int[serialized_channelRouting.arraySize];
-            //randomPlayerState.channelRouting = serializedObject.FindProperty("channelRouting");
+
             for (int i = 0; i < serialized_channelRouting.arraySize; i++)
             {
                 SerializedProperty property = serialized_channelRouting.GetArrayElementAtIndex(i);
@@ -125,7 +125,6 @@ public class At_DynamicRandomPlayerEditor : Editor
         }
         
         outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
-        //randomPlayerState.numChannelInAudiofile = outputState.outputChannelCount;
 
         if (randomPlayerState.fileNames != null)
         {
@@ -140,7 +139,7 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.fileNames = randomPlayerState.fileNames;
         randomPlayer.gain = randomPlayerState.gain;
         randomPlayer.is3D = randomPlayerState.is3D;
-        randomPlayer.isDirective = randomPlayerState.isDirective; //modif mathias 06-17-2021
+        randomPlayer.isDirective = randomPlayerState.isDirective;
         randomPlayer.attenuation = randomPlayerState.attenuation;
         randomPlayer.omniBalance = randomPlayerState.omniBalance;
         randomPlayer.minDistance = randomPlayerState.minDistance;
@@ -149,27 +148,15 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.spawnDistance = randomPlayerState.spawnDistance;
 
         randomPlayer.maxChannelsInAudioFile = randomPlayerState.maxChannelInAudiofile;
-        //randomPlayer.numChannelInAudiofile = randomPlayerState.numChannelInAudiofile;
-        //randomPlayer.state = randomPlayerState;
+
 
         currentOutputChannelCount = outputState.outputChannelCount;
 
         if (randomPlayerState.fileNames != null && randomPlayerState.fileNames.Length != 0)
         {
-            if (randomPlayerState.channelRouting == null || randomPlayerState.channelRouting.Length == 0)//|| player.outputChannelCount != outputState.outputChannelCount)
+            if (randomPlayerState.channelRouting == null || randomPlayerState.channelRouting.Length == 0)
             {
-                //currentOutputChannelCount = outputState.outputChannelCount;
-                //int numChannel = At_PL.getNumChannelInAudioFile();
-
-                // 03/10 - UPMIXING CHANGE -----
-                /*
-                randomPlayerState.channelRouting = new int[randomPlayerState.maxChannelInAudiofile];
-                for (int i = 0; i < randomPlayerState.maxChannelInAudiofile; i++)
-                {
-                    randomPlayerState.channelRouting[i] = i;
-                }
-                */
-                // 03/10 - UPMIXING CHANGE -----
+                
                 currentOutputChannelCount = outputState.outputChannelCount;
                 int numChannel = randomPlayerState.maxChannelInAudiofile;
                 randomPlayerState.channelRouting = new int[currentOutputChannelCount];
@@ -198,7 +185,6 @@ public class At_DynamicRandomPlayerEditor : Editor
 
             }
         }
-
         At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
 
     }
@@ -208,14 +194,12 @@ public class At_DynamicRandomPlayerEditor : Editor
         if (randomPlayer != null && randomPlayer.name != randomPlayer.name)
         {
             if (randomPlayer != null)
-            {
-                //Debug.Log(playerState.name + " as changed to : " + player.name);
+            {  
                 At_AudioEngineUtils.changeRandomPlayerName(SceneManager.GetActiveScene().name, randomPlayer.name, randomPlayer.name);
             }
         }
         if (shouldSave)
         {
-            //At_AudioEngineUtils.SaveRandomPlayerStateWithName(randomPlayer.name); modif mathias 30-06-202
             At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
             shouldSave = false;
         }
@@ -233,21 +217,14 @@ public class At_DynamicRandomPlayerEditor : Editor
     }
     void OnDestroy()
     {
-        /*
-        Event e = Event.current;
-        if (e == null && mRunningInEditor && target == null)
-        {
-            Debug.Log("remove Random Player !");
-            At_AudioEngineUtils.removeRandomPlayerWithGuid(randomPlayer.guid);
-        }
-        */
+       
         if (Application.isEditor == previousIsEditor && previousIsPlaying == Application.isPlaying)
         {
             if (randomPlayer == null)
             {
                 if (!isSceneLoading)
                 {
-                    //Debug.Log("remove Random Player !");
+                    
                     At_AudioEngineUtils.removeRandomPlayerWithGuid(SceneManager.GetActiveScene().name, randomPlayer.guid);
                 }
                 else
@@ -268,7 +245,7 @@ public class At_DynamicRandomPlayerEditor : Editor
 
         if (randomPlayer.name != randomPlayerState.name)
         {
-            //Debug.Log(randomPlayerState.name + " as changed to : " + randomPlayer.name);
+            
             At_AudioEngineUtils.changeRandomPlayerName(SceneManager.GetActiveScene().name, randomPlayerState.name, randomPlayer.name);
 
 
@@ -284,23 +261,7 @@ public class At_DynamicRandomPlayerEditor : Editor
 
             }
         }
-        //modif mathias 06-17-2021
-        /*
-        if (randomPlayerState.is3D == true)
-        {
-            using (new GUILayout.HorizontalScope())
-            {
-                bool b = GUILayout.Toggle(randomPlayerState.isDirective, "Directive");
-                if (b != randomPlayerState.isDirective)
-                {
-                    shouldSave = true;
-                    randomPlayerState.isDirective = b;
-
-                }
-            }
-        }
-        */
-
+       
         using (new GUILayout.HorizontalScope())
         {
             float g = GUILayout.HorizontalSlider(randomPlayerState.gain, 10f, -80f);
@@ -459,32 +420,6 @@ public class At_DynamicRandomPlayerEditor : Editor
 
         }
 
-        
-
-        /*
-        HorizontalLine(Color.grey);
-        using (new GUILayout.HorizontalScope())
-        {
-            // Display and test if the Button "Open" has been clicked
-            if (GUILayout.Button("Add"))
-            {
-                shouldSave = true;
-                string audioFilePath;
-                string[] filter = { "Audio File", "wav,aiff, mp3, aac, mp4" };
-                // if it is, open the panel for choosing an audio file
-                audioFilePath = EditorUtility.OpenFilePanelWithFilters("Open Audio File", Application.dataPath + "/StreamingAssets/", filter);
-
-                string s = audioFilePath.Replace(Application.dataPath + "/StreamingAssets/", "");
-                fileNames.Add(s);
-                if (fileNames[0] == "")
-                {
-                    fileNames.RemoveAt(0);
-                }
-                UpdateFilenamesInState();
-
-            }
-        }
-        */
         HorizontalLine(Color.grey);
         using (new GUILayout.HorizontalScope())
         {
@@ -496,7 +431,7 @@ public class At_DynamicRandomPlayerEditor : Editor
                 new ExtensionFilter("Sound Files", "mp3", "wav", "aiff", "aac", "mp4"),
                 };
                 string[] paths;
-                paths = StandaloneFileBrowser.OpenFilePanel("Open File", externAssetsPath, extensions, true);
+                paths = StandaloneFileBrowser.OpenFilePanel("Open File", At_AudioEngineUtils.GetFilePathForStates(""), extensions, true);
                 randomPlayerState.maxChannelInAudiofile = 0;
                 foreach(string s in paths)
                 {
@@ -505,49 +440,30 @@ public class At_DynamicRandomPlayerEditor : Editor
                     {
                         randomPlayerState.maxChannelInAudiofile = numChannel;
                     }
-                    fileNamesList.Add(s.Replace(externAssetsPath, "")); 
+
+                    string clean_s = "";
+                    if (paths.Length != 0)
+                    {
+                        string rootPath = At_AudioEngineUtils.GetFilePathForStates("");
+                        clean_s = s.Replace("\\", "/");
+                        clean_s = clean_s.Replace(rootPath, "");
+
+                    }
+
+                    fileNamesList.Add(clean_s); 
                 }
                 if (fileNamesList[0] == "")
                 {
                     fileNamesList.RemoveAt(0);
                 }
-                /*
-                randomPlayerState.channelRouting = new int[randomPlayerState.maxChannelInAudiofile];
-                for (int i = 0; i < randomPlayerState.maxChannelInAudiofile; i++)
-                {
-                    randomPlayerState.channelRouting[i] = i;
-                }
-                */
-                // 03/10 - UPMIXING CHANGE -----
+                
                 currentOutputChannelCount = outputState.outputChannelCount;
                 randomPlayerState.channelRouting = new int[currentOutputChannelCount];
                 for (int i = 0; i < currentOutputChannelCount; i++)
                 {
                     randomPlayerState.channelRouting[i] = i % currentOutputChannelCount;
                 }
-                /*
-                currentOutputChannelCount = outputState.outputChannelCount;
-                int numChannel = randomPlayerState.maxChannelInAudiofile;
-                randomPlayerState.channelRouting = new int[currentOutputChannelCount];
-                for (int i = 0; i < currentOutputChannelCount; i++)
-                {
-                    randomPlayerState.channelRouting[i] = i % numChannel;
-                }
-                */
-
-                /*
-                string audioFilePath;
-                string[] filter = { "Audio File", "wav,aiff, mp3, aac, mp4" };
-                // if it is, open the panel for choosing an audio file
-                audioFilePath = EditorUtility.OpenFilePanelWithFilters("Open Audio File", Application.dataPath + "/StreamingAssets/", filter);
-
-                string s = audioFilePath.Replace(Application.dataPath + "/StreamingAssets/", "");
-                fileNames.Add(s);
-                if (fileNames[0] == "")
-                {
-                    fileNames.RemoveAt(0);
-                }
-                */
+                
                 shouldSave = true;
                 UpdateFilenamesInState();
                 GUIUtility.ExitGUI();
@@ -582,80 +498,56 @@ public class At_DynamicRandomPlayerEditor : Editor
             using (new GUILayout.VerticalScope())
             {
                 GUILayout.Label("File channel Routing ");
-                /*
-                if (randomPlayerState.channelRouting != null && randomPlayerState.channelRouting.Length == randomPlayerState.maxChannelInAudiofile)
+                
+                if (randomPlayerState.maxChannelInAudiofile != 0)
                 {
-                    string[] channelRouting = new string[randomPlayer.outputChannelCount];
-                    for (int i = 0; i < channelRouting.Length; i++)
+                    if (randomPlayerState.channelRouting != null && randomPlayerState.channelRouting.Length == currentOutputChannelCount)
                     {
-                        channelRouting[i] = i.ToString();
-                    }
-                    int[] selectedChannelRouting = new int[randomPlayerState.maxChannelInAudiofile];
-                    for (int i = 0; i < selectedChannelRouting.Length; i++)
-                    {
-                        selectedChannelRouting[i] = i;
-                    }
+                        string[] channelRouting = new string[currentOutputChannelCount+1];
+                        for (int i = 0; i < channelRouting.Length; i++)
+                        {
+                            channelRouting[i] = (i % randomPlayerState.maxChannelInAudiofile).ToString();
+                        }
+                        channelRouting[currentOutputChannelCount] = "none";
 
-                    for (int c = 0; c < randomPlayerState.maxChannelInAudiofile; c++)
-                    {
+                        int[] selectedChannelRouting = new int[currentOutputChannelCount];
+                        for (int i = 0; i < selectedChannelRouting.Length; i++)
+                        {
+                            selectedChannelRouting[i] = i;
+                        }
+
                         using (new GUILayout.HorizontalScope())
                         {
-                            GUILayout.Label("channel " + c);
-                            int select = EditorGUILayout.Popup(randomPlayerState.channelRouting[c], channelRouting);
-
-                            if (select != randomPlayerState.channelRouting[c])
+                            using (new GUILayout.HorizontalScope())
                             {
-                                randomPlayerState.channelRouting[c] = select;
-                                shouldSave = true;
+                                GUILayout.Label("-Output-");
+                            }
+                            using (new GUILayout.HorizontalScope())
+                            {
+                                GUILayout.Label("-Input-");
                             }
 
                         }
-
-                    }
-                }
-                */
-                if (randomPlayerState.channelRouting != null && randomPlayerState.channelRouting.Length == currentOutputChannelCount)
-                {
-                    string[] channelRouting = new string[currentOutputChannelCount];
-                    for (int i = 0; i < channelRouting.Length; i++)
-                    {
-                        channelRouting[i] = (i% randomPlayerState.maxChannelInAudiofile).ToString();
-                    }
-                    int[] selectedChannelRouting = new int[currentOutputChannelCount];
-                    for (int i = 0; i < selectedChannelRouting.Length; i++)
-                    {
-                        selectedChannelRouting[i] = i;
-                    }
-
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        using (new GUILayout.HorizontalScope())
+                        for (int c = 0; c < currentOutputChannelCount; c++)
                         {
-                            GUILayout.Label("-Output-");
-                        }
-                        using (new GUILayout.HorizontalScope())
-                        {
-                            GUILayout.Label("-Input-");
-                        }
-
-                    }
-                    for (int c = 0; c < currentOutputChannelCount; c++)
-                    {
-                        using (new GUILayout.HorizontalScope())
-                        {
-                            GUILayout.Label("channel " + c);
-                            int select = EditorGUILayout.Popup(randomPlayerState.channelRouting[c], channelRouting);
-
-                            if (select != randomPlayerState.channelRouting[c])
+                            using (new GUILayout.HorizontalScope())
                             {
-                                randomPlayerState.channelRouting[c] = select;
-                                shouldSave = true;
+                                GUILayout.Label("channel " + c);
+                                int select = EditorGUILayout.Popup(randomPlayerState.channelRouting[c], channelRouting);
+
+                                if (select != randomPlayerState.channelRouting[c])
+                                {
+                                    randomPlayerState.channelRouting[c] = select;
+                                    shouldSave = true;
+                                }
+
                             }
 
                         }
-
                     }
+
                 }
+                
             }
         }
 
@@ -663,7 +555,7 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.fileNames = randomPlayerState.fileNames;
         randomPlayer.gain = randomPlayerState.gain;
         randomPlayer.is3D = randomPlayerState.is3D;
-        randomPlayer.isDirective = randomPlayerState.isDirective; //modif mathias 06-17-2021
+        randomPlayer.isDirective = randomPlayerState.isDirective; 
         randomPlayer.attenuation = randomPlayerState.attenuation;
         randomPlayer.omniBalance = randomPlayerState.omniBalance;
         randomPlayer.maxChannelsInAudioFile = randomPlayerState.maxChannelInAudiofile;
@@ -673,11 +565,9 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.spawnMinAngle = randomPlayerState.spawnMinAngle;
         randomPlayer.spawnMaxAngle = randomPlayerState.spawnMaxAngle;
 
-        //randomPlayer.state = randomPlayerState; 
-
         serialized_gain.floatValue = randomPlayerState.gain;
         serialized_is3D.boolValue = randomPlayerState.is3D;
-        serialized_isDirective.boolValue = randomPlayerState.isDirective; //modif mathias 06-17-2021
+        serialized_isDirective.boolValue = randomPlayerState.isDirective; 
         serialized_omniBalance.floatValue = randomPlayerState.omniBalance;
         serialized_attenuation.floatValue = randomPlayerState.attenuation;
         // minimum distance above which the sound produced by the source is attenuated
@@ -687,8 +577,6 @@ public class At_DynamicRandomPlayerEditor : Editor
         serialized_spawnMaxAngle.floatValue = randomPlayerState.spawnMaxAngle;
         serialized_spawnDistance.floatValue = randomPlayerState.spawnDistance;
 
-        //serialized_fileNames = randomPlayerState.fileNames;
-        //serialized_channelRouting = randomPlayerState.channelRouting;
         serialized_fileNames.ClearArray();
         for (int i = 0; i < randomPlayerState.fileNames.Length; i++)
         {
