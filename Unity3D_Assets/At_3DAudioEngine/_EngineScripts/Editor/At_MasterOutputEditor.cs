@@ -35,9 +35,9 @@ public class At_MasterOutputEditor : Editor
 
     At_OutputState outputState = new At_OutputState();
     At_MasterOutput masterOutput;
-    string[] outputConfigSelection = { "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "1D [48]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]", "3D [42]"};
+    string[] outputConfigSelection = {"select", "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "1D [48]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]", "3D [42]"};
     int selectSpeakerConfig = 0;
-    int outputConfigDimension = 1;
+    int outputConfigDimension = 0;
     public GameObject[] virtualMic;
     public GameObject[] speakers;
 
@@ -96,7 +96,7 @@ public class At_MasterOutputEditor : Editor
         {
             outputState = new At_OutputState();
             outputState.audioDeviceName = "";
-            outputState.outputChannelCount = 2;
+            outputState.outputChannelCount = 0;
             outputState.selectSpeakerConfig = 0;
             outputState.outputConfigDimension = 1;
             outputState.selectedSamplingRate = 0;
@@ -128,7 +128,7 @@ public class At_MasterOutputEditor : Editor
        
 
         deviceList = new List<string>();
-        deviceList.Add("none");
+        deviceList.Add("select");
         foreach (var device in AsioOut.GetDriverNames())
         {
             deviceList.Add(device);
@@ -237,26 +237,31 @@ public class At_MasterOutputEditor : Editor
         {
             GUILayout.Label("Configuration");
             selectSpeakerConfig = EditorGUILayout.Popup(selectSpeakerConfig, outputConfigSelection);
-            int indexStartChannelCount = outputConfigSelection[selectSpeakerConfig].IndexOf("[");
-            int indexendChannelCount = outputConfigSelection[selectSpeakerConfig].IndexOf("]");
-            int channelCount = int.Parse(outputConfigSelection[selectSpeakerConfig].Substring(indexStartChannelCount + 1, indexendChannelCount - indexStartChannelCount - 1));
-            outputConfigDimension = int.Parse(outputConfigSelection[selectSpeakerConfig].Substring(0, 1));
-            if (channelCount != outputState.outputChannelCount || outputConfigDimension != outputState.outputConfigDimension)
+            if (selectSpeakerConfig != 0)
             {
-                speakerConfigHasChanged = true;
-                shouldSave = true;
-                outputState.outputConfigDimension = outputConfigDimension;
-                outputState.outputChannelCount = channelCount;
-                At_Player[] players = GameObject.FindObjectsOfType<At_Player>();
-                foreach(At_Player p in players)
+                int indexStartChannelCount = outputConfigSelection[selectSpeakerConfig].IndexOf("[");
+                int indexendChannelCount = outputConfigSelection[selectSpeakerConfig].IndexOf("]");
+                int channelCount = int.Parse(outputConfigSelection[selectSpeakerConfig].Substring(indexStartChannelCount + 1, indexendChannelCount - indexStartChannelCount - 1));
+                outputConfigDimension = int.Parse(outputConfigSelection[selectSpeakerConfig].Substring(0, 1));
+                if (channelCount != outputState.outputChannelCount || outputConfigDimension != outputState.outputConfigDimension)
                 {
-                    p.outputChannelCount = channelCount;
+                    speakerConfigHasChanged = true;
+                    shouldSave = true;
+                    outputState.outputConfigDimension = outputConfigDimension;
+                    outputState.outputChannelCount = channelCount;
+                    At_Player[] players = GameObject.FindObjectsOfType<At_Player>();
+                    foreach (At_Player p in players)
+                    {
+                        p.outputChannelCount = channelCount;
+                    }
+
+                    outputState.selectSpeakerConfig = selectSpeakerConfig;
+                    meters = new float[outputState.outputChannelCount];
+
                 }
 
-                outputState.selectSpeakerConfig = selectSpeakerConfig;
-                meters = new float[outputState.outputChannelCount];
-               
             }
+
         }
 
         

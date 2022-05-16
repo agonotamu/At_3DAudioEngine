@@ -119,7 +119,7 @@ public class At_MasterOutput : MonoBehaviour
         {
             vm.m_maxDistanceForDelay = outputState.maxDistanceForDelay;
         }
-
+        
     }
 
     /************************************************************************
@@ -131,7 +131,7 @@ public class At_MasterOutput : MonoBehaviour
    */
     public void StartEngine()
     {
-
+        
         isEngineStarted = true;
 
         // initialize the spatializer
@@ -156,43 +156,54 @@ public class At_MasterOutput : MonoBehaviour
 
             if (device == audioDeviceName)
             {
-                    running = true;
-                if(At_AudioEngineUtils.asioOut == null)
-                {
-                    At_AudioEngineUtils.asioOut = new AsioOut((string)device);                    
-                    // Get the number of inputs in the device
-                    int inputChannels = At_AudioEngineUtils.asioOut.DriverInputChannelCount;
-                    // Get the number of outputs in the device
-                    maxDeviceChannel = At_AudioEngineUtils.asioOut.DriverOutputChannelCount;
-                    // Initialize a Patcher with the correct sample rate and number of intput and outputs 
-                    inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);
-                    // Initialize Record and Playback for the device
-                    At_AudioEngineUtils.asioOut.InitRecordAndPlayback(new SampleToWaveProvider(inputPatcher), inputChannels, samplingRate);                    
+                if (outputConfigDimension == 0 || outputChannelCount == 0)
+                {                    
+                    Debug.LogError("Select a speaker configuration in the At_MasterOutput GUI !");
+                    Application.Quit();
                 }
                 else
                 {
-                    // Get the number of inputs in the device
-                    int inputChannels = At_AudioEngineUtils.asioOut.DriverInputChannelCount;
-                    // Get the number of outputs in the device
-                    maxDeviceChannel = At_AudioEngineUtils.asioOut.DriverOutputChannelCount;
-                    // Initialize a Patcher with the correct sample rate and number of intput and outputs 
-                    inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);                    
+
+                    running = true;
+                    if (At_AudioEngineUtils.asioOut == null)
+                    {
+                        At_AudioEngineUtils.asioOut = new AsioOut((string)device);
+                        // Get the number of inputs in the device
+                        int inputChannels = At_AudioEngineUtils.asioOut.DriverInputChannelCount;
+                        // Get the number of outputs in the device
+                        maxDeviceChannel = At_AudioEngineUtils.asioOut.DriverOutputChannelCount;
+                        // Initialize a Patcher with the correct sample rate and number of intput and outputs 
+                        inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);
+                        // Initialize Record and Playback for the device
+                        At_AudioEngineUtils.asioOut.InitRecordAndPlayback(new SampleToWaveProvider(inputPatcher), inputChannels, samplingRate);
+                    }
+                    else
+                    {
+                        // Get the number of inputs in the device
+                        int inputChannels = At_AudioEngineUtils.asioOut.DriverInputChannelCount;
+                        // Get the number of outputs in the device
+                        maxDeviceChannel = At_AudioEngineUtils.asioOut.DriverOutputChannelCount;
+                        // Initialize a Patcher with the correct sample rate and number of intput and outputs 
+                        inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);
+                    }
+
+
+                    for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
+                    {
+                        playerList[playerIndex].initAudioBuffer();
+                    }
+
+                    // Add a callback method to proccess the sample in the in/out buffer
+                    At_AudioEngineUtils.asioOut.AudioAvailable += OnAsioOutAudioAvailable;
+                    // Start processing (i.e. calling the callback method)
+                    At_AudioEngineUtils.asioOut.Play();
                 }
 
-
-                for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
-                {
-                    playerList[playerIndex].initAudioBuffer();
-                }
-
-                // Add a callback method to proccess the sample in the in/out buffer
-                At_AudioEngineUtils.asioOut.AudioAvailable += OnAsioOutAudioAvailable;
-                // Start processing (i.e. calling the callback method)
-                At_AudioEngineUtils.asioOut.Play();
             }
-            else if(audioDeviceName == "none")
+            else if(audioDeviceName == "select")
             {
-                Debug.LogError("ASIO device name    is \'none\' ! Please select a device name in the At_MasterOutput GUI");
+                Debug.LogError("Select a device in the At_MasterOutput GUI !");
+                Application.Quit();
             }
         }
 

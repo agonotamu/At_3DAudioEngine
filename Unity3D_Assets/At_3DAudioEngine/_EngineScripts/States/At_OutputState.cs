@@ -14,9 +14,9 @@ using UnityEngine;
 public class At_OutputState
 {
     /// string given the name of the audio device
-    public string audioDeviceName = "";
+    public string audioDeviceName = "select";
     /// number of channel used for the output bus
-    public int outputChannelCount = 2;
+    public int outputChannelCount = 0;
     /// master gain for the output bus
     public float gain;
     /// selected speaker config
