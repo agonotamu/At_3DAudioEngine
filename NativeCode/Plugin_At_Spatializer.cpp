@@ -43,12 +43,15 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_process(int id, float* inB
 {
     At_SpatializationEngine::getInstance().WFS_process(id, inBuffer, outBuffer, bufferLength, offset, inChannelCount, outChannelCount);
 }
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_getDelay(int id, float* delay, float* volume)
+{
+    At_SpatializationEngine::getInstance().WFS_getDelay(id, delay, volume);
+}
 
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_cleanDelayBuffer(int id)
 {
     At_SpatializationEngine::getInstance().WFS_cleanDelayBuffer(id);
 }
-
 
 
 // One for all Spatializer

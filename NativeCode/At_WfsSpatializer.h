@@ -50,6 +50,8 @@ namespace Spatializer
         ~At_WfsSpatializer(); // destructor
 
         int process(float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannel, int outChannel);
+        int WFS_getDelay(float* delay, float* volume);
+        
         int setSourcePosition(float* position, float* rotation, float* forward); 
         int setSourceAttenuation(float attenuation);
         int setSourceOmniBalance(float omniBalance);

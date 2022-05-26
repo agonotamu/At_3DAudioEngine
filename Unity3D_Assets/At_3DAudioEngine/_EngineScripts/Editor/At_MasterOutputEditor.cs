@@ -47,7 +47,7 @@ public class At_MasterOutputEditor : Editor
     // create your style
     GUIStyle horizontalLine;
         
-    float speakerRigSize = 100;
+    float speakerRigSize = 5;
 
     
 

@@ -563,11 +563,11 @@ public class At_MasterOutput : MonoBehaviour
                 //At_SpeakerConfig.updateVirtualMicPosition(currentMic, currentSpk, virtualMicRigSize, virtualMicWidth, speakerRigSize);
                 if (currentSpk.gameObject.transform.position.magnitude != 0 && currentSpk.distance != 0)
                 {
-                    /*
+                    
                     float ratio = currentSpk.distance / currentSpk.gameObject.transform.position.magnitude;
                         
                     currentMic.transform.position = currentMic.transform.parent.transform.position + currentSpk.transform.position.normalized * outputState.virtualMicRigSize / ratio;
-                    */
+                    
                 }
             }
 

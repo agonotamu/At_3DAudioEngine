@@ -120,9 +120,8 @@ copy $(TargetPath) ..\..\Assets\Plugins\x86\$(TargetName).dll
       <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir ..\..\Assets\Plugins\x86_64
-copy /y $(TargetPath) ..\..\Assets\Plugins\x86_64\$(TargetName).dll
-</Command>
+      <Command>mkdir ..\..\Assets\At_3DAudioEngine\Other\Plugins\x86_64
+copy /y $(TargetPath) ..\..\Assets\At_3DAudioEngine\Other\Plugins\x86_64\$(TargetName).dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -187,19 +186,17 @@ copy /y $(TargetPath) ..\..\Assets\Plugins\x86_64\$(TargetName).dll
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\At_Effect.cpp" />
     <ClCompile Include="..\At_SpatializationEngine.cpp" />
     <ClCompile Include="..\At_WfsSpatializer.cpp" />
-    <ClCompile Include="..\AudioPluginUtil.cpp" />
-    <ClCompile Include="..\hrtftable.cpp" />
     <ClCompile Include="..\Plugin_At_Spatializer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\At_Effect.h" />
     <ClInclude Include="..\At_SpatializationEngine.h" />
     <ClInclude Include="..\At_WfsSpatializer.h" />
     <ClInclude Include="..\AudioPluginInterface.h" />
-    <ClInclude Include="..\AudioPluginUtil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram3.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

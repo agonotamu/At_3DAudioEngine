@@ -342,6 +342,12 @@ namespace Spatializer
 
     }
 
+    int At_WfsSpatializer::WFS_getDelay(float* delay, float* volume) {
+        delay = m_pWfsDelay;
+        volume = m_pWfsVolume;
+        return 0;
+    }
+
     /****************************************************************************
     * 
     *                            MAIN PROCESS METHOD    
