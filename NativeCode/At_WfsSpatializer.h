@@ -50,7 +50,7 @@ namespace Spatializer
         ~At_WfsSpatializer(); // destructor
 
         int process(float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannel, int outChannel);
-        int WFS_getDelay(float* delay, float* volume);
+        int WFS_getDelay(float* delay, int arraySize);
         
         int setSourcePosition(float* position, float* rotation, float* forward); 
         int setSourceAttenuation(float attenuation);
@@ -117,7 +117,8 @@ namespace Spatializer
 
         float m_pWfsVolume[MAX_OUTPUT_CHANNEL];
         float m_pWfsDelay[MAX_OUTPUT_CHANNEL];
-        
+        float m_pProcess_delay[MAX_OUTPUT_CHANNEL];
+
         float m_pWfsVolume_prevFrame[MAX_OUTPUT_CHANNEL];
         float m_pWfsDelay_prevFrame[MAX_OUTPUT_CHANNEL];
 

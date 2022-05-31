@@ -42,7 +42,9 @@ public class At_DynamicRandomPlayerEditor : Editor
     SerializedProperty serialized_spawnMinAngle;
     SerializedProperty serialized_spawnMaxAngle;
     SerializedProperty serialized_spawnDistance;
-
+    SerializedProperty serialized_spawnMinRateMs;
+    SerializedProperty serialized_spawnMaxRateMs;
+    SerializedProperty serialized_maxInstances;
 
     bool isSceneLoading = false;
 
@@ -64,6 +66,9 @@ public class At_DynamicRandomPlayerEditor : Editor
         serialized_spawnMinAngle = serializedObject.FindProperty("spawnMinAngle");
         serialized_spawnMaxAngle = serializedObject.FindProperty("spawnMaxAngle");
         serialized_spawnDistance = serializedObject.FindProperty("spawnDistance");
+        serialized_spawnMinRateMs = serializedObject.FindProperty("spawnMinRateMs");
+        serialized_spawnMaxRateMs = serializedObject.FindProperty("spawnMaxRateMs");
+        serialized_maxInstances = serializedObject.FindProperty("maxInstances");
 
         previousIsEditor = Application.isEditor;
         previousIsPlaying = Application.isPlaying;
@@ -101,6 +106,10 @@ public class At_DynamicRandomPlayerEditor : Editor
             randomPlayerState.spawnMinAngle = serialized_spawnMinAngle.floatValue;
             randomPlayerState.spawnMaxAngle = serialized_spawnMaxAngle.floatValue;
             randomPlayerState.spawnDistance = serialized_spawnDistance.floatValue;
+
+            randomPlayerState.spawnMinRateMs = serialized_spawnMinRateMs.floatValue;
+            randomPlayerState.spawnMaxRateMs = serialized_spawnMaxRateMs.floatValue;
+            randomPlayerState.maxInstances = serialized_maxInstances.intValue;
 
             //randomPlayerState.fileNames = serializedObject.FindProperty("fileNames");
             randomPlayerState.fileNames = new string[serialized_fileNames.arraySize];
@@ -146,6 +155,11 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.spawnMinAngle = randomPlayerState.spawnMinAngle;
         randomPlayer.spawnMaxAngle = randomPlayerState.spawnMaxAngle;
         randomPlayer.spawnDistance = randomPlayerState.spawnDistance;
+
+        randomPlayer.spawnMinRateMs = randomPlayerState.spawnMinRateMs;
+        randomPlayer.spawnMaxRateMs = randomPlayerState.spawnMaxRateMs;
+        randomPlayer.maxInstances = randomPlayerState.maxInstances;
+
 
         randomPlayer.maxChannelsInAudioFile = randomPlayerState.maxChannelInAudiofile;
 
@@ -391,10 +405,62 @@ public class At_DynamicRandomPlayerEditor : Editor
                     }
 
 
+                }                
+
+                GUILayout.TextField((randomPlayerState.spawnMaxAngle).ToString("0.00"));
+                HorizontalLine(Color.grey);
+            }
+
+            using (new GUILayout.VerticalScope())
+            {
+                using (new GUILayout.HorizontalScope())
+                {
+
+                    GUILayout.Label("Spawn min rate (ms)");
+
+                    float rate = GUILayout.HorizontalSlider(randomPlayerState.spawnMinRateMs, 50f, 5000f);
+                    if (rate != randomPlayerState.spawnMinRateMs)
+                    {
+
+                        shouldSave = true;
+                        randomPlayerState.spawnMinRateMs = rate;
+                        if (randomPlayerState.spawnMinRateMs > randomPlayerState.spawnMaxRateMs)
+                        {
+                            randomPlayerState.spawnMaxRateMs = randomPlayerState.spawnMinRateMs;
+                        }
+                    }
+
+
                 }
 
 
-                GUILayout.TextField((randomPlayerState.spawnMaxAngle).ToString("0.00"));
+                GUILayout.TextField((randomPlayerState.spawnMinRateMs).ToString("0.00"));
+
+            }
+
+            using (new GUILayout.VerticalScope())
+            {
+                using (new GUILayout.HorizontalScope())
+                {
+
+                    GUILayout.Label("Spawn max rate (ms)");
+
+                    float rate = GUILayout.HorizontalSlider(randomPlayerState.spawnMaxRateMs, 50f, 5000f);
+                    if (rate != randomPlayerState.spawnMaxRateMs)
+                    {
+                        shouldSave = true;
+                        randomPlayerState.spawnMaxRateMs = rate;
+                        if (randomPlayerState.spawnMaxRateMs < randomPlayerState.spawnMinRateMs)
+                        {
+                            randomPlayerState.spawnMinRateMs = randomPlayerState.spawnMaxRateMs;
+                        }
+                    }
+
+
+                }
+
+                GUILayout.TextField((randomPlayerState.spawnMaxRateMs).ToString("0.00"));
+                HorizontalLine(Color.grey);
             }
 
             using (new GUILayout.VerticalScope())
@@ -414,6 +480,27 @@ public class At_DynamicRandomPlayerEditor : Editor
                 }
 
                 GUILayout.TextField((randomPlayerState.spawnDistance).ToString("0.00"));
+
+                HorizontalLine(Color.grey);
+            }
+
+            using (new GUILayout.VerticalScope())
+            {
+                using (new GUILayout.HorizontalScope())
+                {
+
+                    GUILayout.Label("Max Instances");
+
+                    int max = (int)GUILayout.HorizontalSlider(randomPlayerState.maxInstances, 1, 100);
+                    if (max != randomPlayerState.maxInstances)
+                    {
+                        shouldSave = true;
+                        randomPlayerState.maxInstances = max;
+                    }
+
+                }
+
+                GUILayout.TextField((randomPlayerState.maxInstances).ToString("0"));
 
                 HorizontalLine(Color.grey);
             }
@@ -564,6 +651,9 @@ public class At_DynamicRandomPlayerEditor : Editor
         randomPlayer.spawnDistance = randomPlayerState.spawnDistance;
         randomPlayer.spawnMinAngle = randomPlayerState.spawnMinAngle;
         randomPlayer.spawnMaxAngle = randomPlayerState.spawnMaxAngle;
+        randomPlayer.spawnMinRateMs = randomPlayerState.spawnMinRateMs;
+        randomPlayer.spawnMaxRateMs = randomPlayerState.spawnMaxRateMs;
+        randomPlayer.maxInstances = randomPlayerState.maxInstances;
 
         serialized_gain.floatValue = randomPlayerState.gain;
         serialized_is3D.boolValue = randomPlayerState.is3D;
@@ -576,6 +666,10 @@ public class At_DynamicRandomPlayerEditor : Editor
         serialized_spawnMinAngle.floatValue = randomPlayerState.spawnMinAngle;
         serialized_spawnMaxAngle.floatValue = randomPlayerState.spawnMaxAngle;
         serialized_spawnDistance.floatValue = randomPlayerState.spawnDistance;
+        serialized_spawnMinRateMs.floatValue = randomPlayerState.spawnMinRateMs;
+        serialized_spawnMaxRateMs.floatValue = randomPlayerState.spawnMaxRateMs;
+        serialized_maxInstances.intValue = randomPlayerState.maxInstances;
+
 
         serialized_fileNames.ClearArray();
         for (int i = 0; i < randomPlayerState.fileNames.Length; i++)

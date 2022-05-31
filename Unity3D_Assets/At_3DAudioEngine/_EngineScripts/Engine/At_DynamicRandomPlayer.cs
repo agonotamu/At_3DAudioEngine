@@ -38,6 +38,10 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public float spawnMaxAngle;
     public float spawnDistance;
 
+    public float spawnMinRateMs;
+    public float spawnMaxRateMs;
+    public int maxInstances;
+
     public string externAssetsPath;
     // max number of channel in the audio files
     public int maxChannelsInAudioFile = 0;
@@ -45,13 +49,15 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     public int outputChannelCount;
 
     At_DynamicRandomPlayerState randomPlayerState;
-    const int maxInstance = 10;
+    //const int maxInstance = 10;
 
     public string guid="";
 
     At_MasterOutput masterOutput;
 
     float time = 0;
+
+    float randomTriggerTime = 0;
 
     void Reset()
     {
@@ -85,12 +91,14 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        randomTriggerTime = Random.Range(spawnMinRateMs, spawnMaxRateMs);
+
         randomPlayerState = At_AudioEngineUtils.getRandomPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, guid, gameObject.name);
         masterOutput = GameObject.FindObjectOfType<At_MasterOutput>();//.
-        playerInstances = new GameObject[maxInstance];
-        playerInstancesCreationTime = new float[maxInstance];
+        playerInstances = new GameObject[maxInstances];
+        playerInstancesCreationTime = new float[maxInstances];
 
-        for (int i = 0;i< maxInstance; i++)
+        for (int i = 0;i< maxInstances; i++)
         {
             playerInstances[i] = new GameObject();
             playerInstances[i].SetActive(false);
@@ -109,13 +117,15 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     }
     private void Update()
     {
-        // Auto-generate (Debug)
+        // Auto-generate
         
         time += Time.deltaTime;
-        if (time > 0.5f)
+        if (time > randomTriggerTime/1000f)
         {
             AddOneShotInstanceAndRandomPlay(true, Vector3.zero);
             time = 0;
+            randomTriggerTime = Random.Range(spawnMinRateMs, spawnMaxRateMs);
+            Debug.Log("random time = " + randomTriggerTime.ToString());
         }        
 
         int numberOfInstancePlaying = 0;
@@ -132,7 +142,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     {
         int freeSlotIndex = -1;
 
-        for (int i = 0; i < maxInstance; i++){
+        for (int i = 0; i < maxInstances; i++){
 
             At_Player p = playerInstances[i].GetComponent<At_Player>();
 
@@ -151,7 +161,7 @@ public class At_DynamicRandomPlayer : MonoBehaviour
     int getOlder()
     {
         int indexOlder = 0;
-        for (int i = 0; i < maxInstance; i++)
+        for (int i = 0; i < maxInstances; i++)
         {
             if (playerInstancesCreationTime[i] < playerInstancesCreationTime[indexOlder])
             {

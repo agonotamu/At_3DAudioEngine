@@ -47,7 +47,7 @@ namespace Spatializer
 		
 
 		void WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount);
-		void WFS_getDelay(int id, float* delay, float* volume);
+		void WFS_getDelay(int id, float* delay, int arraySize);
 		void WFS_cleanDelayBuffer(int id);
 
 	private:

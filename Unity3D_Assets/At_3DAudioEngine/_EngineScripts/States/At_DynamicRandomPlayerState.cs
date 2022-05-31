@@ -42,7 +42,12 @@ public class At_DynamicRandomPlayerState
 
     public float spawnMinAngle = 0;
     public float spawnMaxAngle = 0;
-    
+
+    public float spawnMinRateMs = 500;
+    public float spawnMaxRateMs = 1000;
+
+    public int maxInstances = 10;
+
     public float spawnDistance = 1;
 
 

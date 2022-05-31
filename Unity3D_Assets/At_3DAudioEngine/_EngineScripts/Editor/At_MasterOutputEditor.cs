@@ -47,7 +47,7 @@ public class At_MasterOutputEditor : Editor
     // create your style
     GUIStyle horizontalLine;
         
-    float speakerRigSize = 5;
+    float speakerRigSize = 50;
 
     
 
@@ -367,6 +367,8 @@ public class At_MasterOutputEditor : Editor
             virtualSpkParent.transform.parent = masterOutput.gameObject.transform;
             At_SpeakerConfig.addSpeakerConfigToScene(ref virtualMic, outputState.virtualMicRigSize, ref speakers, speakerRigSize,
                 outputState.outputChannelCount, outputState.outputConfigDimension, virtualMicParent, virtualSpkParent);
+
+            
 
             EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
 

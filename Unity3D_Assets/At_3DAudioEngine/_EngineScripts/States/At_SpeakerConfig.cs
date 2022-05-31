@@ -10,6 +10,7 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
     static float virtualSpeakerScale = 3f;
     static string virtualMicModel = "At_3DAudioEngine/Prefabs/simpleArrowModel";
     static string virtualSpeakerModel = "At_3DAudioEngine/Prefabs/simpleSpeakerModel";
+    static string ripplePrefab = "At_3DAudioEngine/Prefabs/RippleParticle/RipplePrefab";
 
     static double[,] geodesicSphere42_angles = { {-179.19, -69.54},{59.86, -70.14},{-61.1, -69.84},{-120.13, -53.29},{120.53, -53.97},{-0.62, -53.95},{-82.29, -36.1},{-157.52, -36.24},{157.72, -36.49},{82.4, -36.95},
                                         {37.3, -36.54},{-38.01, -36.13},{-119.91, -21.67},{120.21, -22.23},{-0.1, -22.06},{-179.95, -12.09},{60.18, -11.97},{-60, -11.73},{-90.07, -0.79},{-149.68, -0.94},
@@ -82,8 +83,17 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
                 speakers[spkCount].transform.SetParent(virtualSpkParent.transform);
                 speakers[spkCount].transform.Rotate(0, 180, 0);
                 speakers[spkCount].GetComponent<At_VirtualSpeaker>().distance = 0;
+                                
 
             }
+            // Uncomment if you want ripple on eah speakers... Debug Only !!
+            /*
+            GameObject go = Instantiate(Resources.Load<GameObject>(ripplePrefab), Vector3.zero, Quaternion.identity);
+            go.transform.parent = speakers[spkCount].transform;
+            go.transform.localPosition = Vector3.zero;
+            go.transform.eulerAngles = new Vector3(90, 0, 0);
+            go.GetComponent<RippleParam>().id = virtualMic[spkCount].GetComponent<At_VirtualMic>().id;
+            */
             PrefabUtility.RecordPrefabInstancePropertyModifications(speakers[spkCount].transform);
         }
     }

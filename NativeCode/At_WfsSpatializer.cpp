@@ -174,17 +174,17 @@ namespace Spatializer
     }
 
     void At_WfsSpatializer::updateMixMaxDelay() {
+        m_maxDelay = m_pWfsDelay[0];
+        m_minDelay = m_pWfsDelay[0];
         for (int virtualMicIdx = 1; virtualMicIdx < m_virtualMicCount; virtualMicIdx++) {
-            
-            if (m_pWfsDelay[virtualMicIdx] >= m_pWfsDelay[virtualMicIdx - 1]) {
+            if (m_pWfsDelay[virtualMicIdx] >= m_maxDelay) {
                 m_maxDelay = m_pWfsDelay[virtualMicIdx];
-                m_minDelay = m_pWfsDelay[virtualMicIdx - 1];
             }
-            else {
-                m_maxDelay = m_pWfsDelay[virtualMicIdx-1];
+            if (m_pWfsDelay[virtualMicIdx] <= m_minDelay) {
                 m_minDelay = m_pWfsDelay[virtualMicIdx];
             }
         }
+        
     }
     
     /****************************************************************************
@@ -195,7 +195,7 @@ namespace Spatializer
     
     void At_WfsSpatializer::cleanDelayBuffer() {
         for (int i = 0; i < m_delayBufferSize; i++) {
-            m_pDelayBuffer[i] = 0;
+            m_pProcess_delay[i] = 0;
         }
     }
 
@@ -289,11 +289,15 @@ namespace Spatializer
         float reverse_delay_prevFrame = m_maxDelay_prevFrame + m_minDelay_prevFrame - m_pWfsDelay_prevFrame[virtualMicIdx];
 
         // Delay for normal WFS source
-        float delay = m_timeReversal * reverse_delay + (1 - m_timeReversal) * m_pWfsDelay[virtualMicIdx];
+        m_pProcess_delay[virtualMicIdx] = m_timeReversal * reverse_delay + (1 - m_timeReversal) * m_pWfsDelay[virtualMicIdx];
         float delay_prevFrame = m_timeReversal * reverse_delay_prevFrame + (1 - m_timeReversal) * m_pWfsDelay_prevFrame[virtualMicIdx];
 
+        //std::cout << " delay  " << virtualMicIdx << " = " << m_pProcess_delay[virtualMicIdx] << "\n";
+        std::cout << " max delay  " << m_maxDelay << "\n";
+        std::cout << " min delay  " << m_minDelay << "\n";
+
         // Convert delay unity from milliseconds to sample
-        float delaySample = m_sampleRate * delay / 1000.0f;
+        float delaySample = m_sampleRate * m_pProcess_delay[virtualMicIdx] / 1000.0f;
         float delaySample_prevFrame = m_sampleRate * delay_prevFrame / 1000.0f;
 
         //int delayBufferSize = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
@@ -342,9 +346,12 @@ namespace Spatializer
 
     }
 
-    int At_WfsSpatializer::WFS_getDelay(float* delay, float* volume) {
-        delay = m_pWfsDelay;
-        volume = m_pWfsVolume;
+    int At_WfsSpatializer::WFS_getDelay(float* delay, int arraySize) {
+        if (arraySize <= MAX_OUTPUT_CHANNEL) {
+            for (int i = 0; i < arraySize; i++) {  
+                delay[i] = m_pProcess_delay[i];
+            }
+        }
         return 0;
     }
 
