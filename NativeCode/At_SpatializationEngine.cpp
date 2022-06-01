@@ -209,6 +209,13 @@ namespace Spatializer
 			ws->WFS_getDelay(delay, arraySize);
 		}
 	}
+	void At_SpatializationEngine::WFS_getVolume(int id, float* volume, int arraySize) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->WFS_getVolume(volume, arraySize);
+		}
+	}
+
 
 	
 }

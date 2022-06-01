@@ -195,7 +195,7 @@ namespace Spatializer
     
     void At_WfsSpatializer::cleanDelayBuffer() {
         for (int i = 0; i < m_delayBufferSize; i++) {
-            m_pProcess_delay[i] = 0;
+            m_pDelayBuffer[i] = 0;
         }
     }
 
@@ -350,6 +350,15 @@ namespace Spatializer
         if (arraySize <= MAX_OUTPUT_CHANNEL) {
             for (int i = 0; i < arraySize; i++) {  
                 delay[i] = m_pProcess_delay[i];
+            }
+        }
+        return 0;
+    }
+
+    int At_WfsSpatializer::WFS_getVolume(float* volume, int arraySize) {
+        if (arraySize <= MAX_OUTPUT_CHANNEL) {
+            for (int i = 0; i < arraySize; i++) {
+                volume[i] = m_pWfsVolume[i];
             }
         }
         return 0;

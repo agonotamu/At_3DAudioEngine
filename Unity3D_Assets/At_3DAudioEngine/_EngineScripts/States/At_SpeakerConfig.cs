@@ -57,10 +57,13 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
             //float scale = (virtualMicTargetwidth * 0.5f) / speakerWidth;
             if (is2D)
             {
-                Vector3 center = virtualSpkParent.transform.parent.transform.position;
+                //Vector3 center = virtualSpkParent.transform.parent.transform.position;
 
-                Vector3 position = center + (virtualMic[spkCount].transform.position - center).normalized * speakerRigSize;
+                // remove distance between spk and mic for 2D :
+                //Vector3 position = center + (virtualMic[spkCount].transform.position - center).normalized * speakerRigSize;
                 //Vector3 position = center + virtualMic[spkCount].transform.position;
+                Vector3 position = virtualMic[spkCount].transform.position;
+
                 speakers[spkCount] = Instantiate(Resources.Load<GameObject>(virtualSpeakerModel), position, Quaternion.identity);
                 //UnityEditor.PrefabUtility.UnpackPrefabInstance(speakers[spkCount], PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 speakers[spkCount].transform.localScale = new Vector3(virtualSpeakerScale, virtualSpeakerScale, virtualSpeakerScale);
@@ -68,8 +71,11 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
                 speakers[spkCount].GetComponent<At_VirtualSpeaker>().id = virtualMic[spkCount].GetComponent<At_VirtualMic>().id;
                 speakers[spkCount].transform.SetParent(virtualSpkParent.transform);
                 speakers[spkCount].transform.Rotate(0, 180, 0);
-                speakers[spkCount].GetComponent<At_VirtualSpeaker>().distance = speakerRigSize;
-                
+
+                // remove distance between spk and mic for 2D :
+                //speakers[spkCount].GetComponent<At_VirtualSpeaker>().distance = speakerRigSize;
+                speakers[spkCount].GetComponent<At_VirtualSpeaker>().distance = 0;
+
             }
             
             else
@@ -87,6 +93,7 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
 
             }
             // Uncomment if you want ripple on eah speakers... Debug Only !!
+            //---------------------------------------------------------------
             /*
             GameObject go = Instantiate(Resources.Load<GameObject>(ripplePrefab), Vector3.zero, Quaternion.identity);
             go.transform.parent = speakers[spkCount].transform;
@@ -94,6 +101,8 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
             go.transform.eulerAngles = new Vector3(90, 0, 0);
             go.GetComponent<RippleParam>().id = virtualMic[spkCount].GetComponent<At_VirtualMic>().id;
             */
+            //---------------------------------------------------------------
+
             PrefabUtility.RecordPrefabInstancePropertyModifications(speakers[spkCount].transform);
         }
     }
