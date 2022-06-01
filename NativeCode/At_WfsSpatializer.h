@@ -38,6 +38,7 @@
 #define MAX_OUTPUT_CHANNEL 48
 #define MAX_INPUT_CHANNEL 16
 
+#define RING_BUFFER
 
 namespace Spatializer
 {
@@ -80,8 +81,12 @@ namespace Spatializer
         void updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount);
 
         
-        void updateDelayBuffer(int bufferLength);
         
+#ifdef RING_BUFFER
+        void updateDelayRingBuffer(int bufferLength);
+#else
+        void updateDelayBuffer(int bufferLength);
+#endif        
         void updateWfsVolumeAndDelay();
         void updateMixMaxDelay();
         void applyWfsGainDelay(int virtualMicIndex, int m_virtualMicCount, int bufferLength, bool isDirective); //modif mathias 06-17-2021
@@ -89,16 +94,23 @@ namespace Spatializer
         
         void updateMixedDirectiveChannel(int virtualMicIdx, int inChannelCount);
 
-        float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];
+        float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];       
         
         // This is now dynamically allocated
         //float m_pDelayBuffer[MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
-        float* m_pDelayBuffer;
+ 
         int m_delayBufferSize;
+ #ifdef RING_BUFFER
+        float* m_pDelayRingBuffer;
+#else
+        float* m_pDelayBuffer;
+#endif
+
         // NO DIRECTIVE SOURCE
         //float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];
 
-        
+        // index of the current position to write in the circular buffer
+        int mDelayRingBuffeWriteIndex = 0;
 
         float m_sourcePosition[3];
         float m_sourceRotation[3]; 

@@ -195,7 +195,12 @@ namespace Spatializer
     
     void At_WfsSpatializer::cleanDelayBuffer() {
         for (int i = 0; i < m_delayBufferSize; i++) {
+            
+#ifdef RING_BUFFER
+            m_pDelayRingBuffer[i] = 0;
+#else
             m_pDelayBuffer[i] = 0;
+#endif
         }
     }
 
@@ -212,18 +217,41 @@ namespace Spatializer
 
         m_delayBufferSize = (int)(MAX_BUFFER_SIZE * numBufferRequiredForUserMaxDistance);
 
+        
+#ifdef RING_BUFFER
+        m_pDelayRingBuffer = new float[m_delayBufferSize];
+#else
         m_pDelayBuffer = new float[m_delayBufferSize];
-
+#endif
         //std::cout << "Init Delay Buffer with " << m_delayBufferSize << " samples for distance = " << m_maxDistanceForDelay << " \n";
 
         //for (int i = 0; i < MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY; i++) {
         for (int i = 0; i < m_delayBufferSize; i++) {
+
+#ifdef RING_BUFFER
+            m_pDelayRingBuffer[i] = 0;
+#else
             m_pDelayBuffer[i] = 0;
+#endif
         }
 #endif
         //std::cout << "last sample of delay buffer is : " << m_pDelayBuffer[m_delayBufferSize-1] << " \n";
     }
+#ifdef RING_BUFFER
+    void At_WfsSpatializer::updateDelayRingBuffer(int bufferLength) {  
+        
+        for (int i = 0; i < bufferLength; i ++)
+        {
+            m_pDelayRingBuffer[mDelayRingBuffeWriteIndex] = m_pTmpMonoBuffer_in[i];
+            mDelayRingBuffeWriteIndex++;
+            if (mDelayRingBuffeWriteIndex == m_delayBufferSize)
+                mDelayRingBuffeWriteIndex = 0;
+        }
+        
+    }
+#endif
 
+#ifndef RING_BUFFER
     // Accummulation of the input buffers to a "mono delay buffer" used to apply delay of the WFS algotithm
     void At_WfsSpatializer::updateDelayBuffer(int bufferLength) {
 
@@ -251,6 +279,7 @@ namespace Spatializer
         }  
 
     }
+#endif
 
     // Accummulation of the input buffers to a "multichannel delay buffer" used to apply delay of the WFS algotithm when the source is "Directive"
     void At_WfsSpatializer::updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount) {
@@ -293,14 +322,32 @@ namespace Spatializer
         float delay_prevFrame = m_timeReversal * reverse_delay_prevFrame + (1 - m_timeReversal) * m_pWfsDelay_prevFrame[virtualMicIdx];
 
         //std::cout << " delay  " << virtualMicIdx << " = " << m_pProcess_delay[virtualMicIdx] << "\n";
+        /*
         std::cout << " max delay  " << m_maxDelay << "\n";
         std::cout << " min delay  " << m_minDelay << "\n";
+        */
 
         // Convert delay unity from milliseconds to sample
         float delaySample = m_sampleRate * m_pProcess_delay[virtualMicIdx] / 1000.0f;
         float delaySample_prevFrame = m_sampleRate * delay_prevFrame / 1000.0f;
 
-        //int delayBufferSize = sizeof(m_pDelayBuffer) / sizeof(*m_pDelayBuffer);
+        // clip the value of the delay (avoiding access outside circular buffer capcity)
+        if (delaySample > m_delayBufferSize - bufferLength)
+            delaySample = m_delayBufferSize - bufferLength;
+
+#ifdef RING_BUFFER
+        // get the index to read in the circular buffer
+        int delayRingBuffeReadIndex = mDelayRingBuffeWriteIndex - delaySample - bufferLength;
+        int delayRingBuffeReadIndex_prevFrame = mDelayRingBuffeWriteIndex - delaySample_prevFrame - bufferLength;
+
+        // apply "modulo" to the read index
+        if (delayRingBuffeReadIndex < 0)
+            delayRingBuffeReadIndex = m_delayBufferSize + delayRingBuffeReadIndex;
+
+        // apply "modulo" to the read index
+        if (delayRingBuffeReadIndex_prevFrame < 0)
+            delayRingBuffeReadIndex_prevFrame = m_delayBufferSize + delayRingBuffeReadIndex_prevFrame;
+#endif
 
         for (int i = 0; i < bufferLength; i++)
         {
@@ -332,12 +379,36 @@ namespace Spatializer
                 // if the source is "Non Directive", we use directly the first channel of the input and apply smooth volume and delay
                 else {
                     // Crossfade value from current and previous parameter
+                    
+#ifdef RING_BUFFER
+                    
+                    sample_prevFrame = m_pWfsVolume_prevFrame[virtualMicIdx] * m_pDelayRingBuffer[delayRingBuffeReadIndex_prevFrame];
+                    sample_currFrame = m_pWfsVolume[virtualMicIdx] * m_pDelayRingBuffer[delayRingBuffeReadIndex];
+                    delayRingBuffeReadIndex_prevFrame++;
+                    delayRingBuffeReadIndex++;
+
+                    
+                    if (delayRingBuffeReadIndex == m_delayBufferSize)
+                        delayRingBuffeReadIndex = 0;
+                    if (delayRingBuffeReadIndex_prevFrame == m_delayBufferSize)
+                        delayRingBuffeReadIndex_prevFrame = 0;
+
+#else
                     sample_prevFrame = m_pWfsVolume_prevFrame[virtualMicIdx] * m_pDelayBuffer[idx_prevFrame];
                     sample_currFrame = m_pWfsVolume[virtualMicIdx] * m_pDelayBuffer[idx];
+#endif
+                    /*
+                    std::cout << "prev :" << delayRingBuffeReadIndex << " \n";
+                    std::cout << "cur :" << delayRingBuffeReadIndex_prevFrame << " \n";
+                  */
+
                 }
 
                 // Apply cross-fading between sample with previous and current parameter to avoid clicks (smooth parameter changes)
                 m_pTmpMonoBuffer_in[i] = fadeOut * sample_prevFrame + (1 - fadeOut) * sample_currFrame;
+               
+               
+               
             }
             else {
                 m_pTmpMonoBuffer_in[i] = 0;
@@ -402,7 +473,12 @@ namespace Spatializer
         }
         else if (m_isDirective == false) {
             forceMonoInput(inBuffer, bufferLength, offset, inChannelCount);
+            
+#ifdef RING_BUFFER
+            updateDelayRingBuffer(bufferLength);
+#else
             updateDelayBuffer(bufferLength);
+#endif
         }     
 
 
