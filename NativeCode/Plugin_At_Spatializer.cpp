@@ -39,6 +39,11 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setMinDistance(int id, flo
 {
     At_SpatializationEngine::getInstance().WFS_setMinDistance(id, minDistance);
 }
+// ----- Modif Rougerie 29/06/2022 -----
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setSpeakerMask(int id, float* activationSpeakerVolume, int outChannelCount)
+{
+    At_SpatializationEngine::getInstance().WFS_setSpeakerMask(id, activationSpeakerVolume, outChannelCount);
+}// ------------------------------------
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount)
 {
     At_SpatializationEngine::getInstance().WFS_process(id, inBuffer, outBuffer, bufferLength, offset, inChannelCount, outChannelCount);

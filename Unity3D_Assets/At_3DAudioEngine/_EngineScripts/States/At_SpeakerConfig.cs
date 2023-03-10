@@ -6,8 +6,8 @@ using UnityEditor;
 public class At_SpeakerConfig : MonoBehaviour//: Editor
 {
 
-    static float virtualMicScale = 50f;
-    static float virtualSpeakerScale = 3f;
+    static float virtualMicScale = 20f;
+    static float virtualSpeakerScale = 1.2f;
     static string virtualMicModel = "At_3DAudioEngine/Prefabs/simpleArrowModel";
     static string virtualSpeakerModel = "At_3DAudioEngine/Prefabs/simpleSpeakerModel";
     static string ripplePrefab = "At_3DAudioEngine/Prefabs/RippleParticle/RipplePrefab";

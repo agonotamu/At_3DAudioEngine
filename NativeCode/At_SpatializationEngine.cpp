@@ -188,6 +188,13 @@ namespace Spatializer
 		}
 		*/
 	}
+	// Modif Rougerie 29/06/2022
+	void At_SpatializationEngine::WFS_setSpeakerMask(int id, float* activationSpeakerVolume, int outChannelCount) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->setSpeakerMask(activationSpeakerVolume, outChannelCount);
+		}
+	}
 
 
 	void At_SpatializationEngine::WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount) {

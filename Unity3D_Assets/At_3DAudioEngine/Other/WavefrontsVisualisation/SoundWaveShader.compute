@@ -1,0 +1,56 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#define maxChannelCount 48
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+float _displayPlaneSizeX, _displayPlaneSizeZ;
+float _displayPlanePositionX, _displayPlanePositionZ;
+float _waveFrequency;
+float _outputChannelCount = 0;
+uniform float4 _wavePositions[maxChannelCount]; // we are obliged to pass float4 value if we want an array (no float2 array passing).
+uniform float4 _wfsAmps[maxChannelCount];
+uniform float4 _wfsDelays[maxChannelCount];
+
+
+float getValueForSinWaveAtPosition(float2 displayPosition, float2 wavePosition, float amp, float delay) {
+
+    displayPosition -= wavePosition;
+    float r = sqrt(displayPosition.x * displayPosition.x + displayPosition.y * displayPosition.y);
+    //return amp * (1/(r*r)) * sin(2.0f * 3.14159265f * r * _waveFrequency / 340.0f);
+    return amp * (1 / (r * r)) * sin(2.0f * 3.14159265f * _waveFrequency * (r / 340.0f + delay/1000.0f));
+}
+
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+
+    // Get the dimensions of the RenderTexture
+    uint width, height;
+    Result.GetDimensions(width, height);
+    
+    float2 xzu = (id.xy * float2(-1, -1) + float2(width / 2.0f, height / 2.0f)) 
+        * float2(_displayPlaneSizeX, _displayPlaneSizeZ) / float2(width, height)
+        + float2(_displayPlanePositionX, _displayPlanePositionZ);
+
+    // Draw sin wave :
+    float value = 0;
+    for (int i = 0; i< _outputChannelCount; i++)
+        value += getValueForSinWaveAtPosition(xzu, float2(_wavePositions[i].x, _wavePositions[i].z), _wfsAmps[i].x, _wfsDelays[i].x);
+    
+    
+    if (value > 0) {
+        Result[id.xy] = float4(0, 0, value, 1);
+    }
+    else {
+        Result[id.xy] = float4(abs(value), 0, 0, 1);
+    }
+    
+
+    //Result[id.xy] = _wfsDelays[15].x * float4(1, 0, 0, 1);
+
+    
+}

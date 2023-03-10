@@ -131,8 +131,15 @@ public class At_Player : MonoBehaviour
     public At_MasterOutput masterOutput;
 
     public string guid = "";
-    
-   
+
+    /// floats set volume for each speakers
+    public float[] activationSpeakerVolume; //Modif Rougerie 29/06/2022
+
+
+    public float[] delayArray;
+    public float[] volumeArray;
+
+    string objectName;
 
     void Reset()
     {        
@@ -219,9 +226,18 @@ public class At_Player : MonoBehaviour
 
     public void Awake() {
 
+        objectName = gameObject.name;
+
+        delayArray = new float[outputChannelCount];
+        volumeArray = new float[outputChannelCount];
+
         masterOutput = GameObject.FindObjectOfType<At_MasterOutput>();
+        /* MODIF GONOT - DEBUG PLAYER LIST
+         *  At_Player do not need to add itself to the MasterOutput list.
         if (!isDynamicInstance)
             masterOutput.addPlayerToList(this);
+        */
+
         if (!isUnityAudioSource)
         {
             initAudioFile(false);
@@ -233,7 +249,12 @@ public class At_Player : MonoBehaviour
             isAskedToPlay = true;
             numChannelsInAudioFile = 1;
         }
-            
+        activationSpeakerVolume = new float[outputChannelCount];
+        for(int i=0; i<outputChannelCount; i++)
+        {
+            activationSpeakerVolume[i] = 1;
+        }
+
     }
 
     // for use from the outside without any instantiated At_Player
@@ -403,6 +424,98 @@ public class At_Player : MonoBehaviour
         */
     public void UpdateSpatialParameters()
     {
+
+        // --------------------- Modif Rougerie 29/06/2022 ---------------------------------------
+
+        getDelay(spatID, delayArray, outputChannelCount);
+        getVolume(spatID, volumeArray, outputChannelCount);
+        
+        //Browse all output channels 
+        for (int channelIndex = 0; channelIndex < outputChannelCount; channelIndex++)
+        {
+            At_VirtualSpeaker vs = masterOutput.speakerWithIndex(channelIndex);
+
+            //masterOutput.outputChannelCount == 15
+            // modif Antoine 03/03/23 - remove Sandie Modif for Sphere
+            if (vs != null)
+            //if (vs != null && activationSpeakerVolume.Length >= 1 && (masterOutput.outputConfigDimension == 3 || masterOutput.outputConfigDimension == 2))            
+            //if (vs != null && activationSpeakerVolume.Length >= 1 && (masterOutput.outputConfigDimension == 3 || masterOutput.outputChannelCount == 8))
+            {
+                //If the layout is U-shaped, we get the first speaker, the last, and the first of the middle.
+                int center = Mathf.FloorToInt(outputChannelCount / 3f) + 1;
+                At_VirtualSpeaker vsFirst = masterOutput.speakerWithIndex(0);
+                At_VirtualSpeaker vsCenter = masterOutput.speakerWithIndex(center);
+                At_VirtualSpeaker vsLast = masterOutput.speakerWithIndex(outputChannelCount - 1);
+
+                // modif Antoine 03/03/23 - remove Sandie Modif for Sphere
+                //Calculate distance between center of the sphere ans position of the audio source
+                //float radiusSphereToAudioSource = (transform.position - masterOutput.gameObject.transform.position).magnitude;
+
+                // Deactivate speaker in the opposite direction
+                Vector3 primaryToSecondaryVector = vs.transform.position - transform.position;
+                float isSourceAndVirtualMicAcuteAngle = Vector3.Dot(vs.transform.forward, primaryToSecondaryVector);
+
+                if (isSourceAndVirtualMicAcuteAngle < 0)
+                {
+                    activationSpeakerVolume[channelIndex] = 0;
+                    vs.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;  //Activate to debug : set the color of each speaker (white : activate/red : desactivate)
+                }
+                else
+                {
+                    activationSpeakerVolume[channelIndex] = 1;
+                    vs.gameObject.GetComponent<MeshRenderer>().material.color = Color.white;
+                }
+
+                // Desactive loudspeakers who are behind the point of propagation
+                bool insideUshaped = transform.position.x > vsFirst.transform.position.x && transform.position.x < vsLast.transform.position.x && transform.position.z < vsCenter.transform.position.z;
+                // modif Antoine 03/03/23 - remove Sandie Modif for Sphere
+                //bool insideSphere = radiusSphereToAudioSource < masterOutput.virtualMicRigSize / 2;
+
+                int isInsideCount = 0;
+                for (int i = 0; i< masterOutput.virtualSpeakers.Length; i++)
+                {
+                    float dot = Vector3.Dot(masterOutput.virtualSpeakers[i].gameObject.transform.forward,
+                        gameObject.transform.position - masterOutput.virtualSpeakers[i].gameObject.transform.position);
+                    if (dot >=0)
+                    {
+                        isInsideCount++;
+                    }                    
+                }
+
+                bool isInside = false;
+                if (isInsideCount == masterOutput.virtualSpeakers.Length)
+                {
+                    isInside = true;
+                }
+
+                // modif Antoine 03/03/23 - remove Sandie Modif for Sphere
+                if (isInside)
+                //if ((masterOutput.outputConfigDimension == 3 && insideSphere) || (masterOutput.outputConfigDimension == 2 && insideUshaped))
+                //if ((masterOutput.outputConfigDimension == 3 && insideSphere) || (masterOutput.outputChannelCount == 8 && insideUshaped))
+                {
+                    timeReversal = 1;
+                    float angle = Vector3.Angle(primaryToSecondaryVector, transform.forward) * Mathf.Deg2Rad;
+
+                    if (angle <= Mathf.PI / 2)
+                    {
+                        activationSpeakerVolume[channelIndex] = 0;
+                        vs.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
+                    }
+                    else
+                    {
+                        activationSpeakerVolume[channelIndex] = 1;
+                        vs.gameObject.GetComponent<MeshRenderer>().material.color = Color.white;
+                    }
+                }
+                else
+                {
+                    //If the audio source is behind the speakers
+                    timeReversal = 0;
+                }
+            }
+        }
+        // ---------------------------------------------------------------------------------------
+
         // Get the position of the GameObject
         float[] position = new float[3];
         float[] rotation = new float[3]; //modif mathias 06-14-2021
@@ -432,7 +545,10 @@ public class At_Player : MonoBehaviour
         AT_SPAT_WFS_setSourceOmniBalance(spatID, omniBalance);
         /// set the balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS (C++ dll call)
         AT_SPAT_WFS_setTimeReversal(spatID, timeReversal);
+        /// set the volume of each speakers depending on the position (C++ dll call)
+        AT_SPAT_WFS_setSpeakerMask(spatID, activationSpeakerVolume, outputChannelCount); // Modif Rougerie 29/06/2022
     }
+
     private void Update()
     {
         /*
@@ -637,6 +753,13 @@ public class At_Player : MonoBehaviour
      */
     private void OnAudioFilterRead(float[] data, int channels)
     {
+        /*
+        if (objectName == "sabreHum")
+        {
+            int a = 1;
+        }
+        */
+
         if (isUnityAudioSource && isInputBufferInitialized == true)
         {
             // asynchrone copy of the unity buffer (data) into At_Player buffer (inputFileBuffer)
@@ -669,7 +792,7 @@ public class At_Player : MonoBehaviour
     {        
         if (isAskedToPlay)
         {
-            if (rawAudioData != null || isUnityAudioSource)
+            if (rawAudioData != null || (isUnityAudioSource && isInputBufferInitialized == true))
             {
                 // if the source is 3D :
                 // ----------------------
@@ -744,7 +867,7 @@ public class At_Player : MonoBehaviour
                 // get a buffer for one channel 
                 for (int sampleIndex = 0; sampleIndex < bufferSize; sampleIndex++)
                 {
-                    if (playerOutputBuffer != null)                    
+                    if (playerOutputBuffer != null && channelIndex < activationSpeakerVolume.Length)                    
                     {
                         mixerInputBuffer[sampleIndex] = playerOutputBuffer[outputChannelCount * sampleIndex + channelIndex];
                     }
@@ -846,12 +969,30 @@ public class At_Player : MonoBehaviour
 
         }
     }
+
+    public unsafe void getDelay(int spatID, float[] delay, int arraySize)
+    {
+        fixed (float* delayPtr = delay)
+        {
+            AT_SPAT_WFS_getDelay(spatID, (IntPtr)delayPtr, arraySize);
+        }
+    }
+
+    public unsafe void getVolume(int spatID, float[] volume, int arraySize)
+    {
+
+        fixed (float* volumePtr = volume)
+        {
+            AT_SPAT_WFS_getVolume(spatID, (IntPtr)volumePtr, arraySize);
+        }
+    }
+
 #endif
 
     /**
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)
      */
-#region DllImport        
+    #region DllImport        
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_setSourcePosition(int id, float[] position, float[] rotation, float[] forward); //modif mathias 06-14-2021
     [DllImport("AudioPlugin_AtSpatializer")]
@@ -863,9 +1004,15 @@ public class At_Player : MonoBehaviour
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_setMinDistance(int id, float minDistance);
     [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern void AT_SPAT_WFS_setSpeakerMask(int id, float[] activationSpeakerVolume, int outChannelCount); // Modif Rougerie 29/06/2022
+    [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_process(int id, float[] inBuffer, float[] outBuffer, int bufferLength, int offset,  int inChannelCount, int outChannelCount);
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_cleanDelayBuffer(int id);
-#endregion
+    [DllImport("AudioPlugin_AtSpatializer", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void AT_SPAT_WFS_getDelay(int id, IntPtr delay, int arraySize);
+    [DllImport("AudioPlugin_AtSpatializer", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void AT_SPAT_WFS_getVolume(int id, IntPtr volume, int arraySize);
+    #endregion
 
 }

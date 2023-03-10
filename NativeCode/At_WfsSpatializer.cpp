@@ -382,8 +382,11 @@ namespace Spatializer
                     
 #ifdef RING_BUFFER
                     
-                    sample_prevFrame = m_pWfsVolume_prevFrame[virtualMicIdx] * m_pDelayRingBuffer[delayRingBuffeReadIndex_prevFrame];
-                    sample_currFrame = m_pWfsVolume[virtualMicIdx] * m_pDelayRingBuffer[delayRingBuffeReadIndex];
+                    // Modif Rougerie 29/06/2022
+                    sample_prevFrame = m_pWfsSpeakerMask_prevFrame[virtualMicIdx] * m_pWfsVolume_prevFrame[virtualMicIdx] * m_pDelayRingBuffer[delayRingBuffeReadIndex_prevFrame];
+                    sample_currFrame = m_pWfsSpeakerMask[virtualMicIdx] * m_pWfsVolume[virtualMicIdx] * m_pDelayRingBuffer[delayRingBuffeReadIndex];
+                    
+
                     delayRingBuffeReadIndex_prevFrame++;
                     delayRingBuffeReadIndex++;
 
@@ -420,7 +423,10 @@ namespace Spatializer
     int At_WfsSpatializer::WFS_getDelay(float* delay, int arraySize) {
         if (arraySize <= MAX_OUTPUT_CHANNEL) {
             for (int i = 0; i < arraySize; i++) {  
-                delay[i] = m_pProcess_delay[i];
+                
+                //delay[i] = m_pProcess_delay[i];
+                // should be :
+                delay[i] = m_pProcess_delay[i] * m_pWfsSpeakerMask[i];
             }
         }
         return 0;
@@ -429,7 +435,9 @@ namespace Spatializer
     int At_WfsSpatializer::WFS_getVolume(float* volume, int arraySize) {
         if (arraySize <= MAX_OUTPUT_CHANNEL) {
             for (int i = 0; i < arraySize; i++) {
-                volume[i] = m_pWfsVolume[i];
+                //volume[i] = m_pWfsVolume[i];
+                // should be : 
+                volume[i] = m_pWfsVolume[i]* m_pWfsSpeakerMask[i];
             }
         }
         return 0;
@@ -499,6 +507,8 @@ namespace Spatializer
             // save spatialization parameter for the next frame
             m_pWfsVolume_prevFrame[virtualMicIndex] = m_pWfsVolume[virtualMicIndex];
             m_pWfsDelay_prevFrame[virtualMicIndex] = m_pWfsDelay[virtualMicIndex];
+            m_pWfsSpeakerMask_prevFrame[virtualMicIndex] = m_pWfsSpeakerMask[virtualMicIndex]; // Modif Rougerie 29/06/2022
+
         }
         m_minDelay_prevFrame = m_minDelay;
         m_maxDelay_prevFrame = m_maxDelay;
@@ -551,6 +561,16 @@ namespace Spatializer
     int At_WfsSpatializer::setMinDistance(float minDistance) {
 
         m_minDistance = minDistance;
+        return 0;
+    }
+
+    // Modif Rougerie 29/06/2022
+    int At_WfsSpatializer::setSpeakerMask(float* activationSpeakerVolume, int outChannelCount)
+    {
+        for (int i = 0; i < outChannelCount; i++)
+        {
+            m_pWfsSpeakerMask[i] = activationSpeakerVolume[i];
+        }
         return 0;
     }
 

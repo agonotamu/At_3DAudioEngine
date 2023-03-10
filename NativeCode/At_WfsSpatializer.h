@@ -59,6 +59,7 @@ namespace Spatializer
         int setSourceOmniBalance(float omniBalance);
         int setTimeReversal(float timeReversal);
         int setMinDistance(float minDistance);
+        int setSpeakerMask(float* activationSpeakerVolume, int outChannelCount); // Modif Rougerie 29/06/2022
 
         int setVirtualMicPosition(int speakerCount, float virtualMicMinDistance, float* positions, float* rotations, float* forwards);
         int setListenerPosition(float* position, float* rotation);
@@ -94,6 +95,8 @@ namespace Spatializer
         
         void updateMixedDirectiveChannel(int virtualMicIdx, int inChannelCount);
 
+
+        // This should be also dynamically allocated !!!
         float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];       
         
         // This is now dynamically allocated
@@ -130,11 +133,13 @@ namespace Spatializer
 
         float m_pWfsVolume[MAX_OUTPUT_CHANNEL];
         float m_pWfsDelay[MAX_OUTPUT_CHANNEL];
+        float m_pWfsSpeakerMask[MAX_OUTPUT_CHANNEL]; // Modif Rougerie 29/06/2022
         
         float m_pProcess_delay[MAX_OUTPUT_CHANNEL];        
 
         float m_pWfsVolume_prevFrame[MAX_OUTPUT_CHANNEL];
         float m_pWfsDelay_prevFrame[MAX_OUTPUT_CHANNEL];
+        float m_pWfsSpeakerMask_prevFrame[MAX_OUTPUT_CHANNEL]; // Modif Rougerie 29/06/2022
 
         // common variables for each instance 
         float m_sampleRate = 48000.0f;

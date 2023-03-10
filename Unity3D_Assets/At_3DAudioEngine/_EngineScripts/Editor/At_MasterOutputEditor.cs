@@ -35,7 +35,7 @@ public class At_MasterOutputEditor : Editor
 
     At_OutputState outputState = new At_OutputState();
     At_MasterOutput masterOutput;
-    string[] outputConfigSelection = {"select", "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "1D [48]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]", "3D [42]"};
+    string[] outputConfigSelection = {"select", "1D [2]", "1D [4]", "1D [8]", "1D [10]", "1D [12]", "1D [14]", "1D [16]", "1D [24]", "1D [26]", "1D [48]", "2D [4]", "2D [6]", "2D [8]", "2D [10]", "2D [12]", "2D [24]", "3D [42]"};
     int selectSpeakerConfig = 0;
     int outputConfigDimension = 0;
     public GameObject[] virtualMic;

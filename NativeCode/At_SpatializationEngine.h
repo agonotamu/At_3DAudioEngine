@@ -7,6 +7,7 @@
 using namespace std;
 
 //#define DEBUGLOG
+// 
 //#define RING_BUFFER
 //#define DIRECTIVE_PLAYER
 
@@ -44,6 +45,7 @@ namespace Spatializer
 		void WFS_setSourceOmniBalance(int id, float omniBalance);
 		void WFS_setTimeReversal(int id, float timeReversal);
 		void WFS_setMinDistance(int id, float minDistance);
+		void WFS_setSpeakerMask(int id, float* activationSpeakerVolume, int outChannelCount); // Modif Rougerie 29/06/2022
 		
 
 		void WFS_process(int id, float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannelCount, int outChannelCount);

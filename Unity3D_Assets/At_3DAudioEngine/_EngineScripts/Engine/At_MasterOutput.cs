@@ -49,6 +49,7 @@ public class At_MasterOutput : MonoBehaviour
     public List<At_Player> playerList;
     /// Array of references to the instances of At_VirtualMic classes
     public At_VirtualMic[] virtualMics;
+    public At_VirtualSpeaker[] virtualSpeakers;
 
     /// List of references to the instances of At_Player classes
     List<int> spatIDToDestroy;
@@ -60,7 +61,7 @@ public class At_MasterOutput : MonoBehaviour
     // "persistant" data, saved in the json file - copy/saved of the At_OutputState class
     // ----------------------------------------------------------------
     /// string given the name of the audio device
-    public string audioDeviceName;
+    public string audioDeviceName= "Voicemeeter Virtual ASIO";
     /// number of channel used for the output bus
     public int outputChannelCount;
     /// index of the selected speaker configuration in the popup menu of the At_MasterOutput Component GUI
@@ -99,6 +100,13 @@ public class At_MasterOutput : MonoBehaviour
     void Awake()
     {
 
+        At_Player[] players = FindObjectsOfType<At_Player>();
+        foreach(At_Player p in players)
+        {
+            addPlayerToList(p);
+        }
+
+
         spatIDToDestroy = new List<int>();
         playerObjectToDestroy = new List<At_Player>();
                 
@@ -114,13 +122,17 @@ public class At_MasterOutput : MonoBehaviour
         if (isStartingEngineOnAwake) {
             StartEngine();
         }
-        At_VirtualMic[] virtualMics = GameObject.FindObjectsOfType<At_VirtualMic>();
+        virtualMics = GameObject.FindObjectsOfType<At_VirtualMic>();
+        virtualSpeakers = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
         foreach (At_VirtualMic vm in virtualMics)
         {
             vm.m_maxDistanceForDelay = outputState.maxDistanceForDelay;
         }
-        
-    }
+
+       
+    
+
+}
 
     /************************************************************************
      *              INITIALIZATION METHODS
@@ -214,7 +226,7 @@ public class At_MasterOutput : MonoBehaviour
     {
         if (meters != null)
         {
-            virtualMics = GameObject.FindObjectsOfType<At_VirtualMic>();
+            
             float[] positions = new float[outputChannelCount * 3];
             float[] rotations = new float[outputChannelCount * 3];
             float[] forwards = new float[outputChannelCount * 3];
@@ -255,6 +267,8 @@ public class At_MasterOutput : MonoBehaviour
     private void InitSpatializerEngine()
     {
         AT_SPAT_setSampleRate(samplingRate);
+        /* MODIF GONOT - DEBUG PLAYER LIST
+         *  The Spatializer has already been created when the At_Player has been added to the list previously
         for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
         {
             int id = -1;            
@@ -269,6 +283,7 @@ public class At_MasterOutput : MonoBehaviour
             }
 
         }
+        */
         UpdateVirtualMicPosition();
 
         mixer.setPlayerList(playerList);
@@ -306,13 +321,14 @@ public class At_MasterOutput : MonoBehaviour
 
             if (mixer == null) mixer = GetComponent<At_Mixer>();
             mixer.setPlayerList(playerList);
+            /*
             if (playerList[playerList.Count - 1].is3D)
             {
                 playerList[playerList.Count - 1].UpdateSpatialParameters();
             }
 
             UpdateVirtualMicPosition();
-
+            */
         }
 
     }
@@ -609,6 +625,8 @@ public class At_MasterOutput : MonoBehaviour
         }
         return null;
     }
+
+
     At_VirtualMic micWithIndex(At_VirtualMic[] vms, int index)
     {
 
@@ -626,6 +644,38 @@ public class At_MasterOutput : MonoBehaviour
     }
 #endif
 
+    public At_VirtualSpeaker speakerWithIndex(int index)
+    {
+
+        if (virtualSpeakers != null)
+        {
+            foreach (At_VirtualSpeaker vs in virtualSpeakers)
+            {
+                if (vs.id == index)
+                {
+                    return vs;
+                }
+            }
+        }
+        return null;
+
+    }
+    public At_VirtualMic micWithIndex(int index)
+    {
+
+        if (virtualMics != null)
+        {
+            foreach (At_VirtualMic vm in virtualMics)
+            {
+                if (vm.id == index)
+                {
+                    return vm;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)
      */
@@ -642,6 +692,7 @@ public class At_MasterOutput : MonoBehaviour
     private static extern void AT_SPAT_WFS_destroyAllSpatializer();
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_setSampleRate(float sampleRate);
+
     #endregion
 
 }
