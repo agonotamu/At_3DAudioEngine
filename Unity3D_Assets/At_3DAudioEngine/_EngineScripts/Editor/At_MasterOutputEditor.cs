@@ -59,7 +59,7 @@ public class At_MasterOutputEditor : Editor
     private Texture meterOn;
     private Texture meterOff;
     public float[] meters;
-
+    public float[] subwooferMeters;
     bool isStartingEngineOnAwake;
 
     bool shouldSave = false;
@@ -107,6 +107,12 @@ public class At_MasterOutputEditor : Editor
             samplingRate = 44100;
             outputState.maxDistanceForDelay = 10.0f;            
             outputConfigDimension = 1;
+
+            // Modif Gonot - 14/03/2023 - Adding Bass Managment
+            outputState.subwooferOutputChannelCount = 1;
+            outputState.isBassManaged = false;
+            outputState.crossoverFilterFrequency = 100;
+           outputState.subwooferGain = 0f;
         }
         else
         {
@@ -122,7 +128,15 @@ public class At_MasterOutputEditor : Editor
             samplingRate = (selectedSamplingRate == 0 ? 44100 : 48000);
             isStartingEngineOnAwake = outputState.isStartingEngineOnAwake;
             masterOutput.virtualMicRigSize = outputState.virtualMicRigSize;
-
+            // Modif Gonot - 14/03/2023 - Adding Bass Managment
+            
+            masterOutput.subwooferOutputChannelCount = outputState.subwooferOutputChannelCount;
+            masterOutput.isBassManaged = outputState.isBassManaged;
+            masterOutput.crossoverFilterFrequency = outputState.crossoverFilterFrequency;
+            masterOutput.indexInputSubwoofer = outputState.indexInputSubwoofer;
+            masterOutput.subwooferGain = outputState.subwooferGain;
+            
+            subwooferMeters = new float[outputState.subwooferOutputChannelCount];
         }
         At_Player[] players = GameObject.FindObjectsOfType<At_Player>();
        
@@ -211,6 +225,7 @@ public class At_MasterOutputEditor : Editor
 
             }
         }
+
         HorizontalLine(Color.grey);
         //-----------------------------------------------------------------
         // MASTER OUTPUT BUS CONFIGURATION
@@ -278,7 +293,7 @@ public class At_MasterOutputEditor : Editor
             }
             float baseX = 0;
             if (meters != null)
-                baseX = DisplayMetering(meters, masterOutput.running);
+                baseX = DisplayMetering(meters, masterOutput.running, outputState.outputChannelCount);
             float sliederHeight = 84;
 
 
@@ -324,10 +339,7 @@ public class At_MasterOutputEditor : Editor
 
         HorizontalLine(Color.grey);
         
-        using (new GUILayout.HorizontalScope())
-        {
-            GUILayout.Label("");
-        }
+        
         using (new GUILayout.HorizontalScope())
         {
 
@@ -401,23 +413,205 @@ public class At_MasterOutputEditor : Editor
         GUILayout.TextField((outputState.maxDistanceForDelay).ToString("00.0"));
 
         HorizontalLine(Color.grey);
-
         //-----------------------------------------------------------------
-        // CLEAN BUTON
+        // BASS MANAGMENT
         //----------------------------------------------------------------
         using (new GUILayout.HorizontalScope())
         {
-            GUILayout.Label("                 ");
-            if (cleanButtonContent == null)
-                cleanButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/CleanStates_icn_transp")); // file name in the resources folder without the (.png) extension
-          
-            if (GUILayout.Button(cleanButtonContent, GUILayout.Width(120), GUILayout.Height(30)))
+            bool b = GUILayout.Toggle(outputState.isBassManaged, "Bass Managed");
+            if (b != outputState.isBassManaged)
             {
-                At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
+                shouldSave = true;
+                outputState.isBassManaged = b;
+
             }
-          
         }
 
+        if (outputState.isBassManaged == true)
+        {
+
+            //-----------------------------------------------------------------
+            // SUB WOOFER METERING AND GAIN
+            //----------------------------------------------------------------
+
+            using (new GUILayout.HorizontalScope())
+            {
+                if (masterOutput.running && masterOutput.subwooferMeters != null)
+                {
+                    subwooferMeters = masterOutput.subwooferMeters;
+                }
+                float baseX = 0;
+                if (subwooferMeters != null)
+                    baseX = DisplayMetering(subwooferMeters, masterOutput.running, outputState.subwooferOutputChannelCount);
+                float sliederHeight = 84;
+
+
+                float g = GUI.VerticalSlider(new Rect(baseX - 20, 320, 80, sliederHeight), outputState.subwooferGain, 10f, -80f);
+                if (g != outputState.subwooferGain)
+                {
+                    outputState.subwooferGain = g;
+                    shouldSave = true;
+                }
+
+                GUI.Label(new Rect(baseX - 30, 370, 80, sliederHeight), ((int)outputState.subwooferGain).ToString() + " dB");
+
+
+            }
+            GUILayout.Label("");
+
+            string[] subChannelRouting = new string[outputState.outputChannelCount];
+            for (int i = 0; i < outputState.outputChannelCount; i++)
+            {
+                subChannelRouting[i] = i.ToString();
+            }
+
+            int count;
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label("Num Subwoofer Channels ");
+                count = (int)CUSTOM_GUILayout.FloatField((float)outputState.subwooferOutputChannelCount);
+
+                if (count != (int)outputState.subwooferOutputChannelCount)
+                {
+                    outputState.subwooferOutputChannelCount = count;
+                    masterOutput.subwooferOutputChannelCount = count;
+
+                    outputState.indexInputSubwoofer = new int[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        outputState.indexInputSubwoofer[i] = i;
+                    }
+                    masterOutput.indexInputSubwoofer = outputState.indexInputSubwoofer;
+                    shouldSave = true;
+                }
+            }
+
+            using (new GUILayout.HorizontalScope())
+            {
+
+                GUILayout.Label("Crossover Filter Frequency");
+
+                float freq = GUILayout.HorizontalSlider(outputState.crossoverFilterFrequency, 50, 200);
+
+                if (freq != outputState.crossoverFilterFrequency)
+                {
+                    outputState.crossoverFilterFrequency = freq;
+                    masterOutput.crossoverFilterFrequency = freq;
+                    shouldSave = true;
+                }
+                GUILayout.TextField((outputState.crossoverFilterFrequency).ToString("00.0"));
+
+            }
+
+            using (new GUILayout.VerticalScope())
+            {
+                GUILayout.Label(" ");
+                GUILayout.Label("Subwoofer Input Routing");
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Label("-Sub Ch. in-");
+                    }
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Label("-Master Ch. out-");
+                    }
+
+                }
+
+                for (int c = 0; c < outputState.subwooferOutputChannelCount; c++)
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+
+                        GUILayout.Label("channel " + c);
+
+                        int select = EditorGUILayout.Popup(outputState.indexInputSubwoofer[c], subChannelRouting);
+
+                        if (select != outputState.indexInputSubwoofer[c])
+                        {
+                            outputState.indexInputSubwoofer[c] = select;
+                            shouldSave = true;
+                        }
+
+                    }
+                }
+            }
+            /*
+            using (new GUILayout.HorizontalScope())
+            {
+
+                if (count != (int)outputState.subwooferOutputChannelCount)
+                {
+                    outputState.subwooferOutputChannelCount = count;
+                    masterOutput.subwooferOutputChannelCount = count;
+
+                    outputState.indexInputSubwoofer = new int[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        outputState.indexInputSubwoofer[i] = i;
+                    }
+                    masterOutput.indexInputSubwoofer = outputState.indexInputSubwoofer;
+                    shouldSave = true;
+
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label("-Output-");
+                        }
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label("-Input-");
+                        }
+
+                    }
+                    for (int c = 0; c < outputState.subwooferOutputChannelCount; c++)
+                    {
+                        using (new GUILayout.HorizontalScope())
+                        {
+
+                            //GUILayout.Label("channel " + c);
+
+                            int select = EditorGUILayout.Popup(outputState.indexInputSubwoofer[c], subChannelRouting);
+
+                            if (select != outputState.indexInputSubwoofer[c])
+                            {
+                                outputState.indexInputSubwoofer[c] = select;
+                                shouldSave = true;
+                            }
+
+
+
+                        }
+                    }
+
+                }
+            }            
+            */
+            HorizontalLine(Color.grey);
+
+            //-----------------------------------------------------------------
+            // CLEAN BUTON
+            //----------------------------------------------------------------
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label("                 ");
+                if (cleanButtonContent == null)
+                    cleanButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/CleanStates_icn_transp")); // file name in the resources folder without the (.png) extension
+
+                if (GUILayout.Button(cleanButtonContent, GUILayout.Width(120), GUILayout.Height(30)))
+                {
+                    At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
+                }
+
+            }
+
+
+
+        }
 
         masterOutput.audioDeviceName = outputState.audioDeviceName;
         masterOutput.outputChannelCount = outputState.outputChannelCount;
@@ -427,6 +621,12 @@ public class At_MasterOutputEditor : Editor
         masterOutput.outputConfigDimension = outputState.outputConfigDimension;
         masterOutput.virtualMicRigSize = outputState.virtualMicRigSize;
         masterOutput.maxDistanceForDelay = outputState.maxDistanceForDelay;
+
+        masterOutput.subwooferOutputChannelCount = outputState.subwooferOutputChannelCount;
+        masterOutput.isBassManaged = outputState.isBassManaged;
+        masterOutput.crossoverFilterFrequency = outputState.crossoverFilterFrequency;
+        masterOutput.indexInputSubwoofer = outputState.indexInputSubwoofer;
+        masterOutput.subwooferGain = outputState.subwooferGain;
     }
 
     // utility method
@@ -439,7 +639,7 @@ public class At_MasterOutputEditor : Editor
     }
 
     // ------------------------------------- DRAWING UTILITY --------------------------------------------
-    float DisplayMetering(float[] metering, bool isEngineStarted)
+    float DisplayMetering(float[] metering, bool isEngineStarted, int numChannel)
     {
         const int MeterCountMaximum = 48;
         int meterHeight = 86;
@@ -452,7 +652,7 @@ public class At_MasterOutputEditor : Editor
 
         float baseX = fullRect.x + (fullRect.width - (meterWidth * metering.Length)) / 2;
 
-        for (int i = 0; i < outputState.outputChannelCount; i++)
+        for (int i = 0; i < numChannel; i++)
         {
             Rect meterRect = new Rect(baseX + meterWidth * i, fullRect.y, meterWidth, fullRect.height);
 

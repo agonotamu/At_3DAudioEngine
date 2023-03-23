@@ -22,7 +22,13 @@ public class SoundWaveShaderManager : MonoBehaviour
     Vector4[] _wfsAmps_v4;
     Vector4[] _wfsDelays_v4;
 
+    bool isMasterOutputInitialized = false;
+
     private void Awake()
+    {
+        
+    }
+    public void Init()
     {
         setShaderParameter();
 
@@ -41,21 +47,25 @@ public class SoundWaveShaderManager : MonoBehaviour
         for (int i = 0; i < vss.Length; i++)
         {
             speakers[i] = vss[i].gameObject;
-        }   
-    }
+        }
 
+        isMasterOutputInitialized = true;
+    }
 
     private void Update()
     {
-        for (int i = 0; i < master.outputChannelCount; i++)
+        if (isMasterOutputInitialized)
         {
-            _wavePositions[i].x = speakers[i].transform.position.x;
-            _wavePositions[i].z = speakers[i].transform.position.z;
-            _wfsAmps_v4[i].x = player.volumeArray[i]; //_wfsAmps[i];
-            _wfsAmps[i] = _wfsAmps_v4[i].x;
-            //_wfsAmps_v4[i].x = _wfsAmps[i];
-            _wfsDelays_v4[i].x = player.delayArray[i];//_wfsDelays[i];
-            _wfsDelays[i] = _wfsDelays_v4[i].x;
+            for (int i = 0; i < master.outputChannelCount; i++)
+            {
+                _wavePositions[i].x = speakers[i].transform.position.x;
+                _wavePositions[i].z = speakers[i].transform.position.z;
+                _wfsAmps_v4[i].x = player.volumeArray[i]; //_wfsAmps[i];
+                _wfsAmps[i] = _wfsAmps_v4[i].x;
+                //_wfsAmps_v4[i].x = _wfsAmps[i];
+                _wfsDelays_v4[i].x = player.delayArray[i];//_wfsDelays[i];
+                _wfsDelays[i] = _wfsDelays_v4[i].x;
+            }
         }
     }
 
@@ -63,23 +73,27 @@ public class SoundWaveShaderManager : MonoBehaviour
     private void setShaderParameter()
     {
 
-        
-
-        _computeShader.SetFloat("_outputChannelCount", master.outputChannelCount);
-        _computeShader.SetFloat("_displayPlaneSizeX", 10 * transform.localScale.x);
-        _computeShader.SetFloat("_displayPlaneSizeZ", 10 * transform.localScale.z);
-        _computeShader.SetFloat("_displayPlanePositionX", transform.position.x);
-        _computeShader.SetFloat("_displayPlanePositionZ", transform.position.z);
-        _computeShader.SetFloat("_waveFrequency", _waveFrequency);        
-        _computeShader.SetVectorArray("_wavePositions", _wavePositions);
-        _computeShader.SetVectorArray("_wfsAmps", _wfsAmps_v4);
-        _computeShader.SetVectorArray("_wfsDelays", _wfsDelays_v4);
+        if (isMasterOutputInitialized)
+        {
+            _computeShader.SetFloat("_outputChannelCount", master.outputChannelCount);
+            _computeShader.SetFloat("_displayPlaneSizeX", 10 * transform.localScale.x);
+            _computeShader.SetFloat("_displayPlaneSizeZ", 10 * transform.localScale.z);
+            _computeShader.SetFloat("_displayPlanePositionX", transform.position.x);
+            _computeShader.SetFloat("_displayPlanePositionZ", transform.position.z);
+            _computeShader.SetFloat("_waveFrequency", _waveFrequency);
+            _computeShader.SetVectorArray("_wavePositions", _wavePositions);
+            _computeShader.SetVectorArray("_wfsAmps", _wfsAmps_v4);
+            _computeShader.SetVectorArray("_wfsDelays", _wfsDelays_v4);
+        }
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        setShaderParameter();
-        Render(destination);
+        if (isMasterOutputInitialized)
+        {
+            setShaderParameter();
+            Render(destination);
+        }
     }
 
     private void Render(RenderTexture destination)

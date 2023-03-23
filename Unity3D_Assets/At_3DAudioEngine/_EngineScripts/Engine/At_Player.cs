@@ -76,8 +76,10 @@ public class At_Player : MonoBehaviour
     public bool isPlayingOnAwake;
     /// boolean telling if the player is looping the read audio file
     public bool isLooping;
+    /// Deprecated --- Secondary sources are now always Omnidirectionnal
     /// directivity balance of the virtual microphone used for this source : balance [0,1] between omnidirectionnal and cardiod
-    public float omniBalance;
+    public float omniBalance = 0;
+    /// Deprecated --- time reversal is managed by the engine depending of the position of the source (inside or outside)
     /// balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS
     public float timeReversal;
     ///type of distance attenuation in the spatialize : 0 = none, 1 = linera, 2 = square
@@ -140,6 +142,8 @@ public class At_Player : MonoBehaviour
     public float[] volumeArray;
 
     string objectName;
+
+    At_Listener listener;
 
     void Reset()
     {        
@@ -225,6 +229,8 @@ public class At_Player : MonoBehaviour
     }
 
     public void Awake() {
+
+        listener = GameObject.FindObjectOfType<At_Listener>();
 
         objectName = gameObject.name;
 
@@ -455,7 +461,8 @@ public class At_Player : MonoBehaviour
                 Vector3 primaryToSecondaryVector = vs.transform.position - transform.position;
                 float isSourceAndVirtualMicAcuteAngle = Vector3.Dot(vs.transform.forward, primaryToSecondaryVector);
 
-                if (isSourceAndVirtualMicAcuteAngle < 0)
+                /// test is note <0 to avoid mask=0 on part of the speaker array
+                if (isSourceAndVirtualMicAcuteAngle < -0.00001)
                 {
                     activationSpeakerVolume[channelIndex] = 0;
                     vs.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;  //Activate to debug : set the color of each speaker (white : activate/red : desactivate)
@@ -494,6 +501,15 @@ public class At_Player : MonoBehaviour
                 //if ((masterOutput.outputConfigDimension == 3 && insideSphere) || (masterOutput.outputChannelCount == 8 && insideUshaped))
                 {
                     timeReversal = 1;
+
+                    // modif Antoine 13/03/23 - force the source to "look" at the listener
+                    /*
+                    if (listener != null)
+                    {
+                        Vector3 normalizedDirection = (listener.gameObject.transform.position - gameObject.transform.position).normalized;
+                        transform.forward = normalizedDirection;
+                    }
+                    */
                     float angle = Vector3.Angle(primaryToSecondaryVector, transform.forward) * Mathf.Deg2Rad;
 
                     if (angle <= Mathf.PI / 2)
@@ -506,6 +522,8 @@ public class At_Player : MonoBehaviour
                         activationSpeakerVolume[channelIndex] = 1;
                         vs.gameObject.GetComponent<MeshRenderer>().material.color = Color.white;
                     }
+
+                                  
                 }
                 else
                 {

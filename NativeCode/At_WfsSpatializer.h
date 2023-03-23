@@ -79,6 +79,10 @@ namespace Spatializer
     private:
         void setIs3DIsDirective(bool is3D, bool isDirective); //modif mathias 06-17-2021
         void forceMonoInput(float* inBuffer, int bufferLength, int offset, int inchannels);
+        // Modif Gonot - 13/03/2023
+        // Now, we apply the roll-off curve on the input buffer
+        void forceMonoInputAndApplyRolloff(float* inBuffer, int bufferLength, int offset, int inchannels);
+
         void updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount);
 
         

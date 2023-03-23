@@ -26,6 +26,8 @@ using NAudio.Wave.SampleProviders;
 using NAudioAsioPatchBay;
 using System.Runtime.InteropServices;
 using UnityEngine.SceneManagement;
+using UnityEditor;
+
 
 
 public class At_MasterOutput : MonoBehaviour
@@ -35,6 +37,10 @@ public class At_MasterOutput : MonoBehaviour
     const int MAX_BUF_SIZE = 2048;    
     /// temporary mono buffer used for processing
     private float[] tmpMonoBuffer;
+
+    // Modif Gonot - 14/03/2023 - Adding Bass Managment
+    /// temporary mono buffer used for processing subwoofer channels
+    private float[,] subWooferTmpMonoBuffer;
 
     /// main NAudio class used to manage ASIO output
     private AsioOut asioOut;
@@ -64,10 +70,25 @@ public class At_MasterOutput : MonoBehaviour
     public string audioDeviceName= "Voicemeeter Virtual ASIO";
     /// number of channel used for the output bus
     public int outputChannelCount;
+
+    // Modif Gonot - 14/03/2023 - Adding Bass Managment
+    /// number of channel used for the subwoofer output bus
+    public int subwooferOutputChannelCount;
+    public bool isBassManaged;
+    public float crossoverFilterFrequency;
+    public int[] indexInputSubwoofer;
+    BiquadDirectFormI lowPassFilterLinkwitzRiley;
+    BiquadDirectFormI highPassFilterLinkwitzRiley;
+    //------------------------------
+
     /// index of the selected speaker configuration in the popup menu of the At_MasterOutput Component GUI
     public int outputConfigDimension;
     /// master gain for the output bus
     public float gain;
+
+    // Modif Gonot - 14/03/2023 - Adding Bass Managment
+    /// master gain for the output bus
+    public float subwooferGain;
     /// audio sampling rate (44.1kHz by default)
     public int samplingRate;
     /// boolean telling if the ASIO output should run when starting the application
@@ -95,29 +116,49 @@ public class At_MasterOutput : MonoBehaviour
     /// rms value of the signal from each channel, used to display bargraph
     public float[] meters;
 
-   
+    // Modif Gonot - 14/03/2023 - Adding Bass Managment
+    /// rms value of the signal from each channel, used to display bargraph
+    public float[] subwooferMeters;
+
+
     // Start is called before the first frame update
     void Awake()
     {
 
+
         At_Player[] players = FindObjectsOfType<At_Player>();
-        foreach(At_Player p in players)
-        {
-            addPlayerToList(p);
-        }
-
-
+        
         spatIDToDestroy = new List<int>();
         playerObjectToDestroy = new List<At_Player>();
                 
         outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
+        // update internal data with the data parse in the json file :
+
+        audioDeviceName = outputState.audioDeviceName;
+        outputChannelCount = outputState.outputChannelCount;
+        outputConfigDimension = outputState.outputConfigDimension;
+        gain = outputState.gain;
+        samplingRate = outputState.samplingRate;
+        isStartingEngineOnAwake = outputState.isStartingEngineOnAwake;
+        virtualMicRigSize = outputState.virtualMicRigSize;
+        maxDistanceForDelay = outputState.maxDistanceForDelay;
+
+        foreach (At_Player p in players)
+        {
+            addPlayerToList(p);
+            p.outputChannelCount = outputChannelCount;
+        }
+
         samplingRate = outputState.samplingRate;
         // get the reference of the At_Mixer instance
         mixer = gameObject.GetComponent<At_Mixer>();
 
         // initialize the temp buffer
         tmpMonoBuffer = new float[MAX_BUF_SIZE];
-       
+
+        // Modif Gonot - 14/03/2023 - Adding Bass Managment
+        subWooferTmpMonoBuffer = new float[subwooferOutputChannelCount,MAX_BUF_SIZE];
+
         // Initialize the spatializer and the ASIO output if "is starting engine on awake"
         if (isStartingEngineOnAwake) {
             StartEngine();
@@ -129,18 +170,40 @@ public class At_MasterOutput : MonoBehaviour
             vm.m_maxDistanceForDelay = outputState.maxDistanceForDelay;
         }
 
-       
-    
+        SoundWaveShaderManager[] swsms = GameObject.FindObjectsOfType<SoundWaveShaderManager>();
+        foreach (SoundWaveShaderManager swsm in swsms)
+        {
+            swsm.Init();
+        }
 
-}
+        // Modif Gonot - 14/03/2023
+        // Init the the lowpass and high pass cross over filter 
+
+        // Coefficients for the Second Order Low Pass Linkwitz - Riley Filter
+        float wc = 2 * Mathf.PI * crossoverFilterFrequency;
+        float k = wc / Mathf.Tan((wc/2.0f) / (float)samplingRate);
+        float den = wc * wc + k * k + 2 * k * wc;
+        float b0 = wc / den;
+        float b1 = 2*wc*wc/ den;
+        float b2 = b0;
+        float a1 = (2 * wc * wc - 2 * k * k) / den;
+        float a2 = (wc * wc + k * k - 2 * k * wc) / den;
+        lowPassFilterLinkwitzRiley = new BiquadDirectFormI(b0, b1, b2, a1, a2);
+
+        // Coefficients for the Second Order High Pass Linkwitz - Riley Filter
+        b0 = k * k / den;
+        b1 = -2 * k * k / den;
+        b2 = b0;
+        highPassFilterLinkwitzRiley = new BiquadDirectFormI(b0, b1, b2, a1, a2);
+    }
 
     /************************************************************************
      *              INITIALIZATION METHODS
      ************************************************************************/
 
-   /**
-   * @brief Method call OnAwake by the game engine
-   */
+    /**
+    * @brief Method call OnAwake by the game engine
+    */
     public void StartEngine()
     {
         
@@ -153,7 +216,10 @@ public class At_MasterOutput : MonoBehaviour
         InitAsio();
 
         meters = new float[outputChannelCount];
-     
+
+        // Modif Gonot - 14/03/2023 - Adding Bass Managment
+        if (isBassManaged && subwooferOutputChannelCount != 0)
+            subwooferMeters = new float[subwooferOutputChannelCount];
     }
 
     /**
@@ -485,34 +551,76 @@ public class At_MasterOutput : MonoBehaviour
         // if the buffers has been filled by the At_player instances 
         if (playerReady && isEngineStarted)
         {
+            // Modif Gonot - 14/03/2023 - Adding Bass Managment
+            int numChannel;
+            if (isBassManaged) numChannel = outputChannelCount + subwooferOutputChannelCount;
+            else numChannel = outputChannelCount;
 
-            
-            for (int masterChannel = 0; masterChannel < outputChannelCount; masterChannel++)
+            //for (int masterChannel = 0; masterChannel < outputChannelCount; masterChannel++)
+            for (int masterChannel = 0; masterChannel < numChannel; masterChannel++)
             {
-                // ask the At_Mixer instance to sum the samples of a buffer for a single channel. 
-                // The result is copied in the tmpMonoBuffer array
-                mixer.fillMasterChannelInput(ref tmpMonoBuffer, e.SamplesPerBuffer, masterChannel, spatIDToDestroy);
-
-                if (meters != null && meters.Length != 0)
+                // Modif Gonot - 14/03/2023 - Adding Bass Managment
+                if (masterChannel < outputChannelCount)
                 {
-                    meters[masterChannel] = 0;
+                    // ask the At_Mixer instance to sum the samples of a buffer for a single channel. 
+                    // The result is copied in the tmpMonoBuffer array
+                    mixer.fillMasterChannelInput(ref tmpMonoBuffer, e.SamplesPerBuffer, masterChannel, spatIDToDestroy);
+
+                    if (meters != null && meters.Length != 0)
+                    {
+                        meters[masterChannel] = 0;
+
+                        for (int sampleCount = 0; sampleCount < e.SamplesPerBuffer; sampleCount++)
+                        {
+
+                            // Modif Gonot - 14/03/2023 - Adding Bass Managment
+                            if (isBassManaged)
+                            {
+                                float s = tmpMonoBuffer[sampleCount];
+                                int indexInSubInput = ArrayUtility.IndexOf(indexInputSubwoofer, masterChannel);
+                                if (indexInSubInput != -1)
+                                {
+                                    float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
+                                    subWooferTmpMonoBuffer[indexInSubInput, sampleCount] = subwooferVolume * lowPassFilterLinkwitzRiley.filter(s);                                    
+
+                                }
+
+                                tmpMonoBuffer[sampleCount] = highPassFilterLinkwitzRiley.filter(s);
+                                
+                            }
+                            // -------------------------
+
+                            // Apply gain set in the custom inspector editor of the player
+                            float volume = Mathf.Pow(10.0f, gain / 20.0f);
+                            tmpMonoBuffer[sampleCount] *= volume;
+                            // set the value of the rms value for displaying meters
+                            meters[masterChannel] += Mathf.Pow(tmpMonoBuffer[sampleCount], 2f);
+
+                        }
+
+                        meters[masterChannel] = Mathf.Sqrt(meters[masterChannel] / e.SamplesPerBuffer);
+
+                    }                    
+                }
+                else
+                {
+
+                    subwooferMeters[masterChannel - outputChannelCount] = 0;
+                    // Modif Gonot - 14/03/2023 - Adding Bass Managment
                     for (int sampleCount = 0; sampleCount < e.SamplesPerBuffer; sampleCount++)
                     {
-                        // Apply gain set in the custom inspector editor of the player
-                        float volume = Mathf.Pow(10.0f, gain / 20.0f);
-                        tmpMonoBuffer[sampleCount] *= volume;
-                        // set the value of the rms value for displaying meters
-                        meters[masterChannel] += Mathf.Pow(tmpMonoBuffer[sampleCount], 2f);
+                        // this mean the engine is bass managed
+                        tmpMonoBuffer[sampleCount] = subWooferTmpMonoBuffer[masterChannel - outputChannelCount, sampleCount];
+                        subwooferMeters[masterChannel - outputChannelCount] += Mathf.Pow(tmpMonoBuffer[sampleCount], 2f);
                     }
-
-                    meters[masterChannel] = Mathf.Sqrt(meters[masterChannel] / e.SamplesPerBuffer);
-
+                    subwooferMeters[masterChannel - outputChannelCount] = Mathf.Sqrt(subwooferMeters[masterChannel - outputChannelCount] / e.SamplesPerBuffer);
                 }
+
                 // call the Sample Provider methtod to convert the sample format to the format requiered 
                 // and output the converted samples to the output buffer of the audio device. 
                 inputPatcher.ProcessBuffer(tmpMonoBuffer, e.OutputBuffers, e.SamplesPerBuffer, e.AsioSampleType, masterChannel, maxDeviceChannel);
                 System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
-               
+
             }
 
             e.WrittenToOutputBuffers = true;

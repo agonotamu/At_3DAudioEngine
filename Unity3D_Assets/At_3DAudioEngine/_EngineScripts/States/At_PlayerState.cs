@@ -34,11 +34,11 @@ public class At_PlayerState
     /// boolean telling if the player is looping the read audio file
     public bool isLooping = false;
     /// directivity balance of the virtual microphone used for this source : balance [0,1] between omnidirectionnal and cardiod
-    public float omniBalance = 1f; // Modif Rougerie 16/06/2022
+    public float omniBalance = 0f; // Modif Rougerie 16/06/2022
     /// balance between "normal delay" and "reverse delay" for focalised source - see Time Reversal technic used for WFS
     public float timeReversal = 0;
     ///type of distance attenuation in the spatialize : 0 = none, 1 = linear, 2 = square
-    public float attenuation = 0;
+    public float attenuation = 2;
     /// Selected attenuation type in the popup menu of the AT_Player Component GUI
     public int selectedAttenuation = 0;
     /// minimum distance above which the sound produced by the source is attenuated

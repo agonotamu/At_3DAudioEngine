@@ -34,6 +34,34 @@ namespace Spatializer
 
     }
 
+    // Modif Gonot - 13/03/2023
+    // Now, we apply the roll-off curve on the input buffer
+    void At_WfsSpatializer::forceMonoInputAndApplyRolloff(float* inBuffer, int bufferLength, int offset, int inchannels) {
+
+        float rolloff;
+        float direction[3];
+        direction[0] = m_sourcePosition[0] - m_listenerPosition[0];
+        direction[1] = m_sourcePosition[1] - m_listenerPosition[1];
+        direction[2] = m_sourcePosition[2] - m_listenerPosition[2];
+
+        float virtualMicDistance = sqrtf(pow(direction[0], 2) + pow(direction[1], 2) + pow(direction[2], 2));
+        if (virtualMicDistance < m_minDistance || m_attenuation == 0) {
+            rolloff = 1;
+        }
+        else {
+            rolloff = 1.0f / pow((virtualMicDistance - m_minDistance) + 1, m_attenuation);
+        }
+
+        int count = 0;
+        for (int i = 0; i < bufferLength * inchannels; i += inchannels) {
+            m_pTmpMonoBuffer_in[count] = rolloff * inBuffer[i + offset];
+            count++;
+        }
+
+    }
+    
+ 
+
     /****************************************************************************
     *
     *           UDPATE THE 2 CHANNELS USED FOR GETTING INPUT MONO INPUT
@@ -138,7 +166,7 @@ namespace Spatializer
             float direction[3], normalizedDirection[3];
 
             static const float kRad2Deg = 180.0f / kPI;
-
+            
             direction[0] = m_sourcePosition[0] - At_WfsSpatializer::m_pVirtualMicPositions[virtualMicIdx][0];
             direction[1] = m_sourcePosition[1] - At_WfsSpatializer::m_pVirtualMicPositions[virtualMicIdx][1];
             direction[2] = m_sourcePosition[2] - At_WfsSpatializer::m_pVirtualMicPositions[virtualMicIdx][2];
@@ -150,22 +178,52 @@ namespace Spatializer
 
             m_pWfsDelay[virtualMicIdx] = (virtualMicDistance / 340.0f) * 1000.0f; // time in milliseconds;
             
-            float rolloff;
-            
+            // Modif Gonot - 13/03/2023
+            // rolloff curve is applyied on the source itself (input buffer), not on the secondary source.
+            /*
+            float rolloff;            
             if (virtualMicDistance < m_minDistance || m_attenuation == 0) {
                 rolloff = 1;
             }
             else {
                 rolloff = 1.0f / pow((virtualMicDistance - m_minDistance) + 1, m_attenuation);
             }
+            */
 
+
+            // Modif Gonot - 13/03/2023
+            // virtual mics are always cardiods.... But there directions switches when the source is inside the speaker setup
+            float fwd[3];
+            if (m_timeReversal == 0) {
+                fwd[0] = m_pVirtualMicForwards[virtualMicIdx][0];
+                fwd[1] = m_pVirtualMicForwards[virtualMicIdx][1];
+                fwd[2] = m_pVirtualMicForwards[virtualMicIdx][2];
+            }
+            else {
+                fwd[0] = -m_pVirtualMicForwards[virtualMicIdx][0];
+                fwd[1] = -m_pVirtualMicForwards[virtualMicIdx][1];
+                fwd[2] = -m_pVirtualMicForwards[virtualMicIdx][2];
+            }
+            float forwardProj = normalizedDirection[0] * fwd[0]
+                + normalizedDirection[1] * fwd[1]
+                + normalizedDirection[2] * fwd[2];
+            /*
             float forwardProj = normalizedDirection[0] * m_pVirtualMicForwards[virtualMicIdx][0]
                 + normalizedDirection[1] * m_pVirtualMicForwards[virtualMicIdx][1]
                 + normalizedDirection[2] * m_pVirtualMicForwards[virtualMicIdx][2];
+            */
 
-            float cardioidSens = m_omniBalance + (1 - m_omniBalance) * (0.5f * (1 + forwardProj));
             
-            m_pWfsVolume[virtualMicIdx] = cardioidSens * rolloff;
+            // Modif Gonot - 13/03/2023
+            // 1) virtual mics are always cardiods.... But there directions switches when the source is inside the speaker setup (focused source)
+            //float cardioidSens = m_omniBalance + (1 - m_omniBalance) * (0.5f * (1 + forwardProj));            
+            
+            // 2) rolloff is not applyied for each virtual speakers but a the source itself - TODO !!!!!!!
+            //m_pWfsVolume[virtualMicIdx] = cardioidSens * rolloff;
+            
+            m_pWfsVolume[virtualMicIdx] = 0.5f * (1 + forwardProj);
+
+
 
             //std::cout << "Mic : " << virtualMicIdx << " - volume : " << m_pWfsVolume[virtualMicIdx] << " \n";
         }
@@ -310,8 +368,8 @@ namespace Spatializer
     *                                 (CORE OF THE WFS)
     *
     *****************************************************************************/
-
     void At_WfsSpatializer::applyWfsGainDelay(int virtualMicIdx, int m_virtualMicCount, int bufferLength, bool isDirective) { //modif mathias 06-17-2021
+       
 
         // Delay for focus WFS source
         float reverse_delay = m_maxDelay + m_minDelay - m_pWfsDelay[virtualMicIdx];
@@ -409,7 +467,10 @@ namespace Spatializer
 
                 // Apply cross-fading between sample with previous and current parameter to avoid clicks (smooth parameter changes)
                 m_pTmpMonoBuffer_in[i] = fadeOut * sample_prevFrame + (1 - fadeOut) * sample_currFrame;
-               
+                // if the sample is NaN
+                if (m_pTmpMonoBuffer_in[i] != m_pTmpMonoBuffer_in[i]) {
+                    m_pTmpMonoBuffer_in[i] = 0;
+                }
                
                
             }
@@ -480,7 +541,10 @@ namespace Spatializer
             */
         }
         else if (m_isDirective == false) {
-            forceMonoInput(inBuffer, bufferLength, offset, inChannelCount);
+            // Modif Gonot - 13/03/2023
+            // Now, we apply the roll-off curve on the input buffer
+            forceMonoInputAndApplyRolloff(inBuffer, bufferLength, offset, inChannelCount);
+            //forceMonoInput(inBuffer, bufferLength, offset, inChannelCount);
             
 #ifdef RING_BUFFER
             updateDelayRingBuffer(bufferLength);

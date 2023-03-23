@@ -421,8 +421,9 @@ public class At_PlayerEditor : Editor
                         playerState.selectedAttenuation = selected;
                     }
                 }
+                
                 HorizontalLine(Color.grey);
-
+                /*
                 using (new GUILayout.VerticalScope())
                 {
                     using (new GUILayout.HorizontalScope())
@@ -446,7 +447,7 @@ public class At_PlayerEditor : Editor
 
                     HorizontalLine(Color.grey);
                 }
-
+                */
                 using (new GUILayout.VerticalScope())
                 {
                     using (new GUILayout.HorizontalScope())
@@ -475,7 +476,7 @@ public class At_PlayerEditor : Editor
             }
 
             
-            
+            /*
             using (new GUILayout.VerticalScope())
             {
 
@@ -500,7 +501,7 @@ public class At_PlayerEditor : Editor
 
                 HorizontalLine(Color.grey);
             }
-            
+            */
 
             if (playerState.fileName != "" && playerState.isUnityAudioSource != true)
             {

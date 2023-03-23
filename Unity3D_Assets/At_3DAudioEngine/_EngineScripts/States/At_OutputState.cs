@@ -31,8 +31,15 @@ public class At_OutputState
     public bool isStartingEngineOnAwake = true;
     /// size of the virtual mic rig in the the scne (1 unit = 1 meter)
     public float virtualMicRigSize = 3;
-
+    /// maximum distance between a player and a virtual mic to be rendered (value used to set the size of the ring buffer => max delay)
     public float maxDistanceForDelay = 10.0f;
+
+    // Modif Gonot - 14/03/2023 - Adding Bass Managment
+    public int subwooferOutputChannelCount = 1;
+    public bool isBassManaged = false;
+    public float crossoverFilterFrequency = 100;
+    public int[] indexInputSubwoofer;
+    public float subwooferGain;
 
     static public bool Compare(At_OutputState s1, At_OutputState s2)
     {        
