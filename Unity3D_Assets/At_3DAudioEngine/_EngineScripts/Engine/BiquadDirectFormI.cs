@@ -53,7 +53,7 @@ public class BiquadDirectFormI
 		m_x1 = x;
 		m_y1 = y;
 
-		return y;
+		return x;
 	}
 
 

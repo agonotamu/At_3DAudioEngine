@@ -22,12 +22,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using NAudio.Wave;
+using NAudio.Wave.Asio;
 using NAudio.Wave.SampleProviders;
 using NAudioAsioPatchBay;
 using System.Runtime.InteropServices;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using System;
 
+enum FilterType
+{
+    None = 0,
+    LowPass = 1,
+    HighPass = 2
+}
 
 
 public class At_MasterOutput : MonoBehaviour
@@ -77,8 +85,8 @@ public class At_MasterOutput : MonoBehaviour
     public bool isBassManaged;
     public float crossoverFilterFrequency;
     public int[] indexInputSubwoofer;
-    BiquadDirectFormI lowPassFilterLinkwitzRiley;
-    BiquadDirectFormI highPassFilterLinkwitzRiley;
+    BiquadDirectFormI[] lowPassFilterLinkwitzRiley;
+    BiquadDirectFormI[] highPassFilterLinkwitzRiley;
     //------------------------------
 
     /// index of the selected speaker configuration in the popup menu of the At_MasterOutput Component GUI
@@ -143,17 +151,18 @@ public class At_MasterOutput : MonoBehaviour
         virtualMicRigSize = outputState.virtualMicRigSize;
         maxDistanceForDelay = outputState.maxDistanceForDelay;
 
-        foreach (At_Player p in players)
-        {
-            addPlayerToList(p);
-            p.outputChannelCount = outputChannelCount;
-        }
+        subwooferOutputChannelCount = outputState.subwooferOutputChannelCount;
+        isBassManaged = outputState.isBassManaged;
+        crossoverFilterFrequency = outputState.crossoverFilterFrequency;
+        indexInputSubwoofer = outputState.indexInputSubwoofer;
+        subwooferGain = outputState.subwooferGain;
+
 
         samplingRate = outputState.samplingRate;
         // get the reference of the At_Mixer instance
         mixer = gameObject.GetComponent<At_Mixer>();
 
-        // initialize the temp buffer
+        // initialize the temp buffer        
         tmpMonoBuffer = new float[MAX_BUF_SIZE];
 
         // Modif Gonot - 14/03/2023 - Adding Bass Managment
@@ -163,6 +172,14 @@ public class At_MasterOutput : MonoBehaviour
         if (isStartingEngineOnAwake) {
             StartEngine();
         }
+
+        
+        foreach (At_Player p in players)
+        {
+            addPlayerToList(p);
+            p.outputChannelCount = outputChannelCount;
+        }
+
         virtualMics = GameObject.FindObjectsOfType<At_VirtualMic>();
         virtualSpeakers = GameObject.FindObjectsOfType<At_VirtualSpeaker>();
         foreach (At_VirtualMic vm in virtualMics)
@@ -188,13 +205,22 @@ public class At_MasterOutput : MonoBehaviour
         float b2 = b0;
         float a1 = (2 * wc * wc - 2 * k * k) / den;
         float a2 = (wc * wc + k * k - 2 * k * wc) / den;
-        lowPassFilterLinkwitzRiley = new BiquadDirectFormI(b0, b1, b2, a1, a2);
+        lowPassFilterLinkwitzRiley = new BiquadDirectFormI[subwooferOutputChannelCount];
+        for (int i = 0; i< subwooferOutputChannelCount; i++)
+        {
+            lowPassFilterLinkwitzRiley[i] = new BiquadDirectFormI(b0, b1, b2, a1, a2);
+        }
+        
 
         // Coefficients for the Second Order High Pass Linkwitz - Riley Filter
         b0 = k * k / den;
         b1 = -2 * k * k / den;
         b2 = b0;
-        highPassFilterLinkwitzRiley = new BiquadDirectFormI(b0, b1, b2, a1, a2);
+        highPassFilterLinkwitzRiley = new BiquadDirectFormI[outputChannelCount];
+        for (int i = 0; i < outputChannelCount; i++)
+        {
+            highPassFilterLinkwitzRiley[i] = new BiquadDirectFormI(b0, b1, b2, a1, a2);
+        }
     }
 
     /************************************************************************
@@ -265,6 +291,9 @@ public class At_MasterOutput : MonoBehaviour
                         inputPatcher = new AsioInputPatcher(samplingRate, inputChannels, maxDeviceChannel);
                     }
 
+                    // Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+                                       
+                    AT_SPAT_WFS_initializeOutput(samplingRate, At_AudioEngineUtils.asioOut.FramesPerBuffer, outputChannelCount, subwooferOutputChannelCount, crossoverFilterFrequency);
 
                     for (int playerIndex = 0; playerIndex < playerList.Count; playerIndex++)
                     {
@@ -379,14 +408,23 @@ public class At_MasterOutput : MonoBehaviour
         {
             int id = playerList.Count - 1;
             playerList.Add(p);
-            AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay);
+            
+            if(AT_SPAT_CreateWfsSpatializer(ref id, playerList[playerList.Count - 1].is3D, playerList[playerList.Count - 1].isDirective, maxDistanceForDelay))
+            {
+                playerList[playerList.Count - 1].masterOutput = this;
+                playerList[playerList.Count - 1].spatID = id;
+                playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
 
-            playerList[playerList.Count - 1].masterOutput = this;
-            playerList[playerList.Count - 1].spatID = id;
-            playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
+                if (mixer == null) mixer = GetComponent<At_Mixer>();
+                mixer.setPlayerList(playerList);
 
-            if (mixer == null) mixer = GetComponent<At_Mixer>();
-            mixer.setPlayerList(playerList);
+            }
+            else
+            {
+                Debug.LogError("Trying to create a spatializer without initialize engine \n " +
+                    "Call AT_SPAT_WFS_initializeOutput() function first");
+            }
+
             /*
             if (playerList[playerList.Count - 1].is3D)
             {
@@ -466,10 +504,8 @@ public class At_MasterOutput : MonoBehaviour
     */
     private void Update()
     {
-
         UpdateVirtualMicPosition();
-
-
+        //AT_SPAT_WFS_setSubwooferCutoff(crossoverFilterFrequency);
     }
 
 
@@ -521,9 +557,7 @@ public class At_MasterOutput : MonoBehaviour
    * 
    */
     void OnAsioOutAudioAvailable(object sender, AsioAudioAvailableEventArgs e)
-    {
-
-        inputPatcher.ClearOutbuffer();
+    {       
 
         bool playerReady = false;
         if (playerList != null && playerList.Count != 0)
@@ -536,9 +570,9 @@ public class At_MasterOutput : MonoBehaviour
                 {
 
                     // tell each player to extract a buffer from their audio file if it is in "play" mode
-                    result = playerList[playerIndex].extractInputBuffer(e.SamplesPerBuffer);
+                    result = playerList[playerIndex].extractInputBuffer(e.SamplesPerBuffer); // C# loop on N Channel x M samples - not avoidable 
                     // conform the input buffer to the output bus format (including spatialization if 3D player)
-                    result = playerList[playerIndex].conformInputBufferToOutputBusFormat(e.SamplesPerBuffer);
+                    result = playerList[playerIndex].conformInputBufferToOutputBusFormat(e.SamplesPerBuffer); // no C# if 3D
 
                     if (result == true) playerReady = true;
 
@@ -551,76 +585,75 @@ public class At_MasterOutput : MonoBehaviour
         // if the buffers has been filled by the At_player instances 
         if (playerReady && isEngineStarted)
         {
-            // Modif Gonot - 14/03/2023 - Adding Bass Managment
+
             int numChannel;
             if (isBassManaged) numChannel = outputChannelCount + subwooferOutputChannelCount;
             else numChannel = outputChannelCount;
 
-            //for (int masterChannel = 0; masterChannel < outputChannelCount; masterChannel++)
-            for (int masterChannel = 0; masterChannel < numChannel; masterChannel++)
+            for (int channelIndex = 0; channelIndex < numChannel; channelIndex++)
             {
-                // Modif Gonot - 14/03/2023 - Adding Bass Managment
-                if (masterChannel < outputChannelCount)
+                if (channelIndex < outputChannelCount)
                 {
-                    // ask the At_Mixer instance to sum the samples of a buffer for a single channel. 
-                    // The result is copied in the tmpMonoBuffer array
-                    mixer.fillMasterChannelInput(ref tmpMonoBuffer, e.SamplesPerBuffer, masterChannel, spatIDToDestroy);
-
-                    if (meters != null && meters.Length != 0)
-                    {
-                        meters[masterChannel] = 0;
-
-                        for (int sampleCount = 0; sampleCount < e.SamplesPerBuffer; sampleCount++)
-                        {
-
-                            // Modif Gonot - 14/03/2023 - Adding Bass Managment
-                            if (isBassManaged)
-                            {
-                                float s = tmpMonoBuffer[sampleCount];
-                                int indexInSubInput = ArrayUtility.IndexOf(indexInputSubwoofer, masterChannel);
-                                if (indexInSubInput != -1)
-                                {
-                                    float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
-                                    subWooferTmpMonoBuffer[indexInSubInput, sampleCount] = subwooferVolume * lowPassFilterLinkwitzRiley.filter(s);                                    
-
-                                }
-
-                                tmpMonoBuffer[sampleCount] = highPassFilterLinkwitzRiley.filter(s);
-                                
-                            }
-                            // -------------------------
-
-                            // Apply gain set in the custom inspector editor of the player
-                            float volume = Mathf.Pow(10.0f, gain / 20.0f);
-                            tmpMonoBuffer[sampleCount] *= volume;
-                            // set the value of the rms value for displaying meters
-                            meters[masterChannel] += Mathf.Pow(tmpMonoBuffer[sampleCount], 2f);
-
-                        }
-
-                        meters[masterChannel] = Mathf.Sqrt(meters[masterChannel] / e.SamplesPerBuffer);
-
-                    }                    
+                    meters[channelIndex] = 0;
+                    
                 }
                 else
                 {
-
-                    subwooferMeters[masterChannel - outputChannelCount] = 0;
-                    // Modif Gonot - 14/03/2023 - Adding Bass Managment
-                    for (int sampleCount = 0; sampleCount < e.SamplesPerBuffer; sampleCount++)
-                    {
-                        // this mean the engine is bass managed
-                        tmpMonoBuffer[sampleCount] = subWooferTmpMonoBuffer[masterChannel - outputChannelCount, sampleCount];
-                        subwooferMeters[masterChannel - outputChannelCount] += Mathf.Pow(tmpMonoBuffer[sampleCount], 2f);
-                    }
-                    subwooferMeters[masterChannel - outputChannelCount] = Mathf.Sqrt(subwooferMeters[masterChannel - outputChannelCount] / e.SamplesPerBuffer);
+                    subwooferMeters[channelIndex - outputChannelCount] = 0;
                 }
+                for (int sampleIndex = 0; sampleIndex < e.SamplesPerBuffer; sampleIndex++)
+                {
+                    
+                    float sample=0;                    
+                    
+                    if (channelIndex < outputChannelCount)
+                    {
 
-                // call the Sample Provider methtod to convert the sample format to the format requiered 
-                // and output the converted samples to the output buffer of the audio device. 
-                inputPatcher.ProcessBuffer(tmpMonoBuffer, e.OutputBuffers, e.SamplesPerBuffer, e.AsioSampleType, masterChannel, maxDeviceChannel);
-                System.Array.Clear(tmpMonoBuffer, 0, tmpMonoBuffer.Length);
+                        // Apply gain set in the custom inspector editor of the player
+                        float volume = Mathf.Pow(10.0f, gain / 20.0f);
+                        if (isBassManaged)
+                            sample = volume * AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(sampleIndex, channelIndex, true);
+                        else
+                            sample = volume * AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(sampleIndex, channelIndex, false);
+                            
+                        meters[channelIndex] += Mathf.Pow(sample, 2f);
 
+                    }
+                    else
+                    {
+                        float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
+                        // channels for subwoofer : 
+                        sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - outputChannelCount]);
+                        subwooferMeters[channelIndex - outputChannelCount] += Mathf.Pow(sample, 2f);
+
+                    }
+
+                    if (channelIndex < maxDeviceChannel)
+                    {
+                        IntPtr buffer = e.OutputBuffers[channelIndex];
+                        if (e.AsioSampleType == AsioSampleType.Int32LSB)
+                            SetOutputSampleInt32LSB(buffer, sampleIndex, sample);
+                        else if (e.AsioSampleType == AsioSampleType.Int16LSB)
+                            SetOutputSampleInt16LSB(buffer, sampleIndex, sample);
+                        else if (e.AsioSampleType == AsioSampleType.Int24LSB)
+                            throw new InvalidOperationException("Not supported");
+                        else if (e.AsioSampleType == AsioSampleType.Float32LSB)
+                            SetOutputSampleFloat32LSB(buffer, sampleIndex, sample);
+                        else
+                            throw new ArgumentException(@"Unsupported ASIO sample type {sampleType}");
+                    }
+
+                }
+                
+
+                if (channelIndex < outputChannelCount)
+                {
+                    meters[channelIndex] = Mathf.Sqrt(meters[channelIndex] / e.SamplesPerBuffer);
+                }
+                else
+                {
+                    subwooferMeters[channelIndex - outputChannelCount] = Mathf.Sqrt(subwooferMeters[channelIndex - outputChannelCount] / e.SamplesPerBuffer);
+                }
             }
 
             e.WrittenToOutputBuffers = true;
@@ -644,6 +677,20 @@ public class At_MasterOutput : MonoBehaviour
 
     }
 
+    private unsafe void SetOutputSampleInt32LSB(IntPtr buffer, int n, float value)
+    {
+        *((int*)buffer + n) = (int)(value * int.MaxValue);
+    }
+
+    private unsafe void SetOutputSampleInt16LSB(IntPtr buffer, int n, float value)
+    {
+        *((short*)buffer + n) = (short)(value * short.MaxValue);
+    }
+
+    private unsafe void SetOutputSampleFloat32LSB(IntPtr buffer, int n, float value)
+    {
+        *((float*)buffer + n) = value;
+    }
 
     /**
    * @brief Method used to display properties of the At_MasterOutput in the Scene View.    
@@ -788,8 +835,21 @@ public class At_MasterOutput : MonoBehaviour
      * Extern declaration of the functions provided by the 3D Audio Engine API (AudioPlugin_AtSpatializer.dll)
      */
     #region DllImport
+
+
+    //[DllImport("AudioPlugin_AtSpatializer", CallingConvention = CallingConvention.Cdecl)]
+    //private static extern void AT_SPAT_WFS_getDemultiplexMixingBuffer(IntPtr demultiplexMixingBuffer, int indexChannel);
     [DllImport("AudioPlugin_AtSpatializer")]
-    private static extern void AT_SPAT_CreateWfsSpatializer(ref int id, bool is3D, bool isDirective, float maxDistanceForDelay);
+    private static extern void AT_SPAT_WFS_setSubwooferCutoff(float subwooferCutoff);
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern float AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(int indexSample, int indexChannel, bool isHighPassFiltered);
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern float AT_SPAT_WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel);
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern void AT_SPAT_WFS_initializeOutput(int sampleRate, int bufferLength, int outChannelCount, int subwooferOutputChannelCount, float subwooferCutoff);
+
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern bool AT_SPAT_CreateWfsSpatializer(ref int id, bool is3D, bool isDirective, float maxDistanceForDelay);
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_DestroyWfsSpatializer(int id);
     [DllImport("AudioPlugin_AtSpatializer")]

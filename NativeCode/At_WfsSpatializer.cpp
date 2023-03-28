@@ -11,9 +11,20 @@
 namespace Spatializer
 {
 
-    At_WfsSpatializer::~At_WfsSpatializer() {
+    int At_WfsSpatializer::m_numInstance = 0;
+    int At_WfsSpatializer::m_numInstanceProcessed = 0;
+    
+    At_WfsSpatializer::At_WfsSpatializer() {        
+        m_numInstance++;
+        std::cout << "Spatializer " << spatID << " created !" << " \n";
+        std::cout << "Num Instance : " << m_numInstance << " \n";
+    }
 
+    At_WfsSpatializer::~At_WfsSpatializer() {
+        m_numInstance--;
+        
         std::cout << "Spatializer " << spatID << " destroyed !" << " \n";
+        std::cout << "Num Instance : " << m_numInstance << " \n";
         //delete[] m_pDelayBuffer;
         //m_pDelayBuffer = NULL;
     }
@@ -565,7 +576,15 @@ namespace Spatializer
 
             // m_virtualMicCount are supposed to be equal to outChannelCount !!!!! Why 2 differents variables !!!
             for (int sampleIndex = 0; sampleIndex < bufferLength; sampleIndex++) {
-                outBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pTmpMonoBuffer_in[sampleIndex];                
+                outBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pTmpMonoBuffer_in[sampleIndex];
+                
+                // Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+                if (m_pEngineMixingBuffer != NULL)
+                    m_pEngineMixingBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex] += m_pTmpMonoBuffer_in[sampleIndex];
+                if (m_pTmpEngineMixingBuffer_hp != NULL)
+                    m_pTmpEngineMixingBuffer_hp[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pEngineMixingBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex];
+                if(m_pTmpEngineMixingBufferSub_lp != NULL)
+                    m_pTmpEngineMixingBufferSub_lp[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pEngineMixingBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex];
             }
 
             // save spatialization parameter for the next frame
@@ -576,9 +595,18 @@ namespace Spatializer
         }
         m_minDelay_prevFrame = m_minDelay;
         m_maxDelay_prevFrame = m_maxDelay;
- 
-#endif
-
+        
+        /*
+        m_numInstanceProcessed++;
+        std::cout << "Num Instance processed : " << m_numInstanceProcessed << " \n";
+        std::cout << "Num Instance : " << m_numInstance << " \n";
+        if (m_numInstanceProcessed >= m_numInstance) {
+            m_numInstanceProcessed = 0;
+            std::cout << "Zero Mixing Buffer : \n";
+            for (int i = 0; i < m_bufferLength*m_outChannelCount+m_subwooferOutputChannelCount ; i++) m_pEngineMixingBuffer[i] = 0;
+        }
+        */
+#endif        
         return 0;
     }
 

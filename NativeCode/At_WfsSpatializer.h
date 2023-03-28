@@ -33,6 +33,7 @@
 #include <iostream>
 #endif
 #include "AudioPluginUtil.h"
+
 #define MAX_BUFFER_SIZE 2048
 #define NUM_BUFFER_IN_DELAY 32
 #define MAX_OUTPUT_CHANNEL 48
@@ -48,6 +49,8 @@ namespace Spatializer
     {
 
     public:
+        
+        At_WfsSpatializer(); // constructor
         ~At_WfsSpatializer(); // destructor
 
         int process(float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannel, int outChannel);
@@ -69,12 +72,21 @@ namespace Spatializer
         void cleanDelayBuffer();
 
         void initDelayBuffer();
-
+       
         int spatID = 0;
-
         bool m_is3D; 
         bool m_isDirective; 
         float  m_maxDistanceForDelay;
+
+        // Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+        float* m_pEngineMixingBuffer;
+        float* m_pTmpEngineMixingBuffer_hp;
+        float* m_pTmpEngineMixingBufferSub_lp;
+
+        int m_bufferLength;
+        int m_outChannelCount;
+        int m_subwooferOutputChannelCount;
+
 
     private:
         void setIs3DIsDirective(bool is3D, bool isDirective); //modif mathias 06-17-2021
@@ -86,7 +98,9 @@ namespace Spatializer
         void updateMultichannelDelayBuffer(float* inBuffer, int bufferLength, int inChannelCount);
 
         
-        
+        static int m_numInstance;
+        static int m_numInstanceProcessed;
+
 #ifdef RING_BUFFER
         void updateDelayRingBuffer(int bufferLength);
 #else
@@ -112,6 +126,7 @@ namespace Spatializer
 #else
         float* m_pDelayBuffer;
 #endif
+        
 
         // NO DIRECTIVE SOURCE
         //float m_pDelayMultiChannelBuffer[MAX_INPUT_CHANNEL][MAX_BUFFER_SIZE * NUM_BUFFER_IN_DELAY];

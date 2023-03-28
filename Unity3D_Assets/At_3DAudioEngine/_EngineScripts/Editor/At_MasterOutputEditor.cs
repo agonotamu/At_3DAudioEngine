@@ -112,7 +112,7 @@ public class At_MasterOutputEditor : Editor
             outputState.subwooferOutputChannelCount = 1;
             outputState.isBassManaged = false;
             outputState.crossoverFilterFrequency = 100;
-           outputState.subwooferGain = 0f;
+            outputState.subwooferGain = 0f;
         }
         else
         {
@@ -491,7 +491,7 @@ public class At_MasterOutputEditor : Editor
 
                 GUILayout.Label("Crossover Filter Frequency");
 
-                float freq = GUILayout.HorizontalSlider(outputState.crossoverFilterFrequency, 50, 200);
+                float freq = GUILayout.HorizontalSlider(outputState.crossoverFilterFrequency, 50, 2000);
 
                 if (freq != outputState.crossoverFilterFrequency)
                 {

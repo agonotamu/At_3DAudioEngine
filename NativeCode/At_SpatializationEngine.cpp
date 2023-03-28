@@ -1,6 +1,8 @@
 
 
 #include "At_SpatializationEngine.h"
+#include <limits.h>
+
 namespace Spatializer
 {
 	At_SpatializationEngine::At_SpatializationEngine() {
@@ -24,9 +26,87 @@ namespace Spatializer
 		for (int i = 0; i < m_pWfsSpatializerList.size(); i++) {
 			delete &m_pWfsSpatializerList[i];
 		}
+		// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+		delete m_pMixingBuffer;
+		delete m_pTmpMixingBuffer_hp;
+		delete m_pTmpMixingBufferSub_lp;
+		delete m_pSubwooferHighpass;
+		delete m_pSubwooferHighpass;
+
 		m_pWfsSpatializerList.clear(); 
 	}
-	 
+	
+	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+	void At_SpatializationEngine::WFS_initializeOutput(int sampleRate, int bufferLength, int outChannelCount, int subwooferOutputChannelCount, float subwooferCutoff) {
+
+		m_pMixingBuffer = new float[bufferLength * outChannelCount];
+		for (int i = 0; i < bufferLength * outChannelCount; i++) {
+			m_pMixingBuffer[i] = 0;
+		}
+		m_pTmpMixingBuffer_hp = new float[bufferLength * outChannelCount];
+		m_pTmpMixingBufferSub_lp = new float[bufferLength * outChannelCount];
+
+		m_pSubwooferHighpass = new Biquad[outChannelCount];
+		for (int i = 0; i <  outChannelCount; i++) {			
+			m_pSubwooferHighpass[i].setHigPassCoefficient_LinkwitzRiley(m_subwooferCutoff, sampleRate);
+		}
+		m_pSubwooferLowpass = new Biquad[outChannelCount];
+		for (int i = 0; i < outChannelCount; i++) {
+			m_pSubwooferLowpass[i].setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, sampleRate);
+		}
+
+		
+
+		m_bufferLength = bufferLength;
+		m_outChannelCount = outChannelCount;
+		m_subwooferOutputChannelCount = subwooferOutputChannelCount;
+		m_subwooferCutoff = subwooferCutoff;
+		m_sampleRate = sampleRate;
+
+
+	}
+
+	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+	void At_SpatializationEngine::WFS_getDemultiplexMixingBuffer(float* demultiplexMixingBuffer, int indexChannel) {
+		if (demultiplexMixingBuffer != NULL) {
+
+			for (int i = 0; i < m_bufferLength; i++) {
+				demultiplexMixingBuffer[i] = m_pMixingBuffer[i * m_outChannelCount + indexChannel];
+				// clear mixing buffer for the next frame
+				m_pMixingBuffer[i * m_outChannelCount + indexChannel] = 0;
+			}
+		}
+	}
+	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+	void At_SpatializationEngine::WFS_fillOutputWithOneChannelOfMixingChannel(float* outBufferOneChannel, int indexChannel, int maxOutputChannel) {
+
+		for (int indexSample = 0; indexSample < m_outChannelCount; indexSample++) {
+			if (indexSample < maxOutputChannel) outBufferOneChannel[indexSample] = m_pMixingBuffer[indexSample * m_outChannelCount + indexChannel];
+		}
+
+	}
+	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+	float At_SpatializationEngine::WFS_getMixingBufferSampleForChannelAndZero(int indexSample, int indexChannel, bool isHighPassFiltered) {
+		
+		// get the value in the mixing buffer
+		float value; 
+		if (isHighPassFiltered) {
+			value = m_pSubwooferHighpass[indexChannel].filter(m_pTmpMixingBuffer_hp[indexSample * m_outChannelCount + indexChannel]);
+		}
+		else {
+			value = m_pMixingBuffer[indexSample * m_outChannelCount + indexChannel];
+		}
+		// set the value to zero in the buffer for the next frame
+		m_pMixingBuffer[indexSample * m_outChannelCount + indexChannel] = 0;
+		return value;
+	}
+	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+	float At_SpatializationEngine::WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel) {
+		
+		return m_pSubwooferLowpass[indexChannel].filter(m_pTmpMixingBufferSub_lp[indexSample * m_outChannelCount + indexChannel]);
+	}
+
+
 	void At_SpatializationEngine::WFS_destroyAllSpatializer() {
 #ifdef DEBUGLOG
 		std::cout << "Clear all Spatializer from destroy all !\n";
@@ -38,23 +118,37 @@ namespace Spatializer
 		incrementalUniqueID = 0;
 	}
 
+	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+	bool At_SpatializationEngine::CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay) { //modif mathias 06-17-2021
+
+		if (m_pMixingBuffer != NULL) {
+			// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+			//At_WfsSpatializer* s = new At_WfsSpatializer(this);
+			At_WfsSpatializer* s = new At_WfsSpatializer();			
+			s->m_pEngineMixingBuffer = m_pMixingBuffer;
+			s->m_pTmpEngineMixingBuffer_hp = m_pTmpMixingBuffer_hp;
+			s->m_pTmpEngineMixingBufferSub_lp = m_pTmpMixingBufferSub_lp;
+			s->m_bufferLength = m_bufferLength;
+			s->m_outChannelCount = m_outChannelCount;
+			s->m_subwooferOutputChannelCount = m_subwooferOutputChannelCount;
+
+
+			s->m_maxDistanceForDelay = maxDistanceForDelay;
+			s->m_is3D = is3D; //modif mathias 06-17-2021
+			s->m_isDirective = isDirective; //modif mathias 06-17-2021
+			//s->spatID = m_pWfsSpatializerList.size() - 1;
+			s->spatID = incrementalUniqueID;
+			s->initDelayBuffer();
+			m_pWfsSpatializerList.push_back(*s);
+			*id = incrementalUniqueID;
+
+			incrementalUniqueID++;
+			return true;
+		}
+		else {
+			return false;
+		}
 	
-	void At_SpatializationEngine::CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay) { //modif mathias 06-17-2021
-
-		At_WfsSpatializer *s = new At_WfsSpatializer();	
-		s->m_maxDistanceForDelay = maxDistanceForDelay;
-		s->m_is3D = is3D; //modif mathias 06-17-2021
-		s->m_isDirective = isDirective; //modif mathias 06-17-2021
-		//s->spatID = m_pWfsSpatializerList.size() - 1;
-		s->spatID = incrementalUniqueID;
-		s->initDelayBuffer();
-		m_pWfsSpatializerList.push_back(*s);
-		*id = incrementalUniqueID;
-
-		incrementalUniqueID++;
-
-
-
 #ifdef DEBUGLOG
 		//std::cout << "adding spatializer with spatID "<< s->spatID <<"\n";
 		
@@ -78,7 +172,7 @@ namespace Spatializer
 
 #ifdef DEBUGLOG
 		//std::cout << "destroy spatializer with spatID "<< id<< "\n";
-		std::cout << "m_pWfsSpatializerList is size : " << m_pWfsSpatializerList.size() << "\n";
+		//std::cout << "m_pWfsSpatializerList is size : " << m_pWfsSpatializerList.size() << "\n";
 #endif
 
 	}
@@ -115,6 +209,20 @@ namespace Spatializer
 		}
 		return NULL;
 	}
+
+	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+	void At_SpatializationEngine::WFS_setSubwooferCutoff(float subwooferCutoff) {
+		
+		for (int i = 0; i < m_outChannelCount; i++) {
+			m_pSubwooferHighpass[i].setHigPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
+		}
+		
+		for (int i = 0; i < m_outChannelCount; i++) {
+			m_pSubwooferHighpass[i].setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
+		}
+
+	}
+
 	// One for each Spatializer ---------------------------------------------------------------------------------------
 	
 	void At_SpatializationEngine::WFS_cleanDelayBuffer(int id) { 

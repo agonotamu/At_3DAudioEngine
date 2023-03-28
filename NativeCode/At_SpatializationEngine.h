@@ -2,6 +2,7 @@
 
 #include "AudioPluginUtil.h"
 #include "At_WfsSpatializer.h"
+#include "Biquad.h"
 #include <vector>
 #include <iostream>
 using namespace std;
@@ -11,8 +12,12 @@ using namespace std;
 //#define RING_BUFFER
 //#define DIRECTIVE_PLAYER
 
+
+
+
 namespace Spatializer
 {
+
 
 	class At_SpatializationEngine
 	{
@@ -29,15 +34,24 @@ namespace Spatializer
 		}
 
 		vector<At_WfsSpatializer> m_pWfsSpatializerList;	
-		void CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay); //modif mathias 06-17-2021
+		
+		// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+		bool CreateWfsSpatializer(int* id, bool is3D, bool isDirective, float maxDistanceForDelay); //modif mathias 06-17-2021
 		void DestroyWfsSpatializer(int id);
 
 		// One for all Spatializer ----------------------------------------------------------------------------------------
+		// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+		void WFS_initializeOutput(int sampleRate, int bufferLength, int outChannelCount, int subwooferOutputChannelCount, float subwooferCutoff);
+		void WFS_getDemultiplexMixingBuffer(float* demultiplexMixingBuffer, int indexChannel);
+		void WFS_fillOutputWithOneChannelOfMixingChannel(float *outBufferOneChannel, int indexChannel, int maxOutputChannel);
+		float WFS_getMixingBufferSampleForChannelAndZero(int indexSample, int indexChannel, bool isHighPassFiltered);
+		float WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel);
+
 		void WFS_setSampleRate(float sampleRatte);
 		void WFS_setListenerPosition(float* position, float* rotation);
 		void WFS_setVirtualMicPosition(int speakerCount, float virtualMicMinDistance, float* positions, float* rotations, float* forwards);
 		void WFS_destroyAllSpatializer();
-
+		void WFS_setSubwooferCutoff(float subwooferCutoff);
 		// One for each Spatializer ---------------------------------------------------------------------------------------
 		
 		void WFS_setSourcePosition(int id, float* position, float* rotation, float* forward); //modif mathias 06-14-2021
@@ -58,5 +72,18 @@ namespace Spatializer
 
 	public:
 		int incrementalUniqueID = 0;
+		// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
+		float* m_pMixingBuffer;
+		float* m_pTmpMixingBuffer_hp;
+		float* m_pTmpMixingBufferSub_lp;
+
+		int m_bufferLength;
+		int m_outChannelCount;
+		int m_subwooferOutputChannelCount;
+		float m_subwooferCutoff;
+
+		Biquad* m_pSubwooferLowpass;
+		Biquad* m_pSubwooferHighpass;
+		float m_sampleRate;
 	};
 }
