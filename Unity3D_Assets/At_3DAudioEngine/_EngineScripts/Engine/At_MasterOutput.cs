@@ -6,7 +6,7 @@
  * @version 1.0
  * @date 19/01/2021
  * 
- * @brief  Output the mixed buffer from At_Mixer to the physical outputs of the selected ASIO device thanks to the NAudio API
+ * @brief  Output the mixed buffer from At_3DAudioEngine API to the physical outputs of the selected ASIO device thanks to the NAudio API
  * 
  * @details
  * First, the At_MasterOuput object act as a listener in the scene. Then, it gives its position to the 3D Audio Engine et and the position of the virtual microphones
@@ -56,9 +56,6 @@ public class At_MasterOutput : MonoBehaviour
     /// format to the format requiered by the audio device
     private AsioInputPatcher inputPatcher;
 
-   
-    /// Reference to an instance of the At_Mixer class
-    At_Mixer mixer;
     /// List of references to the instances of At_Player classes
     public List<At_Player> playerList;
     /// Array of references to the instances of At_VirtualMic classes
@@ -116,7 +113,6 @@ public class At_MasterOutput : MonoBehaviour
     /// boolean telling if the ASIO outpout is running (i.e. the callback method is called)
     public bool running;
     /// boolean telling if the code of the callback method is executed - the output ASIO buffer 
-    /// is feed with the samples from the At_Mixer instance.
     public bool isEngineStarted = false;
     /// Number of physical output of the audiodevice 
     int maxDeviceChannel;
@@ -159,8 +155,6 @@ public class At_MasterOutput : MonoBehaviour
 
 
         samplingRate = outputState.samplingRate;
-        // get the reference of the At_Mixer instance
-        mixer = gameObject.GetComponent<At_Mixer>();
 
         // initialize the temp buffer        
         tmpMonoBuffer = new float[MAX_BUF_SIZE];
@@ -357,7 +351,7 @@ public class At_MasterOutput : MonoBehaviour
     /**
     * @brief Initialise the spatialization engine : set the sampling rate, and create as much 
     * Spatializer than there are At_Player instances in the scene. Each player is given a 
-    * unique Saptializer Id. Pass the list of player to the At_Mixer instance.
+    * unique Saptializer Id.
     */
     private void InitSpatializerEngine()
     {
@@ -380,13 +374,11 @@ public class At_MasterOutput : MonoBehaviour
         }
         */
         UpdateVirtualMicPosition();
-
-        mixer.setPlayerList(playerList);
     }
 
     /**
     * @brief Add a new At_Player instance to the list, create a new spatializer for it with a 
-    * unique ID and pass the list of player to the At_Mixer instance. 
+    * unique ID
     * 
     * @param[in] p : At_Player instance to add
     */
@@ -415,9 +407,7 @@ public class At_MasterOutput : MonoBehaviour
                 playerList[playerList.Count - 1].spatID = id;
                 playerList[playerList.Count - 1].outputChannelCount = outputChannelCount;
 
-                if (mixer == null) mixer = GetComponent<At_Mixer>();
-                mixer.setPlayerList(playerList);
-
+                p.initAudioBuffer();
             }
             else
             {
@@ -551,9 +541,8 @@ public class At_MasterOutput : MonoBehaviour
    * 
    * @details (1) It asks all the At_PLayer instances to extract a multichannel buffer from the raw data read in the audiofile.
    * (2) It asks all the At_Player instances to conform this "input" bufer to the format of the output bus (processing spatialization, or down/upmix, etc.)
-   * (3) It asks the At_Mixer instance to sum for one channel the processed buffers of each At_Player instance and to copy the result in its temporaty mono buffer.
-   * (4) It processes metering to display the bargraph in the editor
-   * (5) It uses the sample provider to convert the audio samples to the format required by the audio device (Int32LSB, Int16LSB, Int24LSB, Float32LSB).  
+   * (3) It processes metering to display the bargraph in the editor
+   * (4) It uses the sample provider to convert the audio samples to the format required by the audio device (Int32LSB, Int16LSB, Int24LSB, Float32LSB).  
    * 
    */
     void OnAsioOutAudioAvailable(object sender, AsioAudioAvailableEventArgs e)
@@ -669,7 +658,6 @@ public class At_MasterOutput : MonoBehaviour
             AT_SPAT_DestroyWfsSpatializer(spatIDToDestroy[i]);
 
             RemovePlayerFromListWithSpatID(spatIDToDestroy[i]);
-            mixer.setPlayerList(playerList);
 
             p.DestroyOnNextFrame();
             spatIDToDestroy.RemoveAt(i);

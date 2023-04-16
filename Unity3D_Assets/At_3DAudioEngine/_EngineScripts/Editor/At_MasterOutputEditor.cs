@@ -78,17 +78,20 @@ public class At_MasterOutputEditor : Editor
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
+        At_Listener listener = FindObjectOfType<At_Listener>();
+        if (listener == null)
+        {
+            GameObject o = Instantiate(Resources.Load<GameObject>("At_3DAudioEngine/Prefabs/At_Listener"), Vector3.zero, Quaternion.identity);
+            o.AddComponent<At_Listener>();
+            o.name = "At_Listener";            
+        }
+
         horizontalLine = new GUIStyle();
         horizontalLine.normal.background = EditorGUIUtility.whiteTexture;
         horizontalLine.margin = new RectOffset(0, 0, 4, 4);
         horizontalLine.fixedHeight = 1;               
 
         masterOutput = (At_MasterOutput)target;
-
-        if (masterOutput.gameObject.GetComponent<At_Mixer>() == null)
-        {
-            masterOutput.gameObject.AddComponent<At_Mixer>();
-        }
                 
         outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
 

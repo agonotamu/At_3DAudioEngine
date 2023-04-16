@@ -145,6 +145,7 @@ public class At_Player : MonoBehaviour
 
     At_Listener listener;
 
+
     void Reset()
     {        
         setGuid();        
@@ -225,7 +226,7 @@ public class At_Player : MonoBehaviour
     }
     public void OnDisable() {
         
-        StopPlaying();
+        StopPlaying();  
     }
 
     public void Awake() {
@@ -243,6 +244,7 @@ public class At_Player : MonoBehaviour
         if (!isDynamicInstance)
             masterOutput.addPlayerToList(this);
         */
+
 
         if (!isUnityAudioSource)
         {
@@ -824,7 +826,9 @@ public class At_Player : MonoBehaviour
                     {
                         offset = currentIndexInputBufferRead_AudioSource *  asioOutputBufferSize;
                     }
+                    
                     AT_SPAT_WFS_process(spatID,inputFileBuffer, playerOutputBuffer, bufferSize, offset, numChannelsInAudioFile, outputChannelCount);
+                    
                     //currentIndexInputBufferRead_AudioSource = mod((currentIndexInputBufferRead_AudioSource + 1), maxIndexBufferRW_AudioSource);
                     currentIndexInputBufferRead_AudioSource++;
                     if (currentIndexInputBufferRead_AudioSource * asioOutputBufferSize >= inputFileBuffer.Length) currentIndexInputBufferRead_AudioSource = 0;
@@ -866,33 +870,6 @@ public class At_Player : MonoBehaviour
             }   
         }
         return false;
-    }
-
-    /**
-     * @brief Method called by the At_Mixer, which sum all the buffers filled by the different players in the scene. 
-     * 
-     * @param[out] mixerInputBuffer : Monophonic buffer to fill for a given output channel
-     * @param[in] bufferSize : size of the output buffer (number of sample for a frame)
-     * @param[in] channelIndex : index of the channel to fill
-     * 
-     */    
-    public void fillMixerChannelInputWithPlayerOutput(ref float[] mixerInputBuffer, int bufferSize, int channelIndex)
-    {
-        if (isAskedToPlay)
-        {
-            if (rawAudioData != null || isUnityAudioSource)
-            {
-                // get a buffer for one channel 
-                for (int sampleIndex = 0; sampleIndex < bufferSize; sampleIndex++)
-                {
-                    if (playerOutputBuffer != null && channelIndex < activationSpeakerVolume.Length)                    
-                    {
-                        mixerInputBuffer[sampleIndex] = playerOutputBuffer[outputChannelCount * sampleIndex + channelIndex];
-                    }
-                    
-                }                
-            }
-        }
     }
 
     /**

@@ -4,7 +4,7 @@
  * First Creation : 19/01/2021
  * 
  * DESCRIPTION : Util class using for :
- * - Maintaining an updated reference to the UNIQUE list of Player States (static variable) / updated by the player engine, by its customized editor or the mixer 
+ * - Maintaining an updated reference to the UNIQUE list of Player States (static variable) / updated by the player engine, by its customized editor
  * - Methods for saving and loading (serializing) the list of Players States
  * 
  */
