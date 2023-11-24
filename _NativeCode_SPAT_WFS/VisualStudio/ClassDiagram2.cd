@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Spatializer::At_SpatializationEngine" Collapsed="true">
+    <Position X="7" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAEQEAAAAAAAAAiAAAikAAQAABCQAAAQAMgAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\At_SpatializationEngine.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Spatializer::At_WfsSpatializer" Collapsed="true">
+    <Position X="8.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NGggxEBAhIBIQQIYEAQIFiJAAgCCAAEkIDAARAQEAHQ=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\At_WfsSpatializer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnityComplexNumberT&lt;T&gt;" Collapsed="true">
+    <Position X="4.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAMAAAAAAAAAFAAAAAIAAAAAAAAAIAQAAAAAAAEAAAQ=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FFT" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FFTAnalyzer" Collapsed="true">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAACABAACAIAICAACAQAAAAAAAAAAAICAAACEABAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HistoryBuffer" Collapsed="true">
+    <Position X="12.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIACgAAAAAAAAAAAEAAAABAAAAAAABAAAASAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RingBuffer&lt;_LENGTH, T&gt;" Collapsed="true">
+    <Position X="7" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAQAAAAAAABgABAAAAEAAABAAABAEAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BiquadFilter" Collapsed="true">
+    <Position X="10.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAFAAAAgAAAgAAAABAAQBAggAgAABgAQAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StateVariableFilter" Collapsed="true">
+    <Position X="8.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAQAAAAAAAAgAIAAgAAFAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Random" Collapsed="true">
+    <Position X="12.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAQABAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NoiseGenerator" Collapsed="true">
+    <Position X="10.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAIAAAAAAoABAAIEAAIAAAAACAkAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Mutex" Collapsed="true">
+    <Position X="7" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAQAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAgAAAAIQA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MutexScopeLock" Collapsed="true">
+    <Position X="8.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAABAAAAAAAAIAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="UnityAudioSpatializerData" Collapsed="true">
+    <Position X="7" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAACABAAAAAAAACAAAACgAAgAAAQCAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="UnityAudioAmbisonicData" Collapsed="true">
+    <Position X="7" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAACAAAAAAAAAACAAAACgAAgAAAQCAAAACAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="UnityAudioEffectState" Collapsed="true">
+    <Position X="10.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="UnityAudioParameterDefinition" Collapsed="true">
+    <Position X="12.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEgAAAAAwAAAQIAAAAAAAAgAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="UnityAudioEffectDefinition" Collapsed="true">
+    <Position X="8.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAgAEAAEAAAAAAAACAACAFIAAAAEAgAAAADQAAAAGAQ=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="Spatializer::DirectiveData" Collapsed="true">
+    <Position X="7" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\At_WfsSpatializer.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="SInt16" Collapsed="true">
+    <Position X="8.75" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="UInt16" Collapsed="true">
+    <Position X="8.75" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="UInt8" Collapsed="true">
+    <Position X="7" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="SInt8" Collapsed="true">
+    <Position X="7" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="SInt32" Collapsed="true">
+    <Position X="10.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="UInt32" Collapsed="true">
+    <Position X="10.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="UInt64" Collapsed="true">
+    <Position X="12.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="SInt64" Collapsed="true">
+    <Position X="12.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="UNITY_AUDIODSP_RESULT" Collapsed="true">
+    <Position X="8.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="UnityComplexNumber" Collapsed="true">
+    <Position X="4.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginUtil.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Enum Name="__unnamed_enum_0005_1" Collapsed="true">
+    <Position X="7" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="UnityAudioEffectDefinitionFlags" Collapsed="true">
+    <Position X="8.75" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAIAAAAAABgAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="UnityAudioEffectStateFlags" Collapsed="true">
+    <Position X="10.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAACAAAAAAAAAACACAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev_NoSensoryBranch\NativeCode\AudioPluginInterface.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

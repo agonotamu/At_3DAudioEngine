@@ -1,0 +1,1 @@
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.dll

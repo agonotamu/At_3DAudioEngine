@@ -38,8 +38,15 @@ public class At_OutputState
     public int subwooferOutputChannelCount = 1;
     public bool isBassManaged = false;
     public float crossoverFilterFrequency = 100;
-    public int[] indexInputSubwoofer;
+    public int[] indexInputSubwoofer = new int[2];
     public float subwooferGain;
+
+    // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+    public int[] hapticListenerOutputChannelsCount;
+    public string[] hapticListenerOutputGuid;
+    public int[] hapticListenerChannelsSelectionIndex;
+    public int[] hapticListenerChannelsIndex;
+
 
     static public bool Compare(At_OutputState s1, At_OutputState s2)
     {        

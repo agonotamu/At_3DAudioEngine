@@ -1,0 +1,72 @@
+﻿  At_Spatializer.cpp
+  AudioPluginUtil.cpp
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(9,5): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(18,5): warning C4996: 'vsprintf': This function or variable may be unsafe. Consider using vsprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(29,18): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(96): message : voir la référence à l'instanciation de la fonction modèle 'void FFTProcess<double>(UnityComplexNumber *,int,bool)' en cours de compilation
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(40,36): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(53,36): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(61,32): warning C4018: '<' : incompatibilité signed/unsigned
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.h(75,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(84): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Sub<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(84): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Sub<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(96): message : voir la référence à l'instanciation de la fonction modèle 'void FFTProcess<double>(UnityComplexNumber *,int,bool)' en cours de compilation
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.h(76,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.h(68,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(85): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Add<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.cpp(85): message : voir la référence à l'instanciation de la fonction modèle 'void UnityComplexNumberT<float>::Add<float,T,float>(const UnityComplexNumberT<float> &,const UnityComplexNumberT<T> &,UnityComplexNumberT<float> &)' en cours de compilation
+          with
+          [
+              T=double
+          ]
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\AudioPluginUtil.h(69,26): warning C4244: '=' : conversion de 'T' en 'T', perte possible de données
+          with
+          [
+              T=double
+          ]
+          and
+          [
+              T=float
+          ]
+  hrtftable.cpp
+  Plugin_Teleport.cpp
+  Génération de code en cours...
+     Création de la bibliothèque D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPluginDemo.lib et de l'objet D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPluginDemo.exp
+  AudioPluginDemo.vcxproj -> D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPluginDemo.dll
+          1 fichier(s) copié(s).

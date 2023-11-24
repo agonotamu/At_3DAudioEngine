@@ -1,0 +1,7 @@
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\_dev\UNITY_WFS\_3DENGINE_DEF\WFS_3DAudioEngine\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.pdb
+D:\RECHERCHE\PRISM\2019-2020_AMIDEX_PICI\AUDIO\3DAudioEngine\3DAudioEngine_dev\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PICI_AMIDEX\DEV_AUDIO\3DAudioEngine\3DAudioEngine_dev\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\PRISM\STAGE_ROUGERIE\dev\ServerClientAudioAnimV2\AudioAnim_Server\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+D:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.dll

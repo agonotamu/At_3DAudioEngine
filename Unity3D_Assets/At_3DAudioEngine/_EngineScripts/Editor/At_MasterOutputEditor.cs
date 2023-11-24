@@ -64,6 +64,8 @@ public class At_MasterOutputEditor : Editor
 
     bool shouldSave = false;
 
+    string[] hapticListenerOutputChannelRouting = null;
+    
     // load ressources for the GUI (textures, etc.)
     private void AffirmResources()
     {
@@ -78,6 +80,9 @@ public class At_MasterOutputEditor : Editor
     // Called when the GameObject with the At_Player component is selected (Inspector is displayed) or when the component is added
     public void OnEnable()
     {
+
+
+
         At_Listener listener = FindObjectOfType<At_Listener>();
         if (listener == null)
         {
@@ -92,7 +97,7 @@ public class At_MasterOutputEditor : Editor
         horizontalLine.fixedHeight = 1;               
 
         masterOutput = (At_MasterOutput)target;
-                
+        
         outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);
 
         if (outputState == null)
@@ -112,10 +117,15 @@ public class At_MasterOutputEditor : Editor
             outputConfigDimension = 1;
 
             // Modif Gonot - 14/03/2023 - Adding Bass Managment
-            outputState.subwooferOutputChannelCount = 1;
+            outputState.subwooferOutputChannelCount = 0;            
             outputState.isBassManaged = false;
             outputState.crossoverFilterFrequency = 100;
             outputState.subwooferGain = 0f;
+            /*
+            outputState.indexInputSubwoofer = new int[2];
+            outputState.indexInputSubwoofer[0] = 0;
+            outputState.indexInputSubwoofer[1] = 1;
+            */
         }
         else
         {
@@ -131,8 +141,9 @@ public class At_MasterOutputEditor : Editor
             samplingRate = (selectedSamplingRate == 0 ? 44100 : 48000);
             isStartingEngineOnAwake = outputState.isStartingEngineOnAwake;
             masterOutput.virtualMicRigSize = outputState.virtualMicRigSize;
+            masterOutput.indexInputSubwoofer = outputState.indexInputSubwoofer;
+
             // Modif Gonot - 14/03/2023 - Adding Bass Managment
-            
             masterOutput.subwooferOutputChannelCount = outputState.subwooferOutputChannelCount;
             masterOutput.isBassManaged = outputState.isBassManaged;
             masterOutput.crossoverFilterFrequency = outputState.crossoverFilterFrequency;
@@ -140,7 +151,12 @@ public class At_MasterOutputEditor : Editor
             masterOutput.subwooferGain = outputState.subwooferGain;
             
             subwooferMeters = new float[outputState.subwooferOutputChannelCount];
-        }
+
+            // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+            masterOutput.hapticListenerOutputChannelsCount = outputState.hapticListenerOutputChannelsCount;
+            masterOutput.hapticListenerOutputGuid = outputState.hapticListenerOutputGuid;
+            masterOutput.hapticListenerChannelsIndex = outputState.hapticListenerChannelsIndex;
+}
         At_Player[] players = GameObject.FindObjectsOfType<At_Player>();
        
 
@@ -160,7 +176,7 @@ public class At_MasterOutputEditor : Editor
     
     public void OnDisable()
     {
-       
+        
         if (shouldSave == true) {
             At_AudioEngineUtils.SaveAllState(SceneManager.GetActiveScene().name);
             shouldSave = false;
@@ -168,6 +184,7 @@ public class At_MasterOutputEditor : Editor
         At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
 
     }
+
 
     public static string CleanStringForFloat(string input)
     {
@@ -190,12 +207,21 @@ public class At_MasterOutputEditor : Editor
             return "0";
         }
     }
+
+    public override bool RequiresConstantRepaint()
+    {
+        return true;
+    }
+
     public override void OnInspectorGUI()
     {
         // laod ressources if needed
         AffirmResources();
 
         bool speakerConfigHasChanged = false;
+
+        // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+        bool updateHapticListenerOutputRouting = false;
 
         //-----------------------------------------------------------------
         // ASIO DEVICE SELECTION
@@ -264,6 +290,10 @@ public class At_MasterOutputEditor : Editor
                 if (channelCount != outputState.outputChannelCount || outputConfigDimension != outputState.outputConfigDimension)
                 {
                     speakerConfigHasChanged = true;
+
+                    // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+                    updateHapticListenerOutputRouting = true;
+
                     shouldSave = true;
                     outputState.outputConfigDimension = outputConfigDimension;
                     outputState.outputChannelCount = channelCount;
@@ -282,11 +312,11 @@ public class At_MasterOutputEditor : Editor
 
         }
 
-        
-
         //-----------------------------------------------------------------
         // MASTER METERING AND GAIN
         //----------------------------------------------------------------
+        
+        GUILayout.Label("WFS Channels Output : [1 - " + outputState.outputChannelCount + "]");
 
         using (new GUILayout.HorizontalScope())
         {
@@ -300,18 +330,20 @@ public class At_MasterOutputEditor : Editor
             float sliederHeight = 84;
 
 
-            float g = GUI.VerticalSlider(new Rect(baseX - 20, 79, 80, sliederHeight), outputState.gain, 10f, -80f);
+            float g = GUI.VerticalSlider(new Rect(baseX - 20, 100, 80, sliederHeight), outputState.gain, 10f, -80f);
             if (g != outputState.gain)
             {
                 outputState.gain = g;
                 shouldSave = true;
             }
 
-            GUI.Label(new Rect(baseX - 30, 130  , 80, sliederHeight), ((int)outputState.gain).ToString() + " dB");
+            GUI.Label(new Rect(baseX - 30, 150  , 80, sliederHeight), ((int)outputState.gain).ToString() + " dB");
 
             
         }
+
         GUILayout.Label("");
+        
         //-----------------------------------------------------------------
         // START/STOP ENGINE BUTTONS
         //----------------------------------------------------------------
@@ -363,6 +395,7 @@ public class At_MasterOutputEditor : Editor
         if (speakerConfigHasChanged)
         {
             speakerConfigHasChanged = false;
+            
             At_VirtualMic[] vms;
             vms = GameObject.FindObjectsOfType<At_VirtualMic>();
             GameObject parent = null;
@@ -424,8 +457,12 @@ public class At_MasterOutputEditor : Editor
             bool b = GUILayout.Toggle(outputState.isBassManaged, "Bass Managed");
             if (b != outputState.isBassManaged)
             {
+                updateHapticListenerOutputRouting = true;
+
                 shouldSave = true;
                 outputState.isBassManaged = b;
+                if (!outputState.isBassManaged)
+                    outputState.subwooferOutputChannelCount = 0; 
 
             }
         }
@@ -436,6 +473,9 @@ public class At_MasterOutputEditor : Editor
             //-----------------------------------------------------------------
             // SUB WOOFER METERING AND GAIN
             //----------------------------------------------------------------
+
+            GUILayout.Label("Subwoofer Channels Output : ["+ (outputState.outputChannelCount+1) +"-" + (outputState.outputChannelCount+outputState.subwooferOutputChannelCount) + "]");
+
 
             using (new GUILayout.HorizontalScope())
             {
@@ -449,14 +489,14 @@ public class At_MasterOutputEditor : Editor
                 float sliederHeight = 84;
 
 
-                float g = GUI.VerticalSlider(new Rect(baseX - 20, 320, 80, sliederHeight), outputState.subwooferGain, 10f, -80f);
+                float g = GUI.VerticalSlider(new Rect(baseX - 20, 360, 80, sliederHeight), outputState.subwooferGain, 10f, -80f);
                 if (g != outputState.subwooferGain)
                 {
                     outputState.subwooferGain = g;
                     shouldSave = true;
                 }
 
-                GUI.Label(new Rect(baseX - 30, 370, 80, sliederHeight), ((int)outputState.subwooferGain).ToString() + " dB");
+                GUI.Label(new Rect(baseX - 30, 410, 80, sliederHeight), ((int)outputState.subwooferGain).ToString() + " dB");
 
 
             }
@@ -465,7 +505,7 @@ public class At_MasterOutputEditor : Editor
             string[] subChannelRouting = new string[outputState.outputChannelCount];
             for (int i = 0; i < outputState.outputChannelCount; i++)
             {
-                subChannelRouting[i] = i.ToString();
+                subChannelRouting[i] = (i+1).ToString();
             }
 
             int count;
@@ -476,6 +516,8 @@ public class At_MasterOutputEditor : Editor
 
                 if (count != (int)outputState.subwooferOutputChannelCount)
                 {
+                    updateHapticListenerOutputRouting = true;
+
                     outputState.subwooferOutputChannelCount = count;
                     masterOutput.subwooferOutputChannelCount = count;
 
@@ -509,17 +551,17 @@ public class At_MasterOutputEditor : Editor
             using (new GUILayout.VerticalScope())
             {
                 GUILayout.Label(" ");
-                GUILayout.Label("Subwoofer Input Routing");
+                GUILayout.Label("Routing");
 
                 using (new GUILayout.HorizontalScope())
                 {
                     using (new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Label("-Sub Ch. in-");
+                        GUILayout.Label("Output\nto channel");
                     }
                     using (new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Label("-Master Ch. out-");
+                        GUILayout.Label("Feed\nfrom channel");
                     }
 
                 }
@@ -529,7 +571,7 @@ public class At_MasterOutputEditor : Editor
                     using (new GUILayout.HorizontalScope())
                     {
 
-                        GUILayout.Label("channel " + c);
+                        GUILayout.Label((outputState.outputChannelCount + 1+c).ToString());
 
                         int select = EditorGUILayout.Popup(outputState.indexInputSubwoofer[c], subChannelRouting);
 
@@ -542,80 +584,119 @@ public class At_MasterOutputEditor : Editor
                     }
                 }
             }
-            /*
-            using (new GUILayout.HorizontalScope())
+            
+        }
+
+        HorizontalLine(Color.grey);
+
+        /*******************************************************************************/
+        // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+        /*******************************************************************************/
+        At_HapticListenerOutput[] hapticListenerOutputs = FindObjectsOfType<At_HapticListenerOutput>();
+
+        int hapticListenerOutputsCount = 0;
+
+        for (int i = 0; i < hapticListenerOutputs.Length; i++)
+        {
+            hapticListenerOutputsCount += hapticListenerOutputs[i].outputChannelCount;
+        }
+
+        int foundCount = 0;
+        if (hapticListenerOutputs != null && outputState.hapticListenerOutputGuid != null)
+        {
+            for (int i = 0; i < hapticListenerOutputs.Length; i++)
             {
-
-                if (count != (int)outputState.subwooferOutputChannelCount)
+                for(int j = 0; j < outputState.hapticListenerOutputGuid.Length; j++)
                 {
-                    outputState.subwooferOutputChannelCount = count;
-                    masterOutput.subwooferOutputChannelCount = count;
-
-                    outputState.indexInputSubwoofer = new int[count];
-                    for (int i = 0; i < count; i++)
+                    if (hapticListenerOutputs[i].guid == outputState.hapticListenerOutputGuid[j])
                     {
-                        outputState.indexInputSubwoofer[i] = i;
+                        foundCount++;
                     }
-                    masterOutput.indexInputSubwoofer = outputState.indexInputSubwoofer;
-                    shouldSave = true;
-
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        using (new GUILayout.HorizontalScope())
-                        {
-                            GUILayout.Label("-Output-");
-                        }
-                        using (new GUILayout.HorizontalScope())
-                        {
-                            GUILayout.Label("-Input-");
-                        }
-
-                    }
-                    for (int c = 0; c < outputState.subwooferOutputChannelCount; c++)
-                    {
-                        using (new GUILayout.HorizontalScope())
-                        {
-
-                            //GUILayout.Label("channel " + c);
-
-                            int select = EditorGUILayout.Popup(outputState.indexInputSubwoofer[c], subChannelRouting);
-
-                            if (select != outputState.indexInputSubwoofer[c])
-                            {
-                                outputState.indexInputSubwoofer[c] = select;
-                                shouldSave = true;
-                            }
-
-
-
-                        }
-                    }
-
                 }
-            }            
-            */
-            HorizontalLine(Color.grey);
-
-            //-----------------------------------------------------------------
-            // CLEAN BUTON
-            //----------------------------------------------------------------
-            using (new GUILayout.HorizontalScope())
-            {
-                GUILayout.Label("                 ");
-                if (cleanButtonContent == null)
-                    cleanButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/CleanStates_icn_transp")); // file name in the resources folder without the (.png) extension
-
-                if (GUILayout.Button(cleanButtonContent, GUILayout.Width(120), GUILayout.Height(30)))
-                {
-                    At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
-                }
-
             }
+        }
 
 
+        
+
+        if (outputState.hapticListenerOutputGuid == null
+            || outputState.hapticListenerOutputGuid.Length == 0
+            || hapticListenerOutputs.Length != outputState.hapticListenerOutputGuid.Length
+            || updateHapticListenerOutputRouting == true
+            || foundCount != hapticListenerOutputs.Length)
+        {
+
+            updateHapticListenerOutputRouting = false;
+
+            outputState.hapticListenerChannelsIndex = new int[hapticListenerOutputsCount];
+            for (int i = 0; i < hapticListenerOutputsCount; i++)
+            {
+                outputState.hapticListenerChannelsIndex[i] = -1;
+            }
+            outputState.hapticListenerChannelsSelectionIndex = new int[hapticListenerOutputsCount];
+
+            outputState.hapticListenerOutputChannelsCount = new int[hapticListenerOutputs.Length];
+            outputState.hapticListenerOutputGuid = new string[hapticListenerOutputs.Length];
+            for (int i = 0; i < hapticListenerOutputs.Length; i++)
+            {
+                outputState.hapticListenerOutputChannelsCount[i] = hapticListenerOutputs[i].outputChannelCount;
+                outputState.hapticListenerOutputGuid[i] = hapticListenerOutputs[i].guid;
+            }
 
         }
 
+
+        hapticListenerOutputChannelRouting = new string[hapticListenerOutputsCount + 1];
+        hapticListenerOutputChannelRouting[0] = "select";
+        for (int c = 1; c < hapticListenerOutputsCount + 1; c++)
+        {
+            hapticListenerOutputChannelRouting[c] = (outputState.outputChannelCount + outputState.subwooferOutputChannelCount + c).ToString();
+        }
+
+        int indexChannel = 0;
+        if (hapticListenerOutputChannelRouting != null)
+        {
+            for (int listenerOutputObjectIndex = 0; listenerOutputObjectIndex < hapticListenerOutputs.Length; listenerOutputObjectIndex++)
+            {
+
+                GUILayout.Label("Channels Output for Object '" + hapticListenerOutputs[listenerOutputObjectIndex].name + "'");
+                for (int c = 0; c < hapticListenerOutputs[listenerOutputObjectIndex].outputChannelCount; c++)
+                {
+
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        int select = EditorGUILayout.Popup(outputState.hapticListenerChannelsSelectionIndex[indexChannel], hapticListenerOutputChannelRouting);
+
+                        if (select != outputState.hapticListenerChannelsSelectionIndex[indexChannel])
+                        {
+                            outputState.hapticListenerChannelsIndex[indexChannel] = int.Parse(hapticListenerOutputChannelRouting[select]) - 1;
+
+                            outputState.hapticListenerChannelsSelectionIndex[indexChannel] = select;
+
+                            shouldSave = true;
+                        }
+                    }
+
+                    indexChannel++;
+                }
+
+            }
+        }
+        //-----------------------------------------------------------------
+        // CLEAN BUTON
+        //----------------------------------------------------------------
+        using (new GUILayout.HorizontalScope())
+        {
+            GUILayout.Label("                 ");
+            if (cleanButtonContent == null)
+                cleanButtonContent = new GUIContent((Texture)Resources.Load("At_3DAudioEngine/Prefabs/CleanStates_icn_transp")); // file name in the resources folder without the (.png) extension
+
+            if (GUILayout.Button(cleanButtonContent, GUILayout.Width(120), GUILayout.Height(30)))
+            {
+                At_AudioEngineUtils.CleanAllStates(SceneManager.GetActiveScene().name);
+            }
+
+        }
         masterOutput.audioDeviceName = outputState.audioDeviceName;
         masterOutput.outputChannelCount = outputState.outputChannelCount;
         masterOutput.gain = outputState.gain;
@@ -630,6 +711,12 @@ public class At_MasterOutputEditor : Editor
         masterOutput.crossoverFilterFrequency = outputState.crossoverFilterFrequency;
         masterOutput.indexInputSubwoofer = outputState.indexInputSubwoofer;
         masterOutput.subwooferGain = outputState.subwooferGain;
+
+
+        masterOutput.hapticListenerChannelsIndex = outputState.hapticListenerChannelsIndex;
+        masterOutput.hapticListenerOutputChannelsCount = outputState.hapticListenerOutputChannelsCount;
+        masterOutput.hapticListenerOutputGuid = outputState.hapticListenerOutputGuid;
+
     }
 
     // utility method

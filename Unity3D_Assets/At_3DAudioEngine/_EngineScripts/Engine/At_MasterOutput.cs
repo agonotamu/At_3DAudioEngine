@@ -37,7 +37,6 @@ enum FilterType
     HighPass = 2
 }
 
-
 public class At_MasterOutput : MonoBehaviour
 {
 
@@ -84,6 +83,13 @@ public class At_MasterOutput : MonoBehaviour
     public int[] indexInputSubwoofer;
     BiquadDirectFormI[] lowPassFilterLinkwitzRiley;
     BiquadDirectFormI[] highPassFilterLinkwitzRiley;
+
+    // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+    At_HapticListenerOutput[] hapticListenerOutputs;
+    At_HapticPlayer[] hapticPlayers;
+    public int[] hapticListenerOutputChannelsCount;
+    public string[] hapticListenerOutputGuid;
+    public int[] hapticListenerChannelsIndex;
     //------------------------------
 
     /// index of the selected speaker configuration in the popup menu of the At_MasterOutput Component GUI
@@ -103,9 +109,6 @@ public class At_MasterOutput : MonoBehaviour
 
     public float maxDistanceForDelay;
 
-
-    
-
     At_OutputState outputState;
     //-----------------------------------------------------------------
     // data used at runtime
@@ -124,11 +127,10 @@ public class At_MasterOutput : MonoBehaviour
     /// rms value of the signal from each channel, used to display bargraph
     public float[] subwooferMeters;
 
-
     // Start is called before the first frame update
     void Awake()
     {
-
+        
 
         At_Player[] players = FindObjectsOfType<At_Player>();
         
@@ -293,6 +295,13 @@ public class At_MasterOutput : MonoBehaviour
                     {
                         playerList[playerIndex].initAudioBuffer();
                     }
+
+                    // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+                    hapticListenerOutputs = FindObjectsOfType<At_HapticListenerOutput>();
+                    foreach (At_HapticListenerOutput hlo in hapticListenerOutputs)
+                        hlo.initializeOutput(samplingRate, At_AudioEngineUtils.asioOut.FramesPerBuffer);
+
+                    hapticPlayers = FindObjectsOfType<At_HapticPlayer>();
 
                     // Add a callback method to proccess the sample in the in/out buffer
                     At_AudioEngineUtils.asioOut.AudioAvailable += OnAsioOutAudioAvailable;
@@ -462,6 +471,9 @@ public class At_MasterOutput : MonoBehaviour
     public void OnApplicationQuit(){
         //Debug.Log("OnDisable Output");
         AT_SPAT_WFS_destroyAllSpatializer();
+
+        //HAPTIC_ENGINE_DESTROY_ALL_MIXER();
+
         if (At_AudioEngineUtils.asioOut != null)
         {
             At_AudioEngineUtils.asioOut.Stop();
@@ -495,7 +507,7 @@ public class At_MasterOutput : MonoBehaviour
     private void Update()
     {
         UpdateVirtualMicPosition();
-        //AT_SPAT_WFS_setSubwooferCutoff(crossoverFilterFrequency);
+        //AT_SPAT_WFS_setSubwooferCutoff(crossoverFilterFrequency);       
     }
 
 
@@ -536,6 +548,39 @@ public class At_MasterOutput : MonoBehaviour
         }
     }
 
+    // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+    At_HapticListenerOutput FindHapticListenerOutputWithChannelIndex(int channelIndex, out int indexChannelOfHapticListenerOutput)
+    {
+        string objectGuid= "";
+        indexChannelOfHapticListenerOutput = -1;
+
+        int offset = 0;
+        for (int indexObject = 0; indexObject < hapticListenerOutputChannelsCount.Length; indexObject++)
+        {
+            int channelCount = hapticListenerOutputChannelsCount[indexObject];
+            for (int i = offset; i< offset + channelCount; i++)
+            {
+                if (hapticListenerChannelsIndex[i] == channelIndex)
+                {
+                    objectGuid = hapticListenerOutputGuid[indexObject];
+                    indexChannelOfHapticListenerOutput = i - offset;
+                    break;
+                }
+            }
+            offset += channelCount;
+        }
+        At_HapticListenerOutput hlo;
+
+        for (int i = 0; i < hapticListenerOutputs.Length; i++)
+        {
+            if (hapticListenerOutputs[i].guid == objectGuid)
+            {
+                return hapticListenerOutputs[i];
+            }
+        }
+
+        return null;
+    }
     /**
    * @brief /!\ Callback method called by NAudio to provide the output buffer to the ASIO driver.
    * 
@@ -563,6 +608,7 @@ public class At_MasterOutput : MonoBehaviour
                     // conform the input buffer to the output bus format (including spatialization if 3D player)
                     result = playerList[playerIndex].conformInputBufferToOutputBusFormat(e.SamplesPerBuffer); // no C# if 3D
 
+
                     if (result == true) playerReady = true;
 
 
@@ -571,13 +617,26 @@ public class At_MasterOutput : MonoBehaviour
             }
         }
 
+        if (hapticPlayers != null & hapticPlayers.Length != 0)
+        {
+            
+            // TODO : check is Haptic Player should be destroyed has we do for At_Player
+            for (int playerIndex = 0; playerIndex < hapticPlayers.Length; playerIndex++)
+            {
+                hapticPlayers[playerIndex].conformInputBufferToOutputBusFormat(e.SamplesPerBuffer);
+            }
+        }
+
         // if the buffers has been filled by the At_player instances 
         if (playerReady && isEngineStarted)
         {
 
             int numChannel;
-            if (isBassManaged) numChannel = outputChannelCount + subwooferOutputChannelCount;
-            else numChannel = outputChannelCount;
+            if (isBassManaged) numChannel = outputChannelCount + subwooferOutputChannelCount + hapticListenerChannelsIndex.Length;
+            else numChannel = outputChannelCount + hapticListenerChannelsIndex.Length;
+
+            foreach (At_HapticListenerOutput hlo in hapticListenerOutputs)
+                hlo.initializeMeterValues();
 
             for (int channelIndex = 0; channelIndex < numChannel; channelIndex++)
             {
@@ -586,10 +645,12 @@ public class At_MasterOutput : MonoBehaviour
                     meters[channelIndex] = 0;
                     
                 }
-                else
+                else if (channelIndex >= outputChannelCount && channelIndex < outputChannelCount + subwooferOutputChannelCount)
                 {
                     subwooferMeters[channelIndex - outputChannelCount] = 0;
                 }
+               
+
                 for (int sampleIndex = 0; sampleIndex < e.SamplesPerBuffer; sampleIndex++)
                 {
                     
@@ -600,20 +661,36 @@ public class At_MasterOutput : MonoBehaviour
 
                         // Apply gain set in the custom inspector editor of the player
                         float volume = Mathf.Pow(10.0f, gain / 20.0f);
-                        if (isBassManaged)
-                            sample = volume * AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(sampleIndex, channelIndex, true);
-                        else
-                            sample = volume * AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(sampleIndex, channelIndex, false);
-                            
+       
+                        sample = volume * AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(sampleIndex, channelIndex, isBassManaged);
+                        
                         meters[channelIndex] += Mathf.Pow(sample, 2f);
 
                     }
-                    else
+                    else if(channelIndex >= outputChannelCount && channelIndex < outputChannelCount + subwooferOutputChannelCount)
                     {
                         float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
                         // channels for subwoofer : 
                         sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - outputChannelCount]);
                         subwooferMeters[channelIndex - outputChannelCount] += Mathf.Pow(sample, 2f);
+
+                    }
+                    // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+                    else
+                    {
+                        int indexChannelOfHapticListenerOutput;
+                        At_HapticListenerOutput hlo = FindHapticListenerOutputWithChannelIndex(channelIndex, out indexChannelOfHapticListenerOutput);
+                        if (indexChannelOfHapticListenerOutput != -1 && hlo != null)
+                        {
+                            sample = hlo.getMixingBufferSampleForChannelAndZero(sampleIndex, indexChannelOfHapticListenerOutput);
+                        }
+                        else
+                        {
+                            Debug.LogError("can't find Haptic Listener Output for channel " + channelIndex + "\n Check Haptic Channel Routing in MasterOutput Component ! ");
+                            
+                            sample = 0;
+                        }
+                         
 
                     }
 
@@ -639,11 +716,15 @@ public class At_MasterOutput : MonoBehaviour
                 {
                     meters[channelIndex] = Mathf.Sqrt(meters[channelIndex] / e.SamplesPerBuffer);
                 }
-                else
+                else if (channelIndex >= outputChannelCount && channelIndex < outputChannelCount + subwooferOutputChannelCount)
                 {
                     subwooferMeters[channelIndex - outputChannelCount] = Mathf.Sqrt(subwooferMeters[channelIndex - outputChannelCount] / e.SamplesPerBuffer);
-                }
+                }               
             }
+
+            foreach (At_HapticListenerOutput hlo in hapticListenerOutputs)
+                hlo.normalizeMeterValues(e.SamplesPerBuffer);
+
 
             e.WrittenToOutputBuffers = true;
 
@@ -849,6 +930,9 @@ public class At_MasterOutput : MonoBehaviour
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_setSampleRate(float sampleRate);
 
+    // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
+    [DllImport("AudioPlugin_AtHaptic")]
+    private static extern void HAPTIC_ENGINE_DESTROY_ALL_MIXER();
     #endregion
 
 }

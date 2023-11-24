@@ -18,6 +18,7 @@ public class SoundWaveShaderManager : MonoBehaviour
     public float[] _wfsAmps;
     public float[] _wfsDelays;
 
+    public float[] _wfsMask;
 
     Vector4[] _wfsAmps_v4;
     Vector4[] _wfsDelays_v4;
@@ -35,6 +36,11 @@ public class SoundWaveShaderManager : MonoBehaviour
         _wavePositions = new Vector4[master.outputChannelCount];
         speakers = new GameObject[master.outputChannelCount];
         _wfsAmps = new float[master.outputChannelCount];
+        _wfsMask = new float[master.outputChannelCount];
+        for (int i = 0; i <master.outputChannelCount; i++)
+        {
+            _wfsMask[i] = 1.0f;
+        }
         _wfsDelays = new float[master.outputChannelCount];
 
 
@@ -60,7 +66,7 @@ public class SoundWaveShaderManager : MonoBehaviour
             {
                 _wavePositions[i].x = speakers[i].transform.position.x;
                 _wavePositions[i].z = speakers[i].transform.position.z;
-                _wfsAmps_v4[i].x = player.volumeArray[i]; //_wfsAmps[i];
+                _wfsAmps_v4[i].x = _wfsMask[i] * player.volumeArray[i]; //_wfsAmps[i];
                 _wfsAmps[i] = _wfsAmps_v4[i].x;
                 //_wfsAmps_v4[i].x = _wfsAmps[i];
                 _wfsDelays_v4[i].x = player.delayArray[i];//_wfsDelays[i];

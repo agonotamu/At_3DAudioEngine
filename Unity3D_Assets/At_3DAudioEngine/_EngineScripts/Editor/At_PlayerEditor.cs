@@ -80,6 +80,7 @@ public class At_PlayerEditor : Editor
     SerializedProperty serialized_channelRouting;
 
     SerializedProperty serialized_isUnityAudioSource;
+
     //----------------------------------------------------
 
     At_OutputState outputState;
@@ -107,6 +108,7 @@ public class At_PlayerEditor : Editor
         serialized_minDistance = serializedObject.FindProperty("minDistance");
         serialized_channelRouting = serializedObject.FindProperty("channelRouting");
         serialized_isUnityAudioSource = serializedObject.FindProperty("isUnityAudioSource");
+        
 
         previousIsEditor = Application.isEditor;
         previousIsPlaying = Application.isPlaying;
@@ -149,6 +151,7 @@ public class At_PlayerEditor : Editor
 
                 playerState.channelRouting = new int[serialized_channelRouting.arraySize];
                 
+
                 for (int i = 0; i < serialized_channelRouting.arraySize; i++)
                 {
                     SerializedProperty property = serialized_channelRouting.GetArrayElementAtIndex(i);
@@ -175,8 +178,7 @@ public class At_PlayerEditor : Editor
             if (!Application.isPlaying)
             {
                 player.initMeters();
-            }
-           
+            }           
 
             // init channel routing data for if the player is 2D
             outputState = At_AudioEngineUtils.getOutputState(SceneManager.GetActiveScene().name);

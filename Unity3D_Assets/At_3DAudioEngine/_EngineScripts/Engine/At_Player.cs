@@ -52,8 +52,11 @@ public class At_Player : MonoBehaviour
     const int maxIndexBufferRW_AudioSource = 4;
     /// array containing the all the samples of the audio file
     private float[] rawAudioData;
+
     /// array containing a single frame of the audio file
-    private float[] inputFileBuffer;
+    public float[] inputFileBuffer;
+    public int inputFileBufferReadOffset;
+
     /// array containing the processed data (after spatialization or up/downmix) of the array for a single frame
     private float[] playerOutputBuffer;
 
@@ -145,6 +148,8 @@ public class At_Player : MonoBehaviour
 
     At_Listener listener;
 
+    // 
+   
 
     void Reset()
     {        
@@ -821,13 +826,13 @@ public class At_Player : MonoBehaviour
                 if (is3D)
                 {
                     //Debug.Log("process spatID = " + spatID);
-                    int offset = 0;
+                    inputFileBufferReadOffset = 0;
                     if (isUnityAudioSource)
                     {
-                        offset = currentIndexInputBufferRead_AudioSource *  asioOutputBufferSize;
+                        inputFileBufferReadOffset = currentIndexInputBufferRead_AudioSource *  asioOutputBufferSize;
                     }
                     
-                    AT_SPAT_WFS_process(spatID,inputFileBuffer, playerOutputBuffer, bufferSize, offset, numChannelsInAudioFile, outputChannelCount);
+                    AT_SPAT_WFS_process(spatID,inputFileBuffer, playerOutputBuffer, bufferSize, inputFileBufferReadOffset, numChannelsInAudioFile, outputChannelCount);
                     
                     //currentIndexInputBufferRead_AudioSource = mod((currentIndexInputBufferRead_AudioSource + 1), maxIndexBufferRW_AudioSource);
                     currentIndexInputBufferRead_AudioSource++;

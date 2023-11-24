@@ -1,0 +1,50 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: Le répertoire intermédiaire (build\Debug\) contient des fichiers partagés provenant d'un autre projet (AudioPlugin_AtSpatializer.vcxproj, AudioPluginDemo.vcxproj). Cela peut entraîner un comportement de nettoyage et de regénération incorrect.
+  At_SpatializationEngine.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_SpatializationEngine.cpp(51,83): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_SpatializationEngine.cpp(55,82): warning C4244: 'argument' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_SpatializationEngine.cpp(64,18): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(835,9): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(785,17): message : voir la référence à l'instanciation de la fonction modèle 'Spatializer::At_WfsSpatializer *std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::_Emplace_reallocate<const _Ty&>(Spatializer::At_WfsSpatializer *const ,const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(873,9): message : voir la référence à l'instanciation de la fonction modèle '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<const _Ty&>(const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(872,23): message : pendant la compilation de la fonction membre classe modèle 'void std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::push_back(const _Ty &)'
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_SpatializationEngine.cpp(142,35): message : voir la première référence à « std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::push_back » dans « Spatializer::At_SpatializationEngine::CreateWfsSpatializer »
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_SpatializationEngine.h(36,29): message : voir la référence à l'instanciation classe modèle 'std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>' en cours de compilation
+  At_WfsSpatializer.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(58,86): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(105,97): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(112,102): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(130,29): warning C4244: '=' : conversion de 'double' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(152,29): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(157,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(159,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(184,90): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(405,45): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(409,37): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(410,47): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(537,23): warning C4553: '==' : résultat de l'expression non utilisé ; souhaitiez-vous utiliser '=' ?
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(570,26): warning C4101: 'wfsDelay' : variable locale non référencée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(570,15): warning C4101: 'wfsVolume' : variable locale non référencée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(540,15): warning C4101: 'direction' : variable locale non référencée
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\ostream(293,13): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\ostream(278,39): message : pendant la compilation de la fonction membre classe modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(int)'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(19,63): message : voir la première référence à « std::basic_ostream<char,std::char_traits<char>>::operator << » dans « Spatializer::At_WfsSpatializer::At_WfsSpatializer »
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_WfsSpatializer.cpp(19,37): message : voir la référence à l'instanciation classe modèle 'std::basic_ostream<char,std::char_traits<char>>' en cours de compilation
+  Plugin_At_Spatializer.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_Effect.h(12,2): warning C4091: 'static ' : ignoré à gauche de 'At_Effect' quand aucune variable n'est déclarée
+  Génération de code en cours...
+     Création de la bibliothèque E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.lib et de l'objet E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.exp
+  AudioPlugin_AtSpatializer.vcxproj -> E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.dll
+  Un sous-répertoire ou un fichier ..\..\Assets\At_3DAudioEngine\Other\Plugins\x86_64 existe déjà.
+          1 fichier(s) copié(s).

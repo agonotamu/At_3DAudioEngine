@@ -53,6 +53,34 @@ public class At_AudioEngineUtils : MonoBehaviour
         }
         return false;
     }
+
+    public static GameObject getGameObjectWithGuid(string guid)
+    {
+       
+        GameObject[] playerObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
+        foreach (GameObject go in playerObjects)
+        {
+            if (go.GetComponent<At_Player>() != null && go.GetComponent<At_Player>().guid == guid) 
+                return go;
+        }
+        return null;
+
+    }
+
+    public static At_Player getAtPlayerWithGuid(string guid)
+    {
+
+        At_Player[] players = Resources.FindObjectsOfTypeAll(typeof(At_Player)) as At_Player[];
+        foreach (At_Player p in players)
+        {
+            if (p.guid == guid)
+                return p;
+        }
+        return null;
+
+    }
+
+
     static bool findGuidOfRandomInScene(string guid, At_DynamicRandomPlayer[] randomPlayers)
     {
         foreach (At_DynamicRandomPlayer drp in randomPlayers)
@@ -61,7 +89,29 @@ public class At_AudioEngineUtils : MonoBehaviour
         }
         return false;
     }
-  
+
+    
+
+    static bool findGuidOfHapticPlayerdInScene(string guid, At_HapticPlayer[] hapticPlayers)
+    {
+        foreach (At_HapticPlayer h in hapticPlayers)
+        {
+            if (h.guid == guid) return true;
+        }
+        return false;
+    }
+
+    static bool findGuidOfHapticListenerOutputdInScene(string guid, At_HapticListenerOutput[] hapticListenerOutputs)
+    {
+        foreach (At_HapticListenerOutput hlo in hapticListenerOutputs)
+        {
+            if (hlo.guid == guid) return true;
+        }
+        return false;
+    }
+
+    
+
     public static void CleanAllStates(string sceneName)
     {
         At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
@@ -69,6 +119,10 @@ public class At_AudioEngineUtils : MonoBehaviour
         At_Player[] players = Resources.FindObjectsOfTypeAll(typeof(At_Player)) as At_Player[];
 
         At_DynamicRandomPlayer[] randomPlayers = Resources.FindObjectsOfTypeAll(typeof(At_DynamicRandomPlayer)) as At_DynamicRandomPlayer[];
+
+        At_HapticPlayer[] haptics = Resources.FindObjectsOfTypeAll(typeof(At_HapticPlayer)) as At_HapticPlayer[];
+
+        At_HapticListenerOutput[] hapticListenerOutputs = Resources.FindObjectsOfTypeAll(typeof(At_HapticListenerOutput)) as At_HapticListenerOutput[];
 
         bool isStateFileClean = false;
 
@@ -116,6 +170,61 @@ public class At_AudioEngineUtils : MonoBehaviour
             {
                 At_DynamicRandomPlayerState rps = audioEngineStatesForScene.randomPlayerStates[i];
                 if (!findGuidOfRandomInScene(rps.guid, randomPlayers))
+                {
+                    isStateFileClean = false;
+                    break;
+                }
+
+            }
+        }
+
+
+        isStateFileClean = false;
+
+        while (!isStateFileClean)
+        {
+            for (int i = 0; i < audioEngineStatesForScene.hapticPlayerStates.Count; i++)
+            {
+                At_HapticPlayerState hs = audioEngineStatesForScene.hapticPlayerStates[i];
+                if (!findGuidOfHapticPlayerdInScene(hs.guid, haptics))
+                {
+                    removeHapticPlayerWithGuid(sceneName, hs.guid);
+                }
+            }
+
+            // test if clean
+            isStateFileClean = true;
+            for (int i = 0; i < audioEngineStatesForScene.hapticPlayerStates.Count; i++)
+            {
+                At_HapticPlayerState hs = audioEngineStatesForScene.hapticPlayerStates[i];
+                if (!findGuidOfHapticPlayerdInScene(hs.guid, haptics))
+                {
+                    isStateFileClean = false;
+                    break;
+                }
+
+            }
+        }
+
+        isStateFileClean = false;
+
+        while (!isStateFileClean)
+        {
+            for (int i = 0; i < audioEngineStatesForScene.hapticListenerOutputStates.Count; i++)
+            {
+                At_HapticListenerOutputState hlos = audioEngineStatesForScene.hapticListenerOutputStates[i];
+                if (!findGuidOfHapticListenerOutputdInScene(hlos.guid, hapticListenerOutputs))
+                {
+                    removeHapticListenerOutputWithGuid(sceneName, hlos.guid);
+                }
+            }
+
+            // test if clean
+            isStateFileClean = true;
+            for (int i = 0; i < audioEngineStatesForScene.hapticListenerOutputStates.Count; i++)
+            {
+                At_HapticListenerOutputState hlos = audioEngineStatesForScene.hapticListenerOutputStates[i];
+                if (!findGuidOfHapticListenerOutputdInScene(hlos.guid, hapticListenerOutputs))
                 {
                     isStateFileClean = false;
                     break;
@@ -246,6 +355,45 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     /***************************************************************************
      * 
+     * CHANGE THE NAME OF A HAPTIC PLAYER IN A HAPTIC PLAYER STATE AND SAVE THE STATE
+     * 
+     **************************************************************************/
+    public static void changeHapticPlayerName(string sceneName, string previousName, string newName)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        foreach (At_HapticPlayerState state in audioEngineStatesForScene.hapticPlayerStates)
+        {
+            if (state.name == previousName)
+            {
+                state.name = newName;
+            }
+        }
+        SaveAllState(sceneName);
+    }
+
+    /***************************************************************************
+     * 
+     * CHANGE THE NAME OF A HAPTIC LISTENER OUTPUT IN A LISTENER OUTPUT STATE AND SAVE THE STATE
+     * 
+     **************************************************************************/
+    public static void changeHapticListernerOutputName(string sceneName, string previousName, string newName)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        foreach (At_HapticListenerOutputState state in audioEngineStatesForScene.hapticListenerOutputStates)
+        {
+            if (state.name == previousName)
+            {
+                state.name = newName;
+            }
+        }
+        SaveAllState(sceneName);
+    }
+    
+
+    /***************************************************************************
+     * 
      * REMOVE PLAYER WHEN COMPONENT IS REMOVED OR GAMEOBJECT IS DELETED
      * 
      **************************************************************************/
@@ -272,6 +420,46 @@ public class At_AudioEngineUtils : MonoBehaviour
             if (audioEngineStatesForScene.randomPlayerStates[i].guid == guid)
             {
                 audioEngineStatesForScene.randomPlayerStates.RemoveAt(i);
+                break;
+            }
+        }
+        SaveAllState(sceneName);
+    }
+
+    /***************************************************************************
+     * 
+     * REMOVE HAPTIC PLAYER WHEN COMPONENT IS REMOVED OR GAMEOBJECT IS DELETED
+     * 
+     **************************************************************************/
+    public static void removeHapticPlayerWithGuid(string sceneName, string guid)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        for (int i = 0; i < audioEngineStatesForScene.hapticPlayerStates.Count; i++)
+        {
+            if (audioEngineStatesForScene.hapticPlayerStates[i].guid == guid)
+            {
+                audioEngineStatesForScene.hapticPlayerStates.RemoveAt(i);
+                break;
+            }
+        }
+        SaveAllState(sceneName);
+    }
+
+    /***************************************************************************
+     * 
+     * REMOVE HAPTIC LISTENER OUTPUT WHEN COMPONENT IS REMOVED OR GAMEOBJECT IS DELETED
+     * 
+     **************************************************************************/
+    public static void removeHapticListenerOutputWithGuid(string sceneName, string guid)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        for (int i = 0; i < audioEngineStatesForScene.hapticListenerOutputStates.Count; i++)
+        {
+            if (audioEngineStatesForScene.hapticListenerOutputStates[i].guid == guid)
+            {
+                audioEngineStatesForScene.hapticListenerOutputStates.RemoveAt(i);
                 break;
             }
         }
@@ -336,6 +524,22 @@ public class At_AudioEngineUtils : MonoBehaviour
                             audioEngineStatesDictionary[sceneName].randomPlayerStates.Add(drps);
 
                         }
+                        // this is an At_HapticPlayer
+                        else if (lines[lineIndex].Contains("\"type\":2"))
+                        {
+                            At_HapticPlayerState hs = new At_HapticPlayerState();
+                            JsonUtility.FromJsonOverwrite(lines[lineIndex], hs);
+                            audioEngineStatesDictionary[sceneName].hapticPlayerStates.Add(hs);
+
+                        }
+                        // this is an At_HapticListenerOutput
+                        else if (lines[lineIndex].Contains("\"type\":3"))
+                        {
+                            At_HapticListenerOutputState hlos = new At_HapticListenerOutputState();
+                            JsonUtility.FromJsonOverwrite(lines[lineIndex], hlos);
+                            audioEngineStatesDictionary[sceneName].hapticListenerOutputStates.Add(hlos);
+
+                        }
 
                     }
                 } 
@@ -386,7 +590,17 @@ public class At_AudioEngineUtils : MonoBehaviour
         {
             string jsonRandomPlayerState = JsonUtility.ToJson(state);
             jsonAllState = jsonAllState + "\n" + jsonRandomPlayerState;
-        }        
+        }
+        foreach (At_HapticPlayerState state in audioEngineStatesForScene.hapticPlayerStates)
+        {
+            string jsonHapticPlayerState = JsonUtility.ToJson(state);
+            jsonAllState = jsonAllState + "\n" + jsonHapticPlayerState;
+        }
+        foreach (At_HapticListenerOutputState state in audioEngineStatesForScene.hapticListenerOutputStates)
+        {
+            string jsonHapticListenerOutputState = JsonUtility.ToJson(state);
+            jsonAllState = jsonAllState + "\n" + jsonHapticListenerOutputState;
+        }
         WriteToFile(sceneName + "_States.txt", jsonAllState);
     }
 
@@ -451,6 +665,12 @@ public class At_AudioEngineUtils : MonoBehaviour
         return audioEngineStatesForScene.outputState;
     }
 
+    /***************************************************************************
+    * 
+    * GET / CREATE At_PlayerState
+    * 
+    **************************************************************************/
+
     // ------------------------------------------------------
     // create and add a PlayerState in the audioEngineStatesForScene class when a new At_Player is added in the scene
     // ------------------------------------------------------
@@ -488,6 +708,96 @@ public class At_AudioEngineUtils : MonoBehaviour
 
     }
 
+    /***************************************************************************
+    * 
+    * GET / CREATE At_HapticPlayerState
+    * 
+    **************************************************************************/
+
+    // ------------------------------------------------------
+    // create and add a At_HapticPlayerState in the audioEngineStatesForScene class when a new At_HapticPlayer is added in the scene
+    // ------------------------------------------------------
+    public static At_HapticPlayerState createNewHapticPlayerStateWithGuidAndName(string sceneName, string guid, string name)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        if (audioEngineStatesForScene == null)
+        {
+            audioEngineStatesForScene = new At_3DAudioEngineState();
+        }
+
+        At_HapticPlayerState hs = new At_HapticPlayerState();
+        hs.name = name;
+        hs.guid = guid;
+        audioEngineStatesForScene.hapticPlayerStates.Add(hs);
+        return audioEngineStatesForScene.hapticPlayerStates[audioEngineStatesForScene.hapticPlayerStates.Count - 1];
+    }
+    // ------------------------------------------------------
+    // get the state of an instance of At_HapticPlayer in the scene
+    // ------------------------------------------------------
+    public static At_HapticPlayerState getHapticPlayerStateWithGuidAndName(string sceneName, string guid, string name)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        if (audioEngineStatesForScene == null)
+        {
+            return null;
+        }
+        else
+        {
+            return audioEngineStatesForScene.getHapticPlayerState(guid);
+        }
+
+    }
+
+    /***************************************************************************
+    * 
+    * GET / CREATE At_HapticListenerOutputState
+    * 
+    **************************************************************************/
+    // ------------------------------------------------------
+    // get the state of an instance of At_HapticListenerOutputState in the scene
+    // ------------------------------------------------------
+    public static At_HapticListenerOutputState getHapticListenerOutputStateWithGuidAndName(string sceneName, string guid, string name)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        if (audioEngineStatesForScene == null)
+        {
+            return null;
+        }
+        else
+        {
+            return audioEngineStatesForScene.getHapticListenerOutputPlayerState(guid);
+        }
+
+    }
+    // ------------------------------------------------------
+    // create and add a At_HapticListenerOutputState in the audioEngineStatesForScene class when a new
+    // At_HapticListenerOutputState is added in the scene
+    // ------------------------------------------------------
+    public static At_HapticListenerOutputState createNewHapticListenerOutputStateWithGuidAndName(string sceneName, string guid, string name)
+    {
+        At_3DAudioEngineState audioEngineStatesForScene = audioEngineStatesDictionary[sceneName];
+
+        if (audioEngineStatesForScene == null)
+        {
+            audioEngineStatesForScene = new At_3DAudioEngineState();
+        }
+
+        At_HapticListenerOutputState hlos = new At_HapticListenerOutputState();
+        hlos.name = name;
+        hlos.guid = guid;
+        audioEngineStatesForScene.hapticListenerOutputStates.Add(hlos);
+        return audioEngineStatesForScene.hapticListenerOutputStates[audioEngineStatesForScene.hapticListenerOutputStates.Count - 1];
+    }
+
+
+    /***************************************************************************
+    * 
+    * GET / CREATE At_HapticListenerOutputState ----- OBSOLETE !!!
+    * 
+    **************************************************************************/
     // ------------------------------------------------------
     // create and add a DynamicRandomPlayerState in the audioEngineStatesForScene class when a new At_DynamicRandomPlayer is added in the scene
     // ------------------------------------------------------

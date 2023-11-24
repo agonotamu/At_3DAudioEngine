@@ -55,12 +55,61 @@ public class At_3DAudioEngineState
         return null;
     }
 
+    /******************************************************************************************************
+     * 
+     *                                  Haptic Player state
+     * 
+     * ***************************************************************************************************/
+    // List of At_PLayerState maintaining the state of each player attached to a GameObject in the scene 
+    public List<At_HapticPlayerState> hapticPlayerStates = new List<At_HapticPlayerState>();
 
-  /******************************************************************************************************
-  * 
-  *                                  dynamic random players state
-  * 
-  * ***************************************************************************************************/
+    // Get whole PLayer State with the GameObject Name
+    public At_HapticPlayerState getHapticPlayerState(string guid)
+    {
+        // loop through the list of Saved Players in the scene
+        for (int i = 0; i < hapticPlayerStates.Count; i++)
+        {
+            // if the name is found, return
+            if (hapticPlayerStates[i].guid == guid)
+            {
+                return hapticPlayerStates[i];
+            }
+        }
+        return null;
+
+    }
+
+    /******************************************************************************************************
+    * 
+    *                                  Haptic Listener Output state
+    * 
+    * ***************************************************************************************************/
+    // List of At_HapticListenerOutputState maintaining the state of each player attached to a GameObject in the scene 
+    public List<At_HapticListenerOutputState> hapticListenerOutputStates = new List<At_HapticListenerOutputState>();
+
+    // Get whole PLayer State with the GameObject Name
+    public At_HapticListenerOutputState getHapticListenerOutputPlayerState(string guid)
+    {
+        // loop through the list of Saved Players in the scene
+        for (int i = 0; i < hapticListenerOutputStates.Count; i++)
+        {
+            // if the name is found, return
+            if (hapticListenerOutputStates[i].guid == guid)
+            {
+                return hapticListenerOutputStates[i];
+            }
+        }
+        return null;
+
+    }
+
+    
+
+    /******************************************************************************************************
+    * 
+    *                                  dynamic random players state
+    * 
+    * ***************************************************************************************************/
     // List of At_PLayerState maintaining the state of each player attached to a GameObject in the scene 
     public List<At_DynamicRandomPlayerState> randomPlayerStates = new List<At_DynamicRandomPlayerState>();
 
