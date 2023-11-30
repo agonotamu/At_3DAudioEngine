@@ -50,6 +50,8 @@ public class At_PlayerState
 
     public bool isUnityAudioSource = false;
 
+    public bool isLookAtListener = false;
+
     
 
 }

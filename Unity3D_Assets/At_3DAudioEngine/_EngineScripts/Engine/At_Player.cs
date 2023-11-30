@@ -94,6 +94,8 @@ public class At_Player : MonoBehaviour
     // copy of the saved player state
     At_PlayerState playerState;
     
+    public bool isLookAtListener;
+
     //-----------------------------------------------------------------
     // data used at runtime
     // ----------------------------------------------------------------
@@ -120,7 +122,7 @@ public class At_Player : MonoBehaviour
     public bool isUnityAudioSource;
 
     // true if the file is streamed from disk or if it is entirely laoded in RAM at startup
-    public bool isStreaming = true;
+    public bool isStreaming = false;
     // current sample index of the stream
     int numSampleReadForStream = 0;
 
@@ -147,9 +149,6 @@ public class At_Player : MonoBehaviour
     string objectName;
 
     At_Listener listener;
-
-    // 
-   
 
     void Reset()
     {        
@@ -236,6 +235,7 @@ public class At_Player : MonoBehaviour
 
     public void Awake() {
 
+            
         listener = GameObject.FindObjectOfType<At_Listener>();
 
         objectName = gameObject.name;
@@ -425,6 +425,23 @@ public class At_Player : MonoBehaviour
         isInputBufferInitialized = true;
     }
 
+    public unsafe void getDelay(int spatID, float[] delay, int arraySize)
+    {
+        fixed (float* delayPtr = delay)
+        {
+            AT_SPAT_WFS_getDelay(spatID, (IntPtr)delayPtr, arraySize);
+        }
+    }
+
+    public unsafe void getVolume(int spatID, float[] volume, int arraySize)
+    {
+
+        fixed (float* volumePtr = volume)
+        {
+            AT_SPAT_WFS_getVolume(spatID, (IntPtr)volumePtr, arraySize);
+        }
+    }
+
     /**
     * 
     * @brief Update the spatialization parameters at each frame using extern call of the 3D Audio Engine API :
@@ -586,6 +603,12 @@ public class At_Player : MonoBehaviour
         if (is3D)
         {
             UpdateSpatialParameters();
+
+            if (isLookAtListener)
+            {
+                transform.LookAt(listener.gameObject.transform);
+            }
+
         }
         else //
         {
@@ -656,7 +679,7 @@ public class At_Player : MonoBehaviour
             {
                 if (bufferSize <= MAX_BUF_SIZE)
                 {
-                    // fill the raw data buffer 
+                    // fill the raw data buffer                     
                     if (aud.Position + bufferSize * numChannelsInAudioFile * 4 <= (int)aud.Length)
                     {
                         
@@ -676,35 +699,46 @@ public class At_Player : MonoBehaviour
             }
 
             if (rawAudioData != null && aud != null)
-            {
+            {                        
+                
+                // Apply gain set in the custom inspector editor of the player
+                float volume = Mathf.Pow(10.0f, gain / 20.0f);
+
+                int indexInInputFileBuffer=0;
+                int indexInRawData=0;
+
+               
                 // loop on each channel of the audio file
                 for (int channelIndex = 0; channelIndex < numChannelsInAudioFile; channelIndex++)
                 {
                     meters[channelIndex] = 0;
+                    indexInInputFileBuffer = 0;
+                    indexInRawData = 0;
 
                     // loop on each sample for the output buffer
                     for (int sampleIndex = 0; sampleIndex < bufferSize; sampleIndex++)
                     {
                         // read index : calculate the index in the raw data of the audio file
-                        int indexInRawData = audioFileReadOffset[channelIndex] + numChannelsInAudioFile * sampleIndex + channelIndex;
+                        indexInRawData = audioFileReadOffset[channelIndex] + numChannelsInAudioFile * sampleIndex + channelIndex;
+
                         // write index : calculate the index in the inputFileBuffer buffer
-                        int indexInInputFileBuffer = numChannelsInAudioFile * sampleIndex + channelIndex;
+                        indexInInputFileBuffer = numChannelsInAudioFile * sampleIndex + channelIndex;
 
 
-                        // Apply gain set in the custom inspector editor of the player
-                        float volume = Mathf.Pow(10.0f, gain / 20.0f);
                         if (isStreaming)
                         {
                             if (sampleIndex < numSampleReadForStream)
                             {
                                 inputFileBuffer[indexInInputFileBuffer] = volume * rawAudioData[indexInInputFileBuffer];
+
                                 meters[channelIndex] += Mathf.Pow(inputFileBuffer[indexInInputFileBuffer], 2f);
                             }
                             else
                             {
                                 reachEndOfFile = true;
+                                break;
                             }
-                            
+
                         }
                         else
                         {
@@ -713,13 +747,18 @@ public class At_Player : MonoBehaviour
                                 inputFileBuffer[indexInInputFileBuffer] = volume * rawAudioData[indexInRawData];
                                 // Start calculating the meter value for each channel (sum of square)
                                 meters[channelIndex] += Mathf.Pow(inputFileBuffer[indexInInputFileBuffer], 2f);
-                            }        
+                            }
                             else
                             {
+                                
                                 reachEndOfFile = true;
+                                break;
                             }
                         }
 
+                        // Modif Gonot 30/11/2023 - Debug Looping
+                        // Do it after breaking the loop when we've finished to fill the output buffer
+                        /*
                         // Otherwise : this is the end of the audiofile
                         if (reachEndOfFile)
                         {
@@ -740,43 +779,115 @@ public class At_Player : MonoBehaviour
                                 isPlaying = false;
 
                             }
-                            reachEndOfFile = false;
+                            reachEndOfFile = false;                            
                             break;
+                        }
+                        */
+
+                        // Modif Gonot 30/11/2023 - Debug Looping
+                        
+                    }
+
+                    // Modif Gonot 30/11/2023 - Debug Looping
+                    // Now, we must finish to feed the buffer with the beginning of the audio file and maintain the looping offset;                    
+                    // ----------------------
+                    // if the end of the file has been reached, feed the rest of buffer with the begining ofnthe audio file
+                    if (reachEndOfFile)
+                    {
+                        break;  
+                    }
+
+                    // update the read offset for each channel
+                    audioFileReadOffset[channelIndex] += bufferSize * numChannelsInAudioFile;
+
+                }
+
+                // Modif Gonot 30/11/2023 - Debug Looping
+                // Now, we must finish to feed the buffer with the beginning of the audio file and maintain the looping offset;                    
+                // ----------------------
+                // if the end of the file has been reached, feed the rest of buffer with the begining ofnthe audio file
+                if (reachEndOfFile)
+                {
+                    if (isStreaming)
+                    {
+                        int restNumSampleReadForStream = bufferSize - numSampleReadForStream;
+                        aud.Position = 0;
+                        //loopingOffsetReadInRawData = numSampleReadForStream;
+                        aud.Read(rawAudioData, 0, restNumSampleReadForStream);
+                        // loop on each channel of the audio file
+                        for (int channelIndex = 0; channelIndex < numChannelsInAudioFile; channelIndex++)
+                        {
+                            for (int sampleIndex = numSampleReadForStream; sampleIndex < bufferSize; sampleIndex++)
+                            {
+                                inputFileBuffer[numChannelsInAudioFile * sampleIndex + channelIndex] = volume * rawAudioData[numChannelsInAudioFile * (sampleIndex - numSampleReadForStream) + channelIndex];
+                                meters[channelIndex] += Mathf.Pow(inputFileBuffer[sampleIndex], 2f);
+                            }
                         }
 
                     }
-                    // update the read offset for each channel
-                    audioFileReadOffset[channelIndex] += bufferSize * numChannelsInAudioFile;
-                    
-                    // compute the RMS value for this buffer (sa:
+                    else
+                    {
+                        
+                        for (int channelIndex = 0; channelIndex < numChannelsInAudioFile; channelIndex++)
+                        {
+                            
+                            // loop on each sample for the output buffer
+                            for (int sampleIndex = indexInInputFileBuffer; sampleIndex < bufferSize - indexInInputFileBuffer; sampleIndex++)
+                            {                               
+                                inputFileBuffer[sampleIndex] = volume * rawAudioData[sampleIndex - indexInInputFileBuffer];
+                                // Start calculating the meter value for each channel (sum of square)
+                                meters[channelIndex] += Mathf.Pow(inputFileBuffer[sampleIndex], 2f);
+                            }
+                            // update the read offset for each channel
+                            audioFileReadOffset[channelIndex] = (bufferSize - indexInInputFileBuffer) * numChannelsInAudioFile;
+                        }
+
+                    }
+
+
+
+
+                    if (!isLooping)
+                    {
+                        isAskedToPlay = false;
+                        isPlaying = false;
+
+                    }
+                    reachEndOfFile = false;
+                }
+
+                for (int channelIndex = 0; channelIndex < numChannelsInAudioFile; channelIndex++)
+                {
                     meters[channelIndex] = Mathf.Sqrt(meters[channelIndex] / bufferSize);
                 }
-                
+
+
             }
+
             return true;
         }
         return false;
     }
 
-    
 
-    int mod(int x, int m)
-    {
-        int r = x % m;
-        return r < 0 ? r + m : r;
-    }
 
-    /**
-     * @brief Unity Callback function to read/write samples for it audio graph. 
-     * 
-     * @details This is where we get the sample from the AudioSource componennt to feed the At_PLayer component
-     * 
-     * @param[in] data : multiplexed unity sample audio buffer
-     * 
-     * @param[in] channels : number of channels in the audio graph
-     * 
-     */
-    private void OnAudioFilterRead(float[] data, int channels)
+int mod(int x, int m)
+{
+    int r = x % m;
+    return r < 0 ? r + m : r;
+}
+
+/**
+ * @brief Unity Callback function to read/write samples for it audio graph. 
+ * 
+ * @details This is where we get the sample from the AudioSource componennt to feed the At_PLayer component
+ * 
+ * @param[in] data : multiplexed unity sample audio buffer
+ * 
+ * @param[in] channels : number of channels in the audio graph
+ * 
+ */
+                    private void OnAudioFilterRead(float[] data, int channels)
     {
         /*
         if (objectName == "sabreHum")
@@ -970,22 +1081,7 @@ public class At_Player : MonoBehaviour
         }
     }
 
-    public unsafe void getDelay(int spatID, float[] delay, int arraySize)
-    {
-        fixed (float* delayPtr = delay)
-        {
-            AT_SPAT_WFS_getDelay(spatID, (IntPtr)delayPtr, arraySize);
-        }
-    }
 
-    public unsafe void getVolume(int spatID, float[] volume, int arraySize)
-    {
-
-        fixed (float* volumePtr = volume)
-        {
-            AT_SPAT_WFS_getVolume(spatID, (IntPtr)volumePtr, arraySize);
-        }
-    }
 
 #endif
 

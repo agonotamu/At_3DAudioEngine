@@ -23,7 +23,7 @@ using NAudio.Wave.SampleProviders;
 using NAudioAsioPatchBay;
 using System;
 using System.Runtime.InteropServices;
-
+using UnityEngine.SceneManagement;
 
 
 public class At_HapticPlayer : MonoBehaviour
@@ -41,7 +41,7 @@ public class At_HapticPlayer : MonoBehaviour
     public float[] listenerOutputSendGains = null;
     public string[] listenerOutputSendGuids = null;
     public string guid = "";
-    public string atPlayer_guid="";
+    public string atPlayer_guid = "";
 
     ///type of distance attenuation in the spatialize : 0 = none, 1 = linera, 2 = square
     public float attenuation;
@@ -68,11 +68,12 @@ public class At_HapticPlayer : MonoBehaviour
 
     //public int outputChannelCount = 0;
 
-    
+
     int hapticPlayerId;
     List<int> haptic_MixerIdList = new List<int>();
     Dictionary<int, string> haptic_MixerIdToListenerGuid_Dict = new Dictionary<int, string>();
 
+    At_HapticPlayerState hapticPlayerState;
 
     void Reset()
     {
@@ -133,15 +134,15 @@ public class At_HapticPlayer : MonoBehaviour
 
     public void addSourceToHapticListener(int hapticMixerId, string guid)
     {
-        
+
         int id = 0;
-        
+
         HAPTIC_ENGINE_ADD_SOURCE_TO_MIXER(hapticMixerId, ref id);
 
         hapticPlayerId = id;
         haptic_MixerIdList.Add(hapticMixerId);
         haptic_MixerIdToListenerGuid_Dict.Add(hapticMixerId, guid);
-        
+
         // 
 
     }
@@ -178,6 +179,16 @@ public class At_HapticPlayer : MonoBehaviour
     public void Awake()
     {
         masterOutput = GameObject.FindObjectOfType<At_MasterOutput>();
+
+        At_HapticPlayerState hapticPlayerState = At_AudioEngineUtils.getHapticPlayerStateWithGuidAndName(SceneManager.GetActiveScene().name, guid, gameObject.name);
+        if (hapticPlayerState != null)
+        {
+
+            listenerOutputSendGains = hapticPlayerState.listenerOutputSendGains;
+            listenerOutputSendGuids = hapticPlayerState.listenerOutputSendGuids;
+            attenuation = hapticPlayerState.attenuation;
+            minDistance = hapticPlayerState.minDistance;
+        }
 
     }
 

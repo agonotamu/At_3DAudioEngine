@@ -81,6 +81,10 @@ public class At_PlayerEditor : Editor
 
     SerializedProperty serialized_isUnityAudioSource;
 
+    SerializedProperty serialized_isLookAtListener;
+
+    
+
     //----------------------------------------------------
 
     At_OutputState outputState;
@@ -108,7 +112,7 @@ public class At_PlayerEditor : Editor
         serialized_minDistance = serializedObject.FindProperty("minDistance");
         serialized_channelRouting = serializedObject.FindProperty("channelRouting");
         serialized_isUnityAudioSource = serializedObject.FindProperty("isUnityAudioSource");
-        
+        serialized_isLookAtListener = serializedObject.FindProperty("isLookAtListener");
 
         previousIsEditor = Application.isEditor;
         previousIsPlaying = Application.isPlaying;
@@ -148,6 +152,7 @@ public class At_PlayerEditor : Editor
                 playerState.timeReversal = serialized_timeReversal.floatValue;
                 playerState.minDistance = serialized_minDistance.floatValue;
                 playerState.isUnityAudioSource = serialized_isUnityAudioSource.boolValue;
+                playerState.isLookAtListener = serialized_isLookAtListener.boolValue;
 
                 playerState.channelRouting = new int[serialized_channelRouting.arraySize];
                 
@@ -173,6 +178,7 @@ public class At_PlayerEditor : Editor
             player.timeReversal = playerState.timeReversal;
             player.minDistance = playerState.minDistance;
             player.isUnityAudioSource = playerState.isUnityAudioSource;
+            player.isLookAtListener = playerState.isLookAtListener;
 
             // init the bargraphs for displaying meters
             if (!Application.isPlaying)
@@ -407,6 +413,17 @@ public class At_PlayerEditor : Editor
             if (playerState.is3D == true)
             {
                 HorizontalLine(Color.grey);
+                using (new GUILayout.HorizontalScope())
+                {
+                    bool b = GUILayout.Toggle(playerState.isLookAtListener, "Always look at listener");
+                    if (b != playerState.isLookAtListener)
+                    {
+                        shouldSave = true;
+                        playerState.isLookAtListener = b;
+
+                    }
+                }
+                HorizontalLine(Color.grey);
 
                 using (new GUILayout.HorizontalScope())
                 {
@@ -604,6 +621,7 @@ public class At_PlayerEditor : Editor
             player.minDistance = playerState.minDistance;
             player.channelRouting = playerState.channelRouting;
             player.isUnityAudioSource = playerState.isUnityAudioSource;
+            player.isLookAtListener = playerState.isLookAtListener;
 
             // serialize the parameters for use in Prefab
             serialized_gain.floatValue = playerState.gain;
@@ -616,7 +634,9 @@ public class At_PlayerEditor : Editor
             serialized_omniBalance.floatValue = playerState.omniBalance;
             serialized_timeReversal.floatValue = playerState.timeReversal;
             serialized_minDistance.floatValue = playerState.minDistance;
-            serialized_isUnityAudioSource.boolValue = playerState.isUnityAudioSource;          
+            serialized_isUnityAudioSource.boolValue = playerState.isUnityAudioSource;
+            serialized_isLookAtListener.boolValue = playerState.isLookAtListener;
+
             serialized_channelRouting.ClearArray();
             for (int i = 0; i < playerState.channelRouting.Length; i++)
             {

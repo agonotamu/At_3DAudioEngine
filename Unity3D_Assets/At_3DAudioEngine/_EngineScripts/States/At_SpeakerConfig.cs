@@ -102,8 +102,9 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
             go.GetComponent<RippleParam>().id = virtualMic[spkCount].GetComponent<At_VirtualMic>().id;
             */
             //---------------------------------------------------------------
-
+#if UNITY_EDITOR
             PrefabUtility.RecordPrefabInstancePropertyModifications(speakers[spkCount].transform);
+#endif
         }
     }
 
@@ -126,7 +127,9 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
             virtualMic[micCount].transform.localScale = new Vector3(virtualMicScale, virtualMicScale, virtualMicScale);
             virtualMic[micCount].GetComponent<At_VirtualMic>().id = micCount;
             virtualMic[micCount].transform.SetParent(virtualMicParent.transform);
+#if UNITY_EDITOR
             PrefabUtility.RecordPrefabInstancePropertyModifications(virtualMic[micCount].transform);
+#endif
         }
         addSpeakers(false, ref speakers, virtualMic, speakerRigSize,virtualSpkParent);
     }
@@ -158,8 +161,9 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
             
             //virtualMic[micCount].transform.position = position;
             angle += angularStep;
+#if UNITY_EDITOR
             PrefabUtility.RecordPrefabInstancePropertyModifications(virtualMic[micCount].transform);
-
+#endif
 
         }
         addSpeakers(true, ref speakers, virtualMic, speakerRigSize, virtualSpkParent);
@@ -189,7 +193,9 @@ public class At_SpeakerConfig : MonoBehaviour//: Editor
             virtualMic[micCount].transform.Rotate(new Vector3(0, 180, 0));
             virtualMic[micCount].GetComponent<At_VirtualMic>().id = micCount;
             virtualMic[micCount].transform.SetParent(virtualMicParent.transform);
+#if UNITY_EDITOR
             PrefabUtility.RecordPrefabInstancePropertyModifications(virtualMic[micCount].transform);
+#endif
         }
         addSpeakers(true, ref speakers, virtualMic, speakerRigSize, virtualSpkParent);
     }

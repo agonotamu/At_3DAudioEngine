@@ -474,7 +474,8 @@ public class At_MasterOutputEditor : Editor
             // SUB WOOFER METERING AND GAIN
             //----------------------------------------------------------------
 
-            GUILayout.Label("Subwoofer Channels Output : ["+ (outputState.outputChannelCount+1) +"-" + (outputState.outputChannelCount+outputState.subwooferOutputChannelCount) + "]");
+            GUILayout.Label("Subwoofer Channels Output : ["+ (outputState.hapticListenerChannelsIndex.Length + outputState.outputChannelCount+1) + 
+                "-" + (outputState.hapticListenerChannelsIndex.Length + outputState.outputChannelCount+outputState.subwooferOutputChannelCount) + "]");
 
 
             using (new GUILayout.HorizontalScope())
@@ -571,7 +572,7 @@ public class At_MasterOutputEditor : Editor
                     using (new GUILayout.HorizontalScope())
                     {
 
-                        GUILayout.Label((outputState.outputChannelCount + 1+c).ToString());
+                        GUILayout.Label((outputState.hapticListenerChannelsIndex.Length + outputState.outputChannelCount + 1+c).ToString());
 
                         int select = EditorGUILayout.Popup(outputState.indexInputSubwoofer[c], subChannelRouting);
 
@@ -593,6 +594,8 @@ public class At_MasterOutputEditor : Editor
         // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
         /*******************************************************************************/
         At_HapticListenerOutput[] hapticListenerOutputs = FindObjectsOfType<At_HapticListenerOutput>();
+
+
 
         int hapticListenerOutputsCount = 0;
 
@@ -643,6 +646,7 @@ public class At_MasterOutputEditor : Editor
                 outputState.hapticListenerOutputGuid[i] = hapticListenerOutputs[i].guid;
             }
 
+            shouldSave = true;
         }
 
 
@@ -650,7 +654,7 @@ public class At_MasterOutputEditor : Editor
         hapticListenerOutputChannelRouting[0] = "select";
         for (int c = 1; c < hapticListenerOutputsCount + 1; c++)
         {
-            hapticListenerOutputChannelRouting[c] = (outputState.outputChannelCount + outputState.subwooferOutputChannelCount + c).ToString();
+            hapticListenerOutputChannelRouting[c] = (outputState.outputChannelCount + c).ToString();
         }
 
         int indexChannel = 0;

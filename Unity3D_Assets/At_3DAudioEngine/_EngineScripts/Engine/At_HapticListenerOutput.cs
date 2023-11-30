@@ -28,6 +28,8 @@ public class At_HapticListenerOutput : MonoBehaviour
 
     string objectName;
 
+    At_HapticListenerOutputState hapticListenerOutputState;
+
     void Reset()
     {
         setGuid();
@@ -95,6 +97,15 @@ public class At_HapticListenerOutput : MonoBehaviour
     }
 
     /*************************************************************/
+    private void Awake()
+    {
+        hapticListenerOutputState = At_AudioEngineUtils.getHapticListenerOutputStateWithGuidAndName(SceneManager.GetActiveScene().name, guid, gameObject.name);
+        if (hapticListenerOutputState != null)
+        {
+            //------ init player serialized parameter
+            gain = hapticListenerOutputState.gain;
+        }
+    }
 
     // Start is called before the first frame update
     void Start()

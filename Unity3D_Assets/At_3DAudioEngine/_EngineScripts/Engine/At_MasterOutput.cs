@@ -155,6 +155,9 @@ public class At_MasterOutput : MonoBehaviour
         indexInputSubwoofer = outputState.indexInputSubwoofer;
         subwooferGain = outputState.subwooferGain;
 
+        hapticListenerOutputChannelsCount = outputState.hapticListenerOutputChannelsCount;
+        hapticListenerOutputGuid = outputState.hapticListenerOutputGuid;
+        hapticListenerChannelsIndex = outputState.hapticListenerChannelsIndex;
 
         samplingRate = outputState.samplingRate;
 
@@ -645,9 +648,9 @@ public class At_MasterOutput : MonoBehaviour
                     meters[channelIndex] = 0;
                     
                 }
-                else if (channelIndex >= outputChannelCount && channelIndex < outputChannelCount + subwooferOutputChannelCount)
+                else if (channelIndex >= outputChannelCount + hapticListenerChannelsIndex.Length && channelIndex < outputChannelCount + hapticListenerChannelsIndex.Length + subwooferOutputChannelCount)
                 {
-                    subwooferMeters[channelIndex - outputChannelCount] = 0;
+                    subwooferMeters[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)] = 0;
                 }
                
 
@@ -664,19 +667,12 @@ public class At_MasterOutput : MonoBehaviour
        
                         sample = volume * AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(sampleIndex, channelIndex, isBassManaged);
                         
+
                         meters[channelIndex] += Mathf.Pow(sample, 2f);
 
                     }
-                    else if(channelIndex >= outputChannelCount && channelIndex < outputChannelCount + subwooferOutputChannelCount)
-                    {
-                        float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
-                        // channels for subwoofer : 
-                        sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - outputChannelCount]);
-                        subwooferMeters[channelIndex - outputChannelCount] += Mathf.Pow(sample, 2f);
-
-                    }
                     // Modif Gonot - 21/11/2023 - Adding Haptic Feedback Managment
-                    else
+                    else if (channelIndex >= outputChannelCount && channelIndex < outputChannelCount + hapticListenerChannelsIndex.Length)
                     {
                         int indexChannelOfHapticListenerOutput;
                         At_HapticListenerOutput hlo = FindHapticListenerOutputWithChannelIndex(channelIndex, out indexChannelOfHapticListenerOutput);
@@ -687,12 +683,22 @@ public class At_MasterOutput : MonoBehaviour
                         else
                         {
                             Debug.LogError("can't find Haptic Listener Output for channel " + channelIndex + "\n Check Haptic Channel Routing in MasterOutput Component ! ");
-                            
+
                             sample = 0;
                         }
-                         
+
 
                     }
+                    // Subwoofer Channels
+                    else if(channelIndex >= outputChannelCount + hapticListenerChannelsIndex.Length && channelIndex < outputChannelCount + hapticListenerChannelsIndex.Length + subwooferOutputChannelCount)
+                    {
+                        float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
+                        // channels for subwoofer : 
+                        sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)]);
+                        subwooferMeters[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)] += Mathf.Pow(sample, 2f);
+
+                    }
+                    
 
                     if (channelIndex < maxDeviceChannel)
                     {
@@ -716,9 +722,9 @@ public class At_MasterOutput : MonoBehaviour
                 {
                     meters[channelIndex] = Mathf.Sqrt(meters[channelIndex] / e.SamplesPerBuffer);
                 }
-                else if (channelIndex >= outputChannelCount && channelIndex < outputChannelCount + subwooferOutputChannelCount)
+                else if (channelIndex >= outputChannelCount + hapticListenerChannelsIndex.Length && channelIndex < outputChannelCount + hapticListenerChannelsIndex.Length + subwooferOutputChannelCount)
                 {
-                    subwooferMeters[channelIndex - outputChannelCount] = Mathf.Sqrt(subwooferMeters[channelIndex - outputChannelCount] / e.SamplesPerBuffer);
+                    subwooferMeters[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)] = Mathf.Sqrt(subwooferMeters[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)] / e.SamplesPerBuffer);
                 }               
             }
 
