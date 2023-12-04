@@ -33,6 +33,7 @@
 #include <iostream>
 #endif
 #include "AudioPluginUtil.h"
+#include "Biquad.h"
 
 #define MAX_BUFFER_SIZE 2048
 #define NUM_BUFFER_IN_DELAY 32
@@ -50,7 +51,7 @@ namespace Spatializer
 
     public:
         
-        At_WfsSpatializer(); // constructor
+        At_WfsSpatializer(int samplingRate); // constructor
         ~At_WfsSpatializer(); // destructor
 
         int process(float* inBuffer, float* outBuffer, int bufferLength, int offset, int inChannel, int outChannel);
@@ -62,6 +63,13 @@ namespace Spatializer
         int setSourceOmniBalance(float omniBalance);
         int setTimeReversal(float timeReversal);
         int setMinDistance(float minDistance);
+
+
+        void setLowPassFc(float fc);
+        void setHighPassFc(float fc);
+        void setLowPassGain(float gain);
+        void setHighPassGain(float gain);
+
         int setSpeakerMask(float* activationSpeakerVolume, int outChannelCount); // Modif Rougerie 29/06/2022
 
         int setVirtualMicPosition(int speakerCount, float virtualMicMinDistance, float* positions, float* rotations, float* forwards);
@@ -170,6 +178,11 @@ namespace Spatializer
         float m_pVirtualMicPositions[MAX_OUTPUT_CHANNEL][3];
         float m_pVirtualMicRotations[MAX_OUTPUT_CHANNEL][3];
         float m_pVirtualMicForwards[MAX_OUTPUT_CHANNEL][3];
+
+        // Effect applied to the input mono source
+        // 1) Filters 
+        Biquad* m_pLowPass;
+        Biquad* m_pHighPass;
     };
 
 }

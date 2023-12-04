@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include "Biquad.h"
+#include <iostream>
 
 #define M_PI 3.14
 
@@ -31,7 +32,7 @@ Biquad::Biquad() {
     z1 = z2 = 0.0;
 }
 
-Biquad::Biquad(int type, double Fc, double Q, double peakGainDB, int sampleRate) {
+Biquad::Biquad(int type, float Fc, float Q, float peakGainDB, int sampleRate) {
     _sampleRate = sampleRate;
     setBiquad(type, Fc, Q, peakGainDB);
     z1 = z2 = 0.0;
@@ -39,6 +40,7 @@ Biquad::Biquad(int type, double Fc, double Q, double peakGainDB, int sampleRate)
 
 Biquad::~Biquad() {
 }
+
 
 void Biquad::setSampleRate(int sampleRate) {
     _sampleRate = sampleRate;
@@ -49,22 +51,22 @@ void Biquad::setType(int type) {
     calcBiquad();
 }
 
-void Biquad::setQ(double Q) {
+void Biquad::setQ(float Q) {
     this->Q = Q;
     calcBiquad();
 }
 
-void Biquad::setFc(double Fc) {
+void Biquad::setFc(float Fc) {
     this->Fc = Fc;
     calcBiquad();
 }
 
-void Biquad::setPeakGain(double peakGainDB) {
+void Biquad::setPeakGain(float peakGainDB) {
     this->peakGain = peakGainDB;
     calcBiquad();
 }
 
-void Biquad::setBiquad(int type, double Fc, double Q, double peakGainDB) {
+void Biquad::setBiquad(int type, float Fc, float Q, float peakGainDB) {
     this->type = type;
     this->Q = Q;
     this->Fc = Fc;
@@ -73,9 +75,9 @@ void Biquad::setBiquad(int type, double Fc, double Q, double peakGainDB) {
 
 void Biquad::calcBiquad(void) {
     
-    double norm;
-    double V = pow(10, fabs(peakGain) / 20.0);
-    double K = tan(M_PI * Fc);
+    float norm;
+    float V = pow(10, fabs(peakGain) / 20.0);
+    float K = tan(M_PI * Fc);
 
     float wc = 2 * M_PI * Fc;
     float k = wc / tan((wc / 2.0f) / _sampleRate);
@@ -89,6 +91,7 @@ void Biquad::calcBiquad(void) {
         a2 = a0;
         b1 = 2 * (K * K - 1) * norm;
         b2 = (1 - K / Q + K * K) * norm;
+        
         break;
 
     case bq_type_highpass:
@@ -98,6 +101,7 @@ void Biquad::calcBiquad(void) {
         a2 = a0;
         b1 = 2 * (K * K - 1) * norm;
         b2 = (1 - K / Q + K * K) * norm;
+        
         break;
     case bq_type_lowpass_LinkwitzRiley:        
         a0 = wc / den;

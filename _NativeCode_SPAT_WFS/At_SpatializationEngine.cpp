@@ -132,7 +132,7 @@ namespace Spatializer
 		if (m_pMixingBuffer != NULL) {
 			// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
 			//At_WfsSpatializer* s = new At_WfsSpatializer(this);
-			At_WfsSpatializer* s = new At_WfsSpatializer();			
+			At_WfsSpatializer* s = new At_WfsSpatializer(m_sampleRate);			
 			s->m_pEngineMixingBuffer = m_pMixingBuffer;
 			s->m_pTmpEngineMixingBuffer_hp = m_pTmpMixingBuffer_hp;
 			s->m_pTmpEngineMixingBufferSub_lp = m_pTmpMixingBufferSub_lp;
@@ -304,6 +304,32 @@ namespace Spatializer
 		}
 		*/
 	}
+
+	void At_SpatializationEngine::WFS_setLowPassFc(int id, float fc) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->setLowPassFc(fc);
+		}
+	}
+	void At_SpatializationEngine::WFS_setHighPassFc(int id, float fc) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->setHighPassFc(fc);
+		}
+	}
+	void At_SpatializationEngine::WFS_setLowPassGain(int id, float gain) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->setLowPassGain(gain);
+		}
+	}
+	void At_SpatializationEngine::WFS_setHighPassGain(int id, float gain) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->setHighPassGain(gain);
+		}
+	}
+
 	// Modif Rougerie 29/06/2022
 	void At_SpatializationEngine::WFS_setSpeakerMask(int id, float* activationSpeakerVolume, int outChannelCount) {
 		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);

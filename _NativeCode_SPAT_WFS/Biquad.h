@@ -34,14 +34,14 @@ enum {
 class Biquad {
 public:
     Biquad();
-    Biquad(int type, double Fc, double Q, double peakGainDB, int sampleRate);
+    Biquad(int type, float Fc, float Q, float peakGainDB, int sampleRate);
     ~Biquad();
     void setSampleRate(int sampleRate);
     void setType(int type);
-    void setQ(double Q);
-    void setFc(double Fc);
-    void setPeakGain(double peakGainDB);
-    void setBiquad(int type, double Fc, double Q, double peakGainDB);
+    void setQ(float Q);
+    void setFc(float Fc);
+    void setPeakGain(float peakGainDB);
+    void setBiquad(int type, float Fc, float Q, float peakGainDB);
     float process(float in);
 
 protected:
@@ -49,16 +49,17 @@ protected:
 
     int type;
     int _sampleRate;
-    double a0, a1, a2, b1, b2;
-    double Fc, Q, peakGain;
-    double z1, z2;
+    float a0, a1, a2, b1, b2;
+    float Fc, Q, peakGain;
+    float z1, z2;
 };
 
 inline float Biquad::process(float in) {
-    double out = in * a0 + z1;
+    float out = in * a0 + z1;
     z1 = in * a1 + z2 - b1 * out;
     z2 = in * a2 - b2 * out;
     return out;
+    
 }
 
 #endif // Biquad_h

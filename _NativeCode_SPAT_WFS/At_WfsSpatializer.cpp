@@ -14,17 +14,25 @@ namespace Spatializer
     int At_WfsSpatializer::m_numInstance = 0;
     int At_WfsSpatializer::m_numInstanceProcessed = 0;
     
-    At_WfsSpatializer::At_WfsSpatializer() {        
+    At_WfsSpatializer::At_WfsSpatializer(int sampleRate) {        
         m_numInstance++;
         std::cout << "Spatializer " << spatID << " created !" << " \n";
-        std::cout << "Num Instance : " << m_numInstance << " \n";
+        std::cout << "Num Instance : " << m_numInstance << " \n";        
+        m_pLowPass = new Biquad(bq_type_lowpass, 20000, 0.707, 0, sampleRate);
+        m_pHighPass = new Biquad(bq_type_highpass, 20, 0.707, 0, sampleRate);
     }
+
+    
 
     At_WfsSpatializer::~At_WfsSpatializer() {
         m_numInstance--;
         
         std::cout << "Spatializer " << spatID << " destroyed !" << " \n";
         std::cout << "Num Instance : " << m_numInstance << " \n";
+
+        delete m_pLowPass;
+        delete m_pHighPass;
+
         //delete[] m_pDelayBuffer;
         //m_pDelayBuffer = NULL;
     }
@@ -65,7 +73,12 @@ namespace Spatializer
 
         int count = 0;
         for (int i = 0; i < bufferLength * inchannels; i += inchannels) {
-            m_pTmpMonoBuffer_in[count] = rolloff * inBuffer[i + offset];
+            //m_pTmpMonoBuffer_in[count] = (float)m_pLowPass->process(m_pHighPass->process(rolloff * inBuffer[i + offset]));
+            //std::cout << "Before Low pass " << rolloff * inBuffer[i + offset] << " \n";
+            m_pTmpMonoBuffer_in[count] = (float)m_pLowPass->process(rolloff * inBuffer[i + offset]);
+            //std::cout << "After Low pass " << m_pTmpMonoBuffer_in[count] << " \n";
+            
+           // m_pTmpMonoBuffer_in[count] = rolloff * inBuffer[i + offset];
             count++;
         }
 
@@ -654,6 +667,23 @@ namespace Spatializer
 
         m_minDistance = minDistance;
         return 0;
+    }
+
+    void At_WfsSpatializer::setLowPassFc(float fc) {
+        if (m_pLowPass != NULL)
+            m_pLowPass->setFc(fc);
+    }
+    void At_WfsSpatializer::setHighPassFc(float fc) {
+        if (m_pHighPass != NULL)
+            m_pHighPass->setFc(fc);
+    }
+    void At_WfsSpatializer::setLowPassGain(float gain) {
+        if (m_pLowPass != NULL)
+            m_pLowPass->setPeakGain(gain);
+    }
+    void At_WfsSpatializer::setHighPassGain(float gain) {
+        if (m_pHighPass != NULL)
+            m_pHighPass->setPeakGain(gain);
     }
 
     // Modif Rougerie 29/06/2022

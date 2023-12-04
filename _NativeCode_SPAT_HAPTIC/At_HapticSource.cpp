@@ -9,16 +9,19 @@ int At_HapticSource::m_numInstanceProcessed = 0;
 
 At_HapticSource::At_HapticSource() {
     m_numInstance++;
-
-    m_pLowPass = new Biquad(bq_type_lowpass, 20000, 0.707, 0);
-    m_pHighPass = new Biquad(bq_type_highpass, 20, 0.707, 0);
-
+    m_pLowPass.setType(bq_type_lowpass);
+    m_pLowPass.setFc(20000);
+    m_pLowPass.setPeakGain(0);
+    m_pHighPass.setType(bq_type_highpass);
+    m_pHighPass.setFc(20);
+    m_pHighPass.setPeakGain(0);
+    
 }
 
 At_HapticSource::~At_HapticSource() {
     m_numInstance--;
-    delete m_pLowPass;
-    delete m_pHighPass;
+
+    
 }
 
 
@@ -45,17 +48,17 @@ void At_HapticSource::setSourceMinDistance(float minDistance) {
 }
 
 void At_HapticSource::SetSourceLowPassFc(double fc) {
-    m_pLowPass->setFc(fc);
+    m_pLowPass.setFc(fc);
 }
 void At_HapticSource::SetSourceHighPassFc(double fc) {
-    m_pHighPass->setFc(fc);
+    m_pHighPass.setFc(fc);
 }
 
 void At_HapticSource::SetSourceLowPassGain(double gain) {
-    m_pLowPass->setPeakGain(gain);
+    m_pLowPass.setPeakGain(gain);
 }
 void At_HapticSource::SetSourceHighPassGain(double gain) {
-    m_pHighPass->setPeakGain(gain);
+    m_pHighPass.setPeakGain(gain);
 }
 
 
@@ -100,7 +103,8 @@ void At_HapticSource::Process(float* inBuffer, int bufferLength, int offset, int
     forceMonoInputAndApplyRolloff(inBuffer, bufferLength, offset, inChannelCount);
     
     for (int sampleIndex = 0; sampleIndex < bufferLength; sampleIndex++) {
-        float sampleValue = (float)m_pLowPass->process(m_pHighPass->process(volume * m_pTmpMonoBuffer_in[sampleIndex]));
+        //float sampleValue = volume * (float)m_pLowPass.process(m_pHighPass.process(m_pTmpMonoBuffer_in[sampleIndex]));
+        float sampleValue = volume * m_pTmpMonoBuffer_in[sampleIndex];
         for (int channel = 0; channel < m_outChannelCount; channel++) {
             //outBuffer[sample * outChannelCount + channel] = m_pTmpMonoBuffer_in[sample];            
             m_pMixingBuffer[sampleIndex * m_outChannelCount + channel] += sampleValue;

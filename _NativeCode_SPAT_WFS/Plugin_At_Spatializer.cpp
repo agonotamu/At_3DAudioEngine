@@ -42,6 +42,22 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setMinDistance(int id, flo
 {
     At_SpatializationEngine::getInstance().WFS_setMinDistance(id, minDistance);
 }
+
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setLowPassFc(int id, float fc) {
+    At_SpatializationEngine::getInstance().WFS_setLowPassFc(id, fc);
+}
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setHighPassFc(int id, float fc) {
+    At_SpatializationEngine::getInstance().WFS_setHighPassFc(id, fc);
+}
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setLowPassGain(int id, float gain) {
+    At_SpatializationEngine::getInstance().WFS_setLowPassGain(id, gain);
+}
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setHighPassGain(int id, float gain) {
+    At_SpatializationEngine::getInstance().WFS_setHighPassGain(id, gain);
+}
+
+
+
 // ----- Modif Rougerie 29/06/2022 -----
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setSpeakerMask(int id, float* activationSpeakerVolume, int outChannelCount)
 {

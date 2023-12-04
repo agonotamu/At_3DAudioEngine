@@ -53,8 +53,8 @@ public:
 
     // Effect applied to the input mono source
     // 1) Filters 
-    Biquad *m_pLowPass;    
-    Biquad *m_pHighPass;
+    Biquad m_pLowPass;
+    Biquad m_pHighPass;
     
 
 
