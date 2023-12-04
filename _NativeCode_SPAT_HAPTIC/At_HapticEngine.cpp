@@ -127,6 +127,32 @@ void At_HapticEngine::SetSourceMinDistance(int mixerId, int sourceId, float minD
 	}
 }
 
+void At_HapticEngine::SetSourceLowPassFc(int mixerId, int sourceId, double fc) {
+	At_HapticMixer* hm = findMixerWithID(mixerId);
+	if (hm != NULL) {
+		hm->SetSourceLowPassFc(sourceId, fc);
+	}
+}
+void At_HapticEngine::SetSourceHighPassFc(int mixerId, int sourceId, double fc) {
+	At_HapticMixer* hm = findMixerWithID(mixerId);
+	if (hm != NULL) {
+		hm->SetSourceHighPassFc(sourceId, fc);
+	}
+}
+void At_HapticEngine::SetSourceLowPassGain(int mixerId, int sourceId, double gain) {
+	At_HapticMixer* hm = findMixerWithID(mixerId);
+	if (hm != NULL) {
+		hm->SetSourceLowPassGain(sourceId, gain);
+	}
+}
+void At_HapticEngine::SetSourceHighPassGain(int mixerId, int sourceId, double gain) {
+	At_HapticMixer* hm = findMixerWithID(mixerId);
+	if (hm != NULL) {
+		hm->SetSourceHighPassGain(sourceId, gain);
+	}
+}
+
+
 At_HapticMixer* At_HapticEngine::findMixerWithID(int mixerId) {
 
 	At_HapticMixer* hm;

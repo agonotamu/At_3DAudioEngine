@@ -6,6 +6,7 @@
 
 #define MAX_BUFFER_SIZE 2048
 #define MAX_OUTPUT_CHANNEL 9
+#include "Biquad.h"
 
 class At_HapticSource
 {
@@ -22,6 +23,12 @@ public:
     
     void SetSourceAttenuation(float attenuation);
     void setSourceMinDistance(float minDistance);
+    
+    void SetSourceLowPassFc(double fc);    
+    void SetSourceHighPassFc(double fc);
+
+    void SetSourceLowPassGain(double gain);
+    void SetSourceHighPassGain(double gain);
 
     float m_pTmpMonoBuffer_in[MAX_BUFFER_SIZE];
 
@@ -43,5 +50,15 @@ public:
     float m_attenuation = 0;
 
     float m_minDistance = 0;
+
+    // Effect applied to the input mono source
+    // 1) Filters 
+    Biquad *m_pLowPass;    
+    Biquad *m_pHighPass;
+    
+
+
+
+
 };
 

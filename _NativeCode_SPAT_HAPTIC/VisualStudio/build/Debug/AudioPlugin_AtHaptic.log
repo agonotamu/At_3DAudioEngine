@@ -1,5 +1,6 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: Le répertoire intermédiaire (build\Debug\) contient des fichiers partagés provenant d'un autre projet (AudioPlugin_AtSpatializer.vcxproj, AudioPluginDemo.vcxproj). Cela peut entraîner un comportement de nettoyage et de regénération incorrect.
   At_HapticEngine.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\Biquad.h(57,12): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(835,9): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(785,17): message : voir la référence à l'instanciation de la fonction modèle 'At_HapticMixer *std::vector<At_HapticMixer,std::allocator<At_HapticMixer>>::_Emplace_reallocate<const _Ty&>(At_HapticMixer *const ,const _Ty &)' en cours de compilation
           with
@@ -16,10 +17,11 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.3282
           [
               _Ty=At_HapticMixer
           ]
-E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_HapticEngine.cpp(36,30): message : voir la première référence à « std::vector<At_HapticMixer,std::allocator<At_HapticMixer>>::push_back » dans « At_HapticEngine::CreateMixer »
-E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_HapticEngine.h(32,25): message : voir la référence à l'instanciation classe modèle 'std::vector<At_HapticMixer,std::allocator<At_HapticMixer>>' en cours de compilation
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\At_HapticEngine.cpp(36,30): message : voir la première référence à « std::vector<At_HapticMixer,std::allocator<At_HapticMixer>>::push_back » dans « At_HapticEngine::CreateMixer »
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\At_HapticEngine.h(33,25): message : voir la référence à l'instanciation classe modèle 'std::vector<At_HapticMixer,std::allocator<At_HapticMixer>>' en cours de compilation
   At_HapticMixer.cpp
-E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_HapticMixer.cpp(74,17): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\Biquad.h(57,12): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\At_HapticMixer.cpp(74,17): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(835,9): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(785,17): message : voir la référence à l'instanciation de la fonction modèle 'At_HapticSource *std::vector<At_HapticSource,std::allocator<At_HapticSource>>::_Emplace_reallocate<const _Ty&>(At_HapticSource *const ,const _Ty &)' en cours de compilation
           with
@@ -36,13 +38,17 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.3282
           [
               _Ty=At_HapticSource
           ]
-E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_HapticMixer.cpp(37,32): message : voir la première référence à « std::vector<At_HapticSource,std::allocator<At_HapticSource>>::push_back » dans « At_HapticMixer::AddSource »
-E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_HapticMixer.h(21,26): message : voir la référence à l'instanciation classe modèle 'std::vector<At_HapticSource,std::allocator<At_HapticSource>>' en cours de compilation
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\At_HapticMixer.cpp(37,32): message : voir la première référence à « std::vector<At_HapticSource,std::allocator<At_HapticSource>>::push_back » dans « At_HapticMixer::AddSource »
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\At_HapticMixer.h(21,26): message : voir la référence à l'instanciation classe modèle 'std::vector<At_HapticSource,std::allocator<At_HapticSource>>' en cours de compilation
   At_HapticSource.cpp
-E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\At_HapticSource.cpp(50,86): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\Biquad.h(57,12): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\At_HapticSource.cpp(72,86): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+  Biquad.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\Biquad.h(57,12): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
   Plugin_At_HapticRender.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\Biquad.h(57,12): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
   Génération de code en cours...
-     Création de la bibliothèque E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.lib et de l'objet E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.exp
-  AudioPlugin_AtHaptic.vcxproj -> E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.dll
+     Création de la bibliothèque E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.lib et de l'objet E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.exp
+  AudioPlugin_AtHaptic.vcxproj -> E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_HAPTIC\VisualStudio\build\Debug\AudioPlugin_AtHaptic.dll
   Un sous-répertoire ou un fichier ..\..\Assets\At_3DAudioEngine\Other\Plugins\x86_64 existe déjà.
           1 fichier(s) copié(s).

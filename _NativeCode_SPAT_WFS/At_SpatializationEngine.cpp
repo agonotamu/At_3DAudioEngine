@@ -48,11 +48,17 @@ namespace Spatializer
 
 		m_pSubwooferHighpass = new Biquad[outChannelCount];
 		for (int i = 0; i <  outChannelCount; i++) {			
-			m_pSubwooferHighpass[i].setHigPassCoefficient_LinkwitzRiley(m_subwooferCutoff, sampleRate);
+			//m_pSubwooferHighpass[i].setHigPassCoefficient_LinkwitzRiley(m_subwooferCutoff, sampleRate);
+			m_pSubwooferHighpass[i].setSampleRate(sampleRate);
+			m_pSubwooferHighpass[i].setType(bq_type_highpass_LinkwitzRiley);
+			m_pSubwooferHighpass[i].setFc(m_subwooferCutoff);
 		}
 		m_pSubwooferLowpass = new Biquad[outChannelCount];
 		for (int i = 0; i < outChannelCount; i++) {
-			m_pSubwooferLowpass[i].setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, sampleRate);
+			//m_pSubwooferLowpass[i].setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, sampleRate);
+			m_pSubwooferLowpass[i].setSampleRate(sampleRate);
+			m_pSubwooferLowpass[i].setType(bq_type_lowpass_LinkwitzRiley);
+			m_pSubwooferLowpass[i].setFc(m_subwooferCutoff);
 		}
 
 		
@@ -91,7 +97,8 @@ namespace Spatializer
 		// get the value in the mixing buffer
 		float value; 
 		if (isHighPassFiltered) {
-			value = m_pSubwooferHighpass[indexChannel].filter(m_pTmpMixingBuffer_hp[indexSample * m_outChannelCount + indexChannel]);
+			//value = m_pSubwooferHighpass[indexChannel].filter(m_pTmpMixingBuffer_hp[indexSample * m_outChannelCount + indexChannel]);
+			value = m_pSubwooferHighpass[indexChannel].process(m_pTmpMixingBuffer_hp[indexSample * m_outChannelCount + indexChannel]);
 		}
 		else {
 			value = m_pMixingBuffer[indexSample * m_outChannelCount + indexChannel];
@@ -103,7 +110,8 @@ namespace Spatializer
 	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
 	float At_SpatializationEngine::WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel) {
 		
-		return m_pSubwooferLowpass[indexChannel].filter(m_pTmpMixingBufferSub_lp[indexSample * m_outChannelCount + indexChannel]);
+		//return m_pSubwooferLowpass[indexChannel].filter(m_pTmpMixingBufferSub_lp[indexSample * m_outChannelCount + indexChannel]);
+		return m_pSubwooferLowpass[indexChannel].process(m_pTmpMixingBufferSub_lp[indexSample * m_outChannelCount + indexChannel]);
 	}
 
 
@@ -214,11 +222,11 @@ namespace Spatializer
 	void At_SpatializationEngine::WFS_setSubwooferCutoff(float subwooferCutoff) {
 		
 		for (int i = 0; i < m_outChannelCount; i++) {
-			m_pSubwooferHighpass[i].setHigPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
+			m_pSubwooferHighpass[i].setFc(m_subwooferCutoff);//setHigPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
 		}
 		
 		for (int i = 0; i < m_outChannelCount; i++) {
-			m_pSubwooferHighpass[i].setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
+			m_pSubwooferHighpass[i].setFc(m_subwooferCutoff);//setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
 		}
 
 	}

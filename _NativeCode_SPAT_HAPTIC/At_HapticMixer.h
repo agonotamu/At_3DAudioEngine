@@ -37,6 +37,12 @@ public:
 	void SetSourceAttenuation(int sourceId, float attenuation);
 	void SetSourceMinDistance(int sourceId, float minDistance);
 
+	void SetSourceLowPassFc(int sourceId, double fc);
+	void SetSourceHighPassFc(int sourceId, double fc);
+	void SetSourceLowPassGain(int sourceId, double gain);
+	void SetSourceHighPassGain(int sourceId, double gain);
+
+
 private:
 	At_HapticSource* findSourceWithID(int id);
 

@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include "At_HapticMixer.h"
+#include "Biquad.h"
 
 using namespace std;
 
@@ -48,6 +49,11 @@ public:
 	void SetSourcePosition(int mixerId, int sourceId, float* position);	
 	void SetSourceAttenuation(int mixerId, int sourceId, float attenuation);
 	void SetSourceMinDistance(int mixerId, int sourceId, float minDistance);
+
+	void SetSourceLowPassFc(int mixerId, int sourceId, double fc);	
+	void SetSourceHighPassFc(int mixerId, int sourceId, double fc);	
+	void SetSourceLowPassGain(int mixerId, int sourceId, double gain);
+	void SetSourceHighPassGain(int mixerId, int sourceId, double gain);
 
 	int m_mixerIncrementalUniqueID = 0;
 

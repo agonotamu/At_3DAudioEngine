@@ -188,6 +188,7 @@ copy /y $(TargetPath) ..\..\Assets\Plugins\x86_64\$(TargetName).dll
   <ItemGroup>
     <ClCompile Include="..\At_SpatializationEngine.cpp" />
     <ClCompile Include="..\At_WfsSpatializer.cpp" />
+    <ClCompile Include="..\Biquad.cpp" />
     <ClCompile Include="..\Plugin_At_Spatializer.cpp" />
   </ItemGroup>
   <ItemGroup>

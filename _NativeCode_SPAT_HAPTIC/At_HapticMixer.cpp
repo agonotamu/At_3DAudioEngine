@@ -120,6 +120,34 @@ void At_HapticMixer::SetSourceMinDistance(int sourceId, float minDistance) {
 	}
 }
 
+void At_HapticMixer::SetSourceLowPassFc(int sourceId, double fc) {
+	At_HapticSource* hs = findSourceWithID(sourceId);
+	if (hs != NULL) {
+		hs->SetSourceLowPassFc(fc);
+	}
+}
+void At_HapticMixer::SetSourceHighPassFc(int sourceId, double fc) {
+	At_HapticSource* hs = findSourceWithID(sourceId);
+	if (hs != NULL) {
+		hs->SetSourceHighPassFc(fc);
+	}
+}
+void At_HapticMixer::SetSourceLowPassGain(int sourceId, double gain) {
+	At_HapticSource* hs = findSourceWithID(sourceId);
+	if (hs != NULL) {
+		hs->SetSourceLowPassGain(gain);
+	}
+}
+void At_HapticMixer::SetSourceHighPassGain(int sourceId, double gain) {
+	At_HapticSource* hs = findSourceWithID(sourceId);
+	if (hs != NULL) {
+		hs->SetSourceHighPassGain(gain);
+	}
+}
+
+
+
+
 At_HapticSource* At_HapticMixer::findSourceWithID(int sourceId) {
 
 	At_HapticSource* hs;

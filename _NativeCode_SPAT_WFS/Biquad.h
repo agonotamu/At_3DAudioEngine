@@ -1,84 +1,64 @@
-#pragma once
+//
+//  Biquad.h
+//
+//  Created by Nigel Redmon on 11/24/12
+//  EarLevel Engineering: earlevel.com
+//  Copyright 2012 Nigel Redmon
+//
+//  For a complete explanation of the Biquad code:
+//  http://www.earlevel.com/main/2012/11/26/biquad-c-source-code/
+//
+//  License:
+//
+//  This source code is provided as is, without warranty.
+//  You may copy and distribute verbatim copies of this document.
+//  You may modify and use this source code to create binary code
+//  for your own purposes, free or commercial.
+//
 
-#include <math.h>
+#ifndef Biquad_h
+#define Biquad_h
 
-class Biquad
-{
-
-private:
-
-	const float kPI = 3.141592653589793f;
-	const double kPI_double = 3.141592653589793;
-
-	// delay line
-	float m_x2 = 0; // x[n-2]
-	float m_y2 = 0; // y[n-2]
-	float m_x1 = 0; // x[n-1]
-	float m_y1 = 0; // y[n-1]
-
-	// coefficients
-	float m_b0 = 0, m_b1 = 0, m_b2 = 0; // FIR
-	float m_a1 = 0, m_a2 = 0; // IIR
-
-public:
-	void setNotchCoefficient(float frequency, float linearGain, float bandwith, float sampleRate)
-	{
-		float alpha;
-		if (linearGain < 1) {
-			alpha = (tan(kPI * bandwith / sampleRate) - linearGain) / (tan(kPI * bandwith / sampleRate) + linearGain);
-		}
-		else {
-			alpha = (tan(kPI * bandwith / sampleRate) - 1) / (tan(kPI * bandwith / sampleRate) + 1);
-		}
-		float beta = -cos(2 * kPI * frequency / sampleRate);
-		float h = linearGain - 1;
-		
-		m_b0 = 1 + (1 + alpha) * h / 2;
-		m_b1 = beta * (1 - alpha);
-		m_b2 = -alpha - (1 + alpha) * h / 2;
-		m_a1 = m_b1;
-		m_a2 = -alpha;
-
-	}
-
-	void setLowPassCoefficient_LinkwitzRiley(float frequency, float sampleRate) 
-	{
-
-		float wc = 2 * kPI * frequency;
-		float k = wc / tan((wc / 2.0f) / sampleRate);
-		float den = wc * wc + k * k + 2 * k * wc;
-		m_b0 = wc / den;
-		m_b1 = 2 * wc * wc / den;
-		m_b2 = m_b0;
-		m_a1 = (2 * wc * wc - 2 * k * k) / den;
-		m_a2 = (wc * wc + k * k - 2 * k * wc) / den;
-		
-	}
-
-	void setHigPassCoefficient_LinkwitzRiley(float frequency, float sampleRate) {
-		
-		float wc = 2 * kPI * frequency;
-		float k = wc / tan((wc / 2.0f) / sampleRate);
-		float den = wc * wc + k * k + 2 * k * wc;
-		m_b0 = k * k / den;
-		m_b1 = -2 * k * k / den;
-		m_b2 = m_b0;
-		m_a1 = (2 * wc * wc - 2 * k * k) / den;
-		m_a2 = (wc * wc + k * k - 2 * k * wc) / den;
-
-	}
-
-	// filtering operation: one sample in and one out
-	float filter(float x)
-	{
-		float y = m_b0 * x + m_b1 * m_x1 + m_b2 * m_x2 - m_a1 * m_y1 - m_a2 * m_y2;
-
-		// update the delay lines
-		m_x2 = m_x1;
-		m_y2 = m_y1;
-		m_x1 = x;
-		m_y1 = y;
-
-		return y;
-	}
+enum {
+    bq_type_lowpass = 0,
+    bq_type_highpass,
+    bq_type_lowpass_LinkwitzRiley,
+    bq_type_highpass_LinkwitzRiley,
+    bq_type_bandpass,
+    bq_type_notch,
+    bq_type_peak,
+    bq_type_lowshelf,
+    bq_type_highshelf
 };
+
+class Biquad {
+public:
+    Biquad();
+    Biquad(int type, double Fc, double Q, double peakGainDB, int sampleRate);
+    ~Biquad();
+    void setSampleRate(int sampleRate);
+    void setType(int type);
+    void setQ(double Q);
+    void setFc(double Fc);
+    void setPeakGain(double peakGainDB);
+    void setBiquad(int type, double Fc, double Q, double peakGainDB);
+    float process(float in);
+
+protected:
+    void calcBiquad(void);
+
+    int type;
+    int _sampleRate;
+    double a0, a1, a2, b1, b2;
+    double Fc, Q, peakGain;
+    double z1, z2;
+};
+
+inline float Biquad::process(float in) {
+    double out = in * a0 + z1;
+    z1 = in * a1 + z2 - b1 * out;
+    z2 = in * a2 - b2 * out;
+    return out;
+}
+
+#endif // Biquad_h

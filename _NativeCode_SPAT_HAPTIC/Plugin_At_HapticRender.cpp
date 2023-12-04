@@ -61,5 +61,17 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void HAPTIC_ENGINE_SET_SOURCE_ATTENUATION(i
 extern "C" UNITY_AUDIODSP_EXPORT_API void HAPTIC_ENGINE_SET_SOURCE_MIN_DISTANCE(int mixerId, int sourceId, float minDistance) {
     At_HapticEngine::getInstance().SetSourceMinDistance(mixerId, sourceId, minDistance);
 }
+extern "C" UNITY_AUDIODSP_EXPORT_API void HAPTIC_ENGINE_SET_SOURCE_LOWPASS_FC(int mixerId, int sourceId, float fc) {
+    At_HapticEngine::getInstance().SetSourceLowPassFc(mixerId, sourceId, fc);
+}
+extern "C" UNITY_AUDIODSP_EXPORT_API void HAPTIC_ENGINE_SET_SOURCE_HIGHPASS_FC(int mixerId, int sourceId, float fc) {
+    At_HapticEngine::getInstance().SetSourceHighPassFc(mixerId, sourceId, fc);
+}
+extern "C" UNITY_AUDIODSP_EXPORT_API void HAPTIC_ENGINE_SET_SOURCE_LOWPASS_GAIN(int mixerId, int sourceId, float gain) {
+    At_HapticEngine::getInstance().SetSourceLowPassGain(mixerId, sourceId, gain);
+}
+extern "C" UNITY_AUDIODSP_EXPORT_API void HAPTIC_ENGINE_SET_SOURCE_HIGHPASS_GAIN(int mixerId, int sourceId, float gain) {
+    At_HapticEngine::getInstance().SetSourceHighPassGain(mixerId, sourceId, gain);
+}
 
 #endif

@@ -6,3 +6,4 @@ D:\RECHERCHE\PRISM\STAGE_ROUGERIE\dev\ServerClientAudioAnimV2\AudioAnim_Server\N
 D:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\NativeCode\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
 E:\RECHERCHE\6DOFs_2022_2023\WFS\TestComputeShaderForDrawingWFS_Wavefronts\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
 D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
