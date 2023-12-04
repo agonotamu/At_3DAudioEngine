@@ -32,4 +32,9 @@ public class At_HapticPlayerState
     /// minimum distance above which the sound produced by the source is attenuated
     public float minDistance = 1;
 
+    public float lowPassFc = 20000.0f;
+    public float lowPassGain = 0.0f;
+    public float highPassFc = 20.0f;
+    public float highPassGain = 0.0f;
+
 }

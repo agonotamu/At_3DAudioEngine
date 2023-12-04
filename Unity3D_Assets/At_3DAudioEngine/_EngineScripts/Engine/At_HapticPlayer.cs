@@ -48,6 +48,12 @@ public class At_HapticPlayer : MonoBehaviour
     /// minimum distance above which the sound produced by the source is attenuated
     public float minDistance;
 
+    // filter parameters
+    public float lowPassFc = 20000.0f;
+    public float lowPassGain = 0.0f;
+    public float highPassFc = 20.0f;
+    public float highPassGain = 0.0f;
+
     //-----------------------------------------------------------------
     // data used at runtime
     // ----------------------------------------------------------------
