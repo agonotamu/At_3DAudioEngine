@@ -38,9 +38,8 @@ public class At_HapticPlayerEditor : Editor
     SerializedProperty serialized_minDistance;
 
     SerializedProperty serialized_lowPassFc;
-    SerializedProperty serialized_lowPassGain;
     SerializedProperty serialized_highPassFc;
-    SerializedProperty serialized_highPassGain;
+    SerializedProperty serialized_makeupGain;
 
     At_Player atPlayerInput;
 
@@ -78,9 +77,8 @@ public class At_HapticPlayerEditor : Editor
         serialized_minDistance = serializedObject.FindProperty("minDistance");
 
         serialized_lowPassFc = serializedObject.FindProperty("lowPassFc");
-        serialized_lowPassGain = serializedObject.FindProperty("lowPassGain");
         serialized_highPassFc = serializedObject.FindProperty("highPassFc");
-        serialized_highPassGain = serializedObject.FindProperty("highPassGain");
+        serialized_makeupGain = serializedObject.FindProperty("makeupGain");
 
 
         // get a reference to the At_Player isntance (core engine of the player)
@@ -117,9 +115,8 @@ public class At_HapticPlayerEditor : Editor
             hapticPlayerState.listenerOutputSendGuids = new string[serialized_listenerOutputSendGuids.arraySize];
 
             hapticPlayerState.lowPassFc = serialized_lowPassFc.floatValue;
-            hapticPlayerState.lowPassGain = serialized_lowPassGain.floatValue;
             hapticPlayerState.highPassFc = serialized_highPassFc.floatValue;
-            hapticPlayerState.lowPassGain = serialized_lowPassGain.floatValue;
+            hapticPlayerState.makeupGain = serialized_makeupGain.floatValue;
 
             for (int i = 0; i < serialized_listenerOutputSendGains.arraySize; i++)
             {
@@ -147,9 +144,8 @@ public class At_HapticPlayerEditor : Editor
         hapticPlayer.minDistance = hapticPlayerState.minDistance;
 
         hapticPlayer.lowPassFc = hapticPlayerState.lowPassFc;
-        hapticPlayer.lowPassGain = hapticPlayerState.lowPassGain;
         hapticPlayer.highPassFc = hapticPlayerState.highPassFc;
-        hapticPlayer.lowPassGain = hapticPlayerState.lowPassGain;
+        hapticPlayer.makeupGain = hapticPlayerState.makeupGain;
 
 
     }
@@ -342,16 +338,15 @@ public class At_HapticPlayerEditor : Editor
         
         using (new GUILayout.HorizontalScope())
         {
-            GUILayout.Label("Low Pass Filter");
+            GUILayout.Label("Low Pass Frequency");
 
-            float dist = GUILayout.HorizontalSlider(hapticPlayerState.lowPassFc, 20f, 20000f);
+            float dist = GUILayout.HorizontalSlider(hapticPlayerState.lowPassFc, 20f, 200f);
 
             if (dist != hapticPlayerState.lowPassFc)
             {
                 hapticPlayerState.lowPassFc = dist;
                 shouldSave = true;
 
-                //SceneView.RepaintAll();
             }
         }
 
@@ -361,19 +356,36 @@ public class At_HapticPlayerEditor : Editor
 
         using (new GUILayout.HorizontalScope())
         {
-            GUILayout.Label("High Pass Filter");
-            float dist = GUILayout.HorizontalSlider(hapticPlayerState.highPassFc, 20f, 20000f);
+            GUILayout.Label("High Pass Frequency");
+            float dist = GUILayout.HorizontalSlider(hapticPlayerState.highPassFc, 20f, 200f);
 
             if (dist != hapticPlayerState.highPassFc)
             {
                 hapticPlayerState.highPassFc = dist;
                 shouldSave = true;
 
-                //SceneView.RepaintAll();
             }
         }
 
+        HorizontalLine(Color.grey);
+
         GUILayout.TextField((hapticPlayerState.highPassFc).ToString("0.00"));
+
+        using (new GUILayout.HorizontalScope())
+        {
+            GUILayout.Label("Make Up Gain");
+
+            float dist = GUILayout.HorizontalSlider(hapticPlayerState.makeupGain, -80f, 24f);
+
+            if (dist != hapticPlayerState.makeupGain)
+            {
+                hapticPlayerState.makeupGain = dist;
+                shouldSave = true;
+
+            }
+        }
+        GUILayout.TextField((hapticPlayerState.makeupGain).ToString("0.00") + " dB");
+
 
         // update the parameters in the At_Player component
         //haptic.crossoverFilterFrequency = hapticState.crossoverFilterFrequency;
@@ -385,9 +397,8 @@ public class At_HapticPlayerEditor : Editor
         hapticPlayer.minDistance = hapticPlayerState.minDistance;
 
         hapticPlayer.lowPassFc = hapticPlayerState.lowPassFc;
-        hapticPlayer.lowPassGain = hapticPlayerState.lowPassGain;
         hapticPlayer.highPassFc = hapticPlayerState.highPassFc;
-        hapticPlayer.lowPassGain = hapticPlayerState.lowPassGain;
+        hapticPlayer.makeupGain = hapticPlayerState.makeupGain;
 
         // serialize the parameters for use in Prefab
         //serialized_crossoverFilterFrequency.floatValue = hapticState.crossoverFilterFrequency ;        
@@ -397,9 +408,8 @@ public class At_HapticPlayerEditor : Editor
         serialized_minDistance.floatValue = hapticPlayer.minDistance;
 
         serialized_lowPassFc.floatValue = hapticPlayer.lowPassFc;
-        serialized_lowPassGain.floatValue = hapticPlayer.lowPassGain;
         serialized_highPassFc.floatValue = hapticPlayer.highPassFc;
-        serialized_lowPassGain.floatValue = hapticPlayer.lowPassGain;
+        serialized_makeupGain.floatValue = hapticPlayer.makeupGain;
 
         serialized_listenerOutputSendGains.ClearArray();
         serialized_listenerOutputSendGuids.ClearArray();

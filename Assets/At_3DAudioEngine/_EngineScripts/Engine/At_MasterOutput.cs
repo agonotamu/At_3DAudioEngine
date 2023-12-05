@@ -510,7 +510,7 @@ public class At_MasterOutput : MonoBehaviour
     private void Update()
     {
         UpdateVirtualMicPosition();
-        //AT_SPAT_WFS_setSubwooferCutoff(crossoverFilterFrequency);       
+        AT_SPAT_WFS_setSubwooferCutoff(crossoverFilterFrequency);       
     }
 
 
@@ -694,7 +694,8 @@ public class At_MasterOutput : MonoBehaviour
                     {
                         float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
                         // channels for subwoofer : 
-                        sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)]);
+                        //sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)]);
+                        sample = subwooferVolume * AT_SPAT_WFS_getSubWooferSample(sampleIndex);
                         subwooferMeters[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)] += Mathf.Pow(sample, 2f);
 
                     }
@@ -920,6 +921,9 @@ public class At_MasterOutput : MonoBehaviour
     private static extern float AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(int indexSample, int indexChannel, bool isHighPassFiltered);
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern float AT_SPAT_WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel);
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern float AT_SPAT_WFS_getSubWooferSample(int indexSample);
+
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_initializeOutput(int sampleRate, int bufferLength, int outChannelCount, int subwooferOutputChannelCount, float subwooferCutoff);
 

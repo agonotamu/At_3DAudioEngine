@@ -7,7 +7,7 @@
 #include <iostream>
 using namespace std;
 
-//#define DEBUGLOG
+#define DEBUGLOG
 // 
 //#define RING_BUFFER
 //#define DIRECTIVE_PLAYER
@@ -46,6 +46,7 @@ namespace Spatializer
 		void WFS_fillOutputWithOneChannelOfMixingChannel(float *outBufferOneChannel, int indexChannel, int maxOutputChannel);
 		float WFS_getMixingBufferSampleForChannelAndZero(int indexSample, int indexChannel, bool isHighPassFiltered);
 		float WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel);
+		float WFS_getSubWooferSample(int indexSample);
 
 		void WFS_setSampleRate(float sampleRatte);
 		void WFS_setListenerPosition(float* position, float* rotation);

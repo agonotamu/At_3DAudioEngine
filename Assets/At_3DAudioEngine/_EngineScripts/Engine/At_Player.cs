@@ -347,6 +347,12 @@ public class At_Player : MonoBehaviour
                 timeReversal = playerState.timeReversal;
                 minDistance = playerState.minDistance;
                 channelRouting = playerState.channelRouting;
+
+                lowPassFc = playerState.lowPassFc;
+                highPassFc = playerState.highPassFc;
+                lowPassGain = playerState.lowPassGain;
+                highPassGain = playerState.highPassGain;
+
             }
             
         }

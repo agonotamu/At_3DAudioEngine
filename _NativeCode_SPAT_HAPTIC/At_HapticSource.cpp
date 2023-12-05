@@ -103,15 +103,11 @@ void At_HapticSource::Process(float* inBuffer, int bufferLength, int offset, int
     forceMonoInputAndApplyRolloff(inBuffer, bufferLength, offset, inChannelCount);
     
     for (int sampleIndex = 0; sampleIndex < bufferLength; sampleIndex++) {
-        //float sampleValue = volume * (float)m_pLowPass.process(m_pHighPass.process(m_pTmpMonoBuffer_in[sampleIndex]));
-        float sampleValue = volume * m_pTmpMonoBuffer_in[sampleIndex];
+        float sampleValue = volume * (float)m_pLowPass.process(m_pHighPass.process(m_pTmpMonoBuffer_in[sampleIndex]));
+        //float sampleValue = volume * m_pTmpMonoBuffer_in[sampleIndex];
         for (int channel = 0; channel < m_outChannelCount; channel++) {
             //outBuffer[sample * outChannelCount + channel] = m_pTmpMonoBuffer_in[sample];            
             m_pMixingBuffer[sampleIndex * m_outChannelCount + channel] += sampleValue;
-#ifdef DEBUGLOG
-            std::cout << "mixing buffer :" << m_pMixingBuffer[sample * outChannelCount + channel] << "," "\n";
-#endif
-
         }
     }
     

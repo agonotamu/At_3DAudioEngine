@@ -1,76 +1,83 @@
-//
-//  Biquad.cpp
-//
-//  Created by Nigel Redmon on 11/24/12
-//  EarLevel Engineering: earlevel.com
-//  Copyright 2012 Nigel Redmon
-//
-//  For a complete explanation of the Biquad code:
-//  http://www.earlevel.com/main/2012/11/26/biquad-c-source-code/
-//
-//  License:
-//
-//  This source code is provided as is, without warranty.
-//  You may copy and distribute verbatim copies of this document.
-//  You may modify and use this source code to create binary code
-//  for your own purposes, free or commercial.
-//
+
 
 #include <math.h>
 #include "Biquad.h"
 
-#define M_PI 3.14
+#define M_PI 3.141592653589793f
 
 Biquad::Biquad() {
     type = bq_type_lowpass;
     a0 = 1.0;
     a1 = a2 = b1 = b2 = 0.0;
-    Fc = 0.50;
-    Q = 0.707;
+    Fc = 20000.0f;
+    Q = 0.707f;
     peakGain = 0.0;
-    z1 = z2 = 0.0;
+    x1 = x2 = y1 = y2 = 0.0;
+    _sampleRate = 48000;
+    calcBiquad();
 }
 
-Biquad::Biquad(int type, double Fc, double Q, double peakGainDB) {
+Biquad::Biquad(int type, float Fc, float Q, float peakGainDB, int sampleRate) {
+    _sampleRate = sampleRate;
     setBiquad(type, Fc, Q, peakGainDB);
-    z1 = z2 = 0.0;
+    x1 = x2 = y1 = y2 = 0.0;
+    calcBiquad();
 }
 
 Biquad::~Biquad() {
 }
 
+
+void Biquad::setSampleRate(int sampleRate) {
+    _sampleRate = sampleRate;
+}
+
 void Biquad::setType(int type) {
+    if (type != this->type) {
+        this->type = type;
+        calcBiquad();
+    }
+}
+
+void Biquad::setQ(float Q) {
+    if (Q != this->Q) {
+        this->Q = Q;
+        calcBiquad();
+    }
+}
+
+void Biquad::setFc(float Fc) {
+    if (Fc != this->Fc) {
+        this->Fc = Fc;
+        calcBiquad();
+    }
+}
+
+void Biquad::setPeakGain(float peakGainDB) {
+    if (peakGainDB != this->peakGain) {
+        this->peakGain = peakGainDB;
+        calcBiquad();
+    }
+}
+
+void Biquad::setBiquad(int type, float Fc, float Q, float peakGainDB) {
     this->type = type;
-    calcBiquad();
-}
-
-void Biquad::setQ(double Q) {
     this->Q = Q;
-    calcBiquad();
-}
-
-void Biquad::setFc(double Fc) {
     this->Fc = Fc;
-    calcBiquad();
-}
-
-void Biquad::setPeakGain(double peakGainDB) {
     this->peakGain = peakGainDB;
-    calcBiquad();
-}
-
-void Biquad::setBiquad(int type, double Fc, double Q, double peakGainDB) {
-    this->type = type;
-    this->Q = Q;
-    this->Fc = Fc;
-    setPeakGain(peakGainDB);
+    
 }
 
 void Biquad::calcBiquad(void) {
     
-    double norm;
-    double V = pow(10, fabs(peakGain) / 20.0);
-    double K = tan(M_PI * Fc);
+    float norm;
+    float V = pow(10, fabs(peakGain) / 20.0);
+    float K = tan(M_PI * (Fc/_sampleRate));
+    std::cout << "low pass calc - V =" << V << "\n";
+    float wc = 2 * M_PI * Fc;
+    float k = wc / tan((wc / 2.0f) / _sampleRate);
+    float den = wc * wc + k * k + 2 * k * wc;
+
     switch (this->type) {
     case bq_type_lowpass:
         norm = 1 / (1 + K / Q + K * K);
@@ -79,6 +86,7 @@ void Biquad::calcBiquad(void) {
         a2 = a0;
         b1 = 2 * (K * K - 1) * norm;
         b2 = (1 - K / Q + K * K) * norm;
+        std::cout << "low pass calc - Fc =" << Fc <<"\n";
         break;
 
     case bq_type_highpass:
@@ -88,8 +96,22 @@ void Biquad::calcBiquad(void) {
         a2 = a0;
         b1 = 2 * (K * K - 1) * norm;
         b2 = (1 - K / Q + K * K) * norm;
+        std::cout << "high pass calc - Fc =" << Fc <<"\n";
         break;
-
+    case bq_type_lowpass_LinkwitzRiley:        
+        a0 = wc / den;
+        a1 = 2 * wc * wc / den;
+        a2 = a0;
+        b1 = (2 * wc * wc - 2 * k * k) / den;
+        b2 = (wc * wc + k * k - 2 * k * wc) / den;
+        break;
+    case bq_type_highpass_LinkwitzRiley:       
+        a0 = k * k / den;
+        a1 = -2 * k * k / den;
+        a2 = a0;
+        b1 = (2 * wc * wc - 2 * k * k) / den;
+        b2 = (wc * wc + k * k - 2 * k * wc) / den;
+        break;
     case bq_type_bandpass:
         norm = 1 / (1 + K / Q + K * K);
         a0 = K / Q * norm;

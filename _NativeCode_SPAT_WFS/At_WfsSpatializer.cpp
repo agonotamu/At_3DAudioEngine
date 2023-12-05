@@ -73,12 +73,14 @@ namespace Spatializer
 
         int count = 0;
         for (int i = 0; i < bufferLength * inchannels; i += inchannels) {
-            //m_pTmpMonoBuffer_in[count] = (float)m_pLowPass->process(m_pHighPass->process(rolloff * inBuffer[i + offset]));
-            //std::cout << "Before Low pass " << rolloff * inBuffer[i + offset] << " \n";
-            m_pTmpMonoBuffer_in[count] = (float)m_pLowPass->process(rolloff * inBuffer[i + offset]);
-            //std::cout << "After Low pass " << m_pTmpMonoBuffer_in[count] << " \n";
             
-           // m_pTmpMonoBuffer_in[count] = rolloff * inBuffer[i + offset];
+            float value = rolloff * inBuffer[i + offset];
+            
+            // just in case...
+            if (isnan(value) || isinf(value)) value = 0;
+
+            m_pTmpMonoBuffer_in[count] = (float)m_pLowPass->process(m_pHighPass->process(value));
+                                   
             count++;
         }
 

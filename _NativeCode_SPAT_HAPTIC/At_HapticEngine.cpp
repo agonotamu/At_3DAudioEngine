@@ -8,7 +8,7 @@ At_HapticEngine::At_HapticEngine() {
 	AllocConsole();
 	freopen_s(&pConsole, "CONOUT$", "wb", stdout);
 
-	std::cout << "Spat Engine created !\n";
+	std::cout << "Haptic Engine created !\n";
 #endif
 }
 

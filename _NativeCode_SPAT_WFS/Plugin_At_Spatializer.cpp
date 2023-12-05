@@ -109,6 +109,11 @@ extern "C" UNITY_AUDIODSP_EXPORT_API float AT_SPAT_WFS_getLowPasMixingBufferForC
     return At_SpatializationEngine::getInstance().WFS_getLowPasMixingBufferForChannel(indexSample, indexChannel);
 }
 
+extern "C" UNITY_AUDIODSP_EXPORT_API float AT_SPAT_WFS_getSubWooferSample(int indexSample)
+{
+    return At_SpatializationEngine::getInstance().WFS_getSubWooferSample(indexSample);
+}
+
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setSubwooferCutoff(float subwooferCutoff)
 {
     At_SpatializationEngine::getInstance().WFS_setSubwooferCutoff(subwooferCutoff);

@@ -110,10 +110,17 @@ namespace Spatializer
 	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
 	float At_SpatializationEngine::WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel) {
 		
-		//return m_pSubwooferLowpass[indexChannel].filter(m_pTmpMixingBufferSub_lp[indexSample * m_outChannelCount + indexChannel]);
 		return m_pSubwooferLowpass[indexChannel].process(m_pTmpMixingBufferSub_lp[indexSample * m_outChannelCount + indexChannel]);
+
 	}
 
+	float At_SpatializationEngine::WFS_getSubWooferSample(int indexSample) {
+		float sampleValue = 0;
+		for (int c = 0; c < m_outChannelCount; c++) {
+			sampleValue += m_pTmpMixingBufferSub_lp[indexSample * m_outChannelCount + c];
+		}
+		return sampleValue /= m_outChannelCount;
+	}
 
 	void At_SpatializationEngine::WFS_destroyAllSpatializer() {
 #ifdef DEBUGLOG
@@ -226,7 +233,7 @@ namespace Spatializer
 		}
 		
 		for (int i = 0; i < m_outChannelCount; i++) {
-			m_pSubwooferHighpass[i].setFc(m_subwooferCutoff);//setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
+			m_pSubwooferLowpass[i].setFc(m_subwooferCutoff);//setLowPassCoefficient_LinkwitzRiley(m_subwooferCutoff, m_sampleRate);
 		}
 
 	}
