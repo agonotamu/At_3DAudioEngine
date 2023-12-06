@@ -162,12 +162,17 @@ public class At_PlayerEditor : Editor
                 playerState.minDistance = serialized_minDistance.floatValue;
                 playerState.isUnityAudioSource = serialized_isUnityAudioSource.boolValue;
                 playerState.isLookAtListener = serialized_isLookAtListener.boolValue;
-
+                /*
                 playerState.lowPassFc = serialized_lowPassFc.floatValue;
                 playerState.lowPassGain = serialized_lowPassGain.floatValue;
                 playerState.highPassFc = serialized_highPassFc.floatValue;
                 playerState.lowPassGain = serialized_lowPassGain.floatValue;
-
+                */
+                playerState.lowPassFc = 20000.0f;
+                //playerState.lowPassGain = serialized_lowPassGain.floatValue;
+                playerState.highPassFc = 20.0f;
+                //playerState.lowPassGain = serialized_lowPassGain.floatValue;
+                
                 playerState.channelRouting = new int[serialized_channelRouting.arraySize];
                 
 
