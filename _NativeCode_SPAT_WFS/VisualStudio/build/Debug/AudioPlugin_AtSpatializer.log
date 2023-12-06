@@ -1,51 +1,65 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: Le répertoire intermédiaire (build\Debug\) contient des fichiers partagés provenant d'un autre projet (AudioPluginDemo.vcxproj). Cela peut entraîner un comportement de nettoyage et de regénération incorrect.
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: Le répertoire intermédiaire (build\Debug\) contient des fichiers partagés provenant d'un autre projet (AudioPluginDemo.vcxproj). Cela peut entraîner un comportement de nettoyage et de regénération incorrect.
   At_SpatializationEngine.cpp
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(70,18): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(142,49): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\ostream(374,1): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\ostream(367): message : pendant la compilation de la fonction membre classe modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(unsigned __int64)'
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(24): message : voir la référence à l'instanciation de la fonction modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(unsigned __int64)' en cours de compilation
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(15): message : voir la référence à l'instanciation classe modèle 'std::basic_ostream<char,std::char_traits<char>>' en cours de compilation
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(70,18): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(142,49): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(835,9): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(785,17): message : voir la référence à l'instanciation de la fonction modèle 'Spatializer::At_WfsSpatializer *std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::_Emplace_reallocate<const _Ty&>(Spatializer::At_WfsSpatializer *const ,const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(873,9): message : voir la référence à l'instanciation de la fonction modèle '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<const _Ty&>(const _Ty &)' en cours de compilation
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(872,23): message : pendant la compilation de la fonction membre classe modèle 'void std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::push_back(const _Ty &)'
+          with
+          [
+              _Ty=Spatializer::At_WfsSpatializer
+          ]
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(157,35): message : voir la première référence à « std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>::push_back » dans « Spatializer::At_SpatializationEngine::CreateWfsSpatializer »
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.h(36,29): message : voir la référence à l'instanciation classe modèle 'std::vector<Spatializer::At_WfsSpatializer,std::allocator<Spatializer::At_WfsSpatializer>>' en cours de compilation
   At_WfsSpatializer.cpp
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(21,78): warning C4305: 'argument' : troncation de 'double' à 'float'
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(22,77): warning C4305: 'argument' : troncation de 'double' à 'float'
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(66,86): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(120,97): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(127,102): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(145,29): warning C4244: '=' : conversion de 'double' en 'int', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(167,29): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(172,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(174,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(199,90): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(420,45): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(424,37): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(425,47): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(552,23): warning C4553: '==' : résultat de l'expression non utilisé ; souhaitiez-vous utiliser '=' ?
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(585,26): warning C4101: 'wfsDelay' : variable locale non référencée
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(585,15): warning C4101: 'wfsVolume' : variable locale non référencée
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(555,15): warning C4101: 'direction' : variable locale non référencée
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\ostream(283,1): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\ostream(268): message : pendant la compilation de la fonction membre classe modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(int)'
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(19): message : voir la référence à l'instanciation de la fonction modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(int)' en cours de compilation
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(19): message : voir la référence à l'instanciation classe modèle 'std::basic_ostream<char,std::char_traits<char>>' en cours de compilation
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(21,57): warning C4305: 'argument' : troncation de 'double' à 'float'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(22,56): warning C4305: 'argument' : troncation de 'double' à 'float'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(66,86): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(120,97): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(127,102): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(145,29): warning C4244: '=' : conversion de 'double' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(167,29): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(172,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(174,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(199,90): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(420,45): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(424,37): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(425,47): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(552,23): warning C4553: '==' : résultat de l'expression non utilisé ; souhaitiez-vous utiliser '=' ?
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(585,26): warning C4101: 'wfsDelay' : variable locale non référencée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(585,15): warning C4101: 'wfsVolume' : variable locale non référencée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(555,15): warning C4101: 'direction' : variable locale non référencée
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\ostream(293,13): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\ostream(278,39): message : pendant la compilation de la fonction membre classe modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(int)'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(19,63): message : voir la première référence à « std::basic_ostream<char,std::char_traits<char>>::operator << » dans « Spatializer::At_WfsSpatializer::At_WfsSpatializer »
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(19,37): message : voir la référence à l'instanciation classe modèle 'std::basic_ostream<char,std::char_traits<char>>' en cours de compilation
   Biquad.cpp
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(76,13): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(157,22): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(162,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(166,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(168,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(175,22): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(180,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(184,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(186,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\ostream(392,1): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\ostream(385): message : pendant la compilation de la fonction membre classe modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(float)'
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(51): message : voir la référence à l'instanciation de la fonction modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(float)' en cours de compilation
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(51): message : voir la référence à l'instanciation classe modèle 'std::basic_ostream<char,std::char_traits<char>>' en cours de compilation
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(76,13): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(157,22): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(162,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(166,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(168,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(175,22): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(180,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(184,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(186,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\ostream(402,13): warning C4530: Gestionnaire d'exceptions C++ utilisé, mais les sémantiques de déroulement n'ont pas été activées. Spécifiez /EHsc
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\ostream(395,39): message : pendant la compilation de la fonction membre classe modèle 'std::basic_ostream<char,std::char_traits<char>> &std::basic_ostream<char,std::char_traits<char>>::operator <<(float)'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(51,60): message : voir la première référence à « std::basic_ostream<char,std::char_traits<char>>::operator << » dans « Biquad::setFc »
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(51,54): message : voir la référence à l'instanciation classe modèle 'std::basic_ostream<char,std::char_traits<char>>' en cours de compilation
   Plugin_At_Spatializer.cpp
-D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_Effect.h(12,2): warning C4091: 'static ' : ignoré à gauche de 'At_Effect' quand aucune variable n'est déclarée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_Effect.h(12,2): warning C4091: 'static ' : ignoré à gauche de 'At_Effect' quand aucune variable n'est déclarée
   Génération de code en cours...
-     Création de la bibliothèque D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.lib et de l'objet D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.exp
-  AudioPlugin_AtSpatializer.vcxproj -> D:\RECHERCHE\PRISM\6DOFs_2022-2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
+     Création de la bibliothèque E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.lib et de l'objet E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.exp
+  AudioPlugin_AtSpatializer.vcxproj -> E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\build\Debug\AudioPlugin_AtSpatializer.dll
   Un sous-répertoire ou un fichier ..\..\Assets\At_3DAudioEngine\Other\Plugins\x86_64 existe déjà.
           1 fichier(s) copié(s).
