@@ -14,12 +14,38 @@ namespace Spatializer
     int At_WfsSpatializer::m_numInstance = 0;
     int At_WfsSpatializer::m_numInstanceProcessed = 0;
     
+
+    At_WfsSpatializer::At_WfsSpatializer() {
+        m_numInstance++;
+        std::cout << "Spatializer " << spatID << " created !" << " \n";
+        std::cout << "Num Instance : " << m_numInstance << " \n";
+        //m_pLowPass = new Biquad(bq_type_lowpass, 20000, 0.707, 0, sampleRate);
+        m_pLowPass.setType(bq_type_lowpass);
+        m_pLowPass.setFc(20000);
+        m_pLowPass.setQ(0.707);
+        //m_pHighPass = new Biquad(bq_type_highpass, 20, 0.707, 0, sampleRate);
+        m_pHighPass.setType(bq_type_highpass);
+        m_pHighPass.setFc(20);
+        m_pHighPass.setQ(0.707);
+
+    }
+    
+    
     At_WfsSpatializer::At_WfsSpatializer(int sampleRate) {        
         m_numInstance++;
         std::cout << "Spatializer " << spatID << " created !" << " \n";
         std::cout << "Num Instance : " << m_numInstance << " \n";        
-        m_pLowPass = new Biquad(bq_type_lowpass, 20000, 0.707, 0, sampleRate);
-        m_pHighPass = new Biquad(bq_type_highpass, 20, 0.707, 0, sampleRate);
+        //m_pLowPass = new Biquad(bq_type_lowpass, 20000, 0.707, 0, sampleRate);
+        m_pLowPass.setType(bq_type_lowpass);
+        m_pLowPass.setFc(20000);
+        m_pLowPass.setQ(0.707);
+        m_pLowPass.setSampleRate(sampleRate);
+        //m_pHighPass = new Biquad(bq_type_highpass, 20, 0.707, 0, sampleRate);
+        m_pHighPass.setType(bq_type_highpass);
+        m_pHighPass.setFc(20);
+        m_pHighPass.setQ(0.707);
+        m_pHighPass.setSampleRate(sampleRate);
+
     }
 
     
@@ -30,8 +56,8 @@ namespace Spatializer
         std::cout << "Spatializer " << spatID << " destroyed !" << " \n";
         std::cout << "Num Instance : " << m_numInstance << " \n";
 
-        delete m_pLowPass;
-        delete m_pHighPass;
+        //delete m_pLowPass;
+        //delete m_pHighPass;
 
         //delete[] m_pDelayBuffer;
         //m_pDelayBuffer = NULL;
@@ -79,8 +105,29 @@ namespace Spatializer
             // just in case...
             if (isnan(value) || isinf(value)) value = 0;
 
-            m_pTmpMonoBuffer_in[count] = (float)m_pLowPass->process(m_pHighPass->process(value));
-                                   
+            /*
+            float lowPassValue = (float)m_pLowPass.process(value);
+            float highPassValue = (float)m_pHighPass.process(value);
+            float lowHighPassValue = (float)m_pLowPass.process(m_pHighPass.process(value));
+
+            if (!m_lowPassBypass && m_highPassBypass) {
+                m_pTmpMonoBuffer_in[count] = lowPassValue;
+            }
+            else if (m_lowPassBypass && !m_highPassBypass) {
+                m_pTmpMonoBuffer_in[count] = highPassValue;
+            }
+            else if (!m_lowPassBypass && !m_highPassBypass) {
+                m_pTmpMonoBuffer_in[count] = lowHighPassValue;
+            }
+            else {
+                m_pTmpMonoBuffer_in[count] = value;
+            }
+            */
+
+            m_pTmpMonoBuffer_in[count] = (float)m_pLowPass.process(m_pHighPass.process(value));
+            
+            //m_pTmpMonoBuffer_in[count] = value;
+
             count++;
         }
 
@@ -291,8 +338,8 @@ namespace Spatializer
     void At_WfsSpatializer::initDelayBuffer() {
 
         // 
-#ifdef DEBUG_LOAD        
-#else
+//#ifdef DEBUG_LOAD        
+//#else
         float maxDistanceForOneBuffer = 340 * MAX_BUFFER_SIZE / m_sampleRate;
 
         //std::cout << "maxDistanceForOneBuffer = " << maxDistanceForOneBuffer << " \n";
@@ -301,7 +348,7 @@ namespace Spatializer
 
         m_delayBufferSize = (int)(MAX_BUFFER_SIZE * numBufferRequiredForUserMaxDistance);
 
-        
+        std::cout << "init buffer with size : ! " << m_delayBufferSize << "\n";
 #ifdef RING_BUFFER
         m_pDelayRingBuffer = new float[m_delayBufferSize];
 #else
@@ -318,7 +365,7 @@ namespace Spatializer
             m_pDelayBuffer[i] = 0;
 #endif
         }
-#endif
+//#endif
         //std::cout << "last sample of delay buffer is : " << m_pDelayBuffer[m_delayBufferSize-1] << " \n";
     }
 #ifdef RING_BUFFER
@@ -547,6 +594,8 @@ namespace Spatializer
         }
 #else 
 
+        cout << "entering process function \n";
+
         // NO DIRECTIVE SOURCE
         // force no directive source
         m_isDirective == false;
@@ -557,7 +606,9 @@ namespace Spatializer
         m_virtualMicCount = outChannelCount;
 
         updateWfsVolumeAndDelay();
+        cout << "updateWfsVolumeAndDelay ok \n";
         updateMixMaxDelay();
+        cout << "updateMixMaxDelay ok \n";
 
         if (m_isDirective == true) {
             // NO DIRECTIVE SOURCE
@@ -572,8 +623,11 @@ namespace Spatializer
             forceMonoInputAndApplyRolloff(inBuffer, bufferLength, offset, inChannelCount);
             //forceMonoInput(inBuffer, bufferLength, offset, inChannelCount);
             
+            cout << "force mono input ok \n";
+
 #ifdef RING_BUFFER
             updateDelayRingBuffer(bufferLength);
+            cout << "update dela ok \n";
 #else
             updateDelayBuffer(bufferLength);
 #endif
@@ -583,6 +637,8 @@ namespace Spatializer
         float* inBufferInit = inBuffer;
         float volumeSum = 0;
         float wfsVolume, wfsDelay;
+
+        std::cout << "Start process for id : " << spatID << "\n";
 
         for (int virtualMicIndex = 0; virtualMicIndex < m_virtualMicCount; virtualMicIndex++) {
 
@@ -600,6 +656,7 @@ namespace Spatializer
                     m_pTmpEngineMixingBuffer_hp[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pEngineMixingBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex];
                 if(m_pTmpEngineMixingBufferSub_lp != NULL)
                     m_pTmpEngineMixingBufferSub_lp[m_virtualMicCount * sampleIndex + virtualMicIndex] = m_pEngineMixingBuffer[m_virtualMicCount * sampleIndex + virtualMicIndex];
+                
             }
 
             // save spatialization parameter for the next frame
@@ -608,6 +665,7 @@ namespace Spatializer
             m_pWfsSpeakerMask_prevFrame[virtualMicIndex] = m_pWfsSpeakerMask[virtualMicIndex]; // Modif Rougerie 29/06/2022
 
         }
+        std::cout << "end process for id : " << spatID << "\n";
         m_minDelay_prevFrame = m_minDelay;
         m_maxDelay_prevFrame = m_maxDelay;
         
@@ -672,20 +730,27 @@ namespace Spatializer
     }
 
     void At_WfsSpatializer::setLowPassFc(float fc) {
-        if (m_pLowPass != NULL)
-            m_pLowPass->setFc(fc);
+        //if (m_pLowPass != NULL)
+            m_pLowPass.setFc(fc);
     }
     void At_WfsSpatializer::setHighPassFc(float fc) {
-        if (m_pHighPass != NULL)
-            m_pHighPass->setFc(fc);
+        //if (m_pHighPass != NULL)
+            m_pHighPass.setFc(fc);
     }
     void At_WfsSpatializer::setLowPassGain(float gain) {
-        if (m_pLowPass != NULL)
-            m_pLowPass->setPeakGain(gain);
+        //if (m_pLowPass != NULL)
+            m_pLowPass.setPeakGain(gain);
     }
     void At_WfsSpatializer::setHighPassGain(float gain) {
-        if (m_pHighPass != NULL)
-            m_pHighPass->setPeakGain(gain);
+        //if (m_pHighPass != NULL)
+            m_pHighPass.setPeakGain(gain);
+    }
+
+    void At_WfsSpatializer::setLowPassBypass(bool bypass) {
+        m_lowPassBypass = bypass;
+    }
+    void At_WfsSpatializer::setHighPassBypass(bool bypass) {
+        m_highPassBypass = bypass;
     }
 
     // Modif Rougerie 29/06/2022
@@ -732,6 +797,12 @@ namespace Spatializer
     }
     void At_WfsSpatializer::setSampleRate(float sampleRate) {
         m_sampleRate = sampleRate;
+        //if (m_pLowPass == NULL)
+            //m_pLowPass = new Biquad(bq_type_lowpass, 20000, 0.707, 0, sampleRate);
+        m_pLowPass.setSampleRate(sampleRate);
+        //if (m_pHighPass == NULL)
+            //m_pHighPass = new Biquad(bq_type_highpass, 20, 0.707, 0, sampleRate);
+        m_pHighPass.setSampleRate(sampleRate);
     }   
 
     void At_WfsSpatializer::setIs3DIsDirective(bool is3D, bool isDirective) {

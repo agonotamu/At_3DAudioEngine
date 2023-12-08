@@ -119,6 +119,7 @@ copy $(TargetPath) ..\..\Assets\Plugins\x86\$(TargetName).dll
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>kernel32.lib;user32.lib;winmm.lib</AdditionalDependencies>
+      <AssemblyDebug>true</AssemblyDebug>
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\..\Assets\At_3DAudioEngine\Other\Plugins\x86_64

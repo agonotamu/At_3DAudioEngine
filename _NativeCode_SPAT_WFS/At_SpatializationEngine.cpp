@@ -23,17 +23,22 @@ namespace Spatializer
 		std::cout << "Clear all Spatializer from destructor !\n";
 		std::cout << "m_pWfsSpatializerList is size : " << m_pWfsSpatializerList.size() << "\n";
 #endif
+		/*
 		for (int i = 0; i < m_pWfsSpatializerList.size(); i++) {
 			delete &m_pWfsSpatializerList[i];
 		}
+		*/
+		m_pWfsSpatializerList.clear();
+
 		// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
 		delete m_pMixingBuffer;
 		delete m_pTmpMixingBuffer_hp;
 		delete m_pTmpMixingBufferSub_lp;
-		delete m_pSubwooferHighpass;
-		delete m_pSubwooferHighpass;
+		
+		//delete m_pSubwooferHighpass;
+		//delete m_pSubwooferHighpass;
 
-		m_pWfsSpatializerList.clear(); 
+		
 	}
 	
 	// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
@@ -139,22 +144,27 @@ namespace Spatializer
 		if (m_pMixingBuffer != NULL) {
 			// Modif Gonot 28/03/2023 - [optim] Add Mixing Buffer
 			//At_WfsSpatializer* s = new At_WfsSpatializer(this);
-			At_WfsSpatializer* s = new At_WfsSpatializer(m_sampleRate);			
-			s->m_pEngineMixingBuffer = m_pMixingBuffer;
-			s->m_pTmpEngineMixingBuffer_hp = m_pTmpMixingBuffer_hp;
-			s->m_pTmpEngineMixingBufferSub_lp = m_pTmpMixingBufferSub_lp;
-			s->m_bufferLength = m_bufferLength;
-			s->m_outChannelCount = m_outChannelCount;
-			s->m_subwooferOutputChannelCount = m_subwooferOutputChannelCount;
+			std::cout << "create spatializer ! "<< "\n";
+			//At_WfsSpatializer* s = new At_WfsSpatializer(m_sampleRate);
+			At_WfsSpatializer s; 
+			s.setSampleRate(m_sampleRate);
+			s.m_pEngineMixingBuffer = m_pMixingBuffer;
+			s.m_pTmpEngineMixingBuffer_hp = m_pTmpMixingBuffer_hp;
+			s.m_pTmpEngineMixingBufferSub_lp = m_pTmpMixingBufferSub_lp;
+			s.m_bufferLength = m_bufferLength;
+			s.m_outChannelCount = m_outChannelCount;
+			s.m_subwooferOutputChannelCount = m_subwooferOutputChannelCount;
 
 
-			s->m_maxDistanceForDelay = maxDistanceForDelay;
-			s->m_is3D = is3D; //modif mathias 06-17-2021
-			s->m_isDirective = isDirective; //modif mathias 06-17-2021
+			s.m_maxDistanceForDelay = maxDistanceForDelay;
+			s.m_is3D = is3D; //modif mathias 06-17-2021
+			s.m_isDirective = isDirective; //modif mathias 06-17-2021
 			//s->spatID = m_pWfsSpatializerList.size() - 1;
-			s->spatID = incrementalUniqueID;
-			s->initDelayBuffer();
-			m_pWfsSpatializerList.push_back(*s);
+			s.spatID = incrementalUniqueID;
+			s.initDelayBuffer();
+			std::cout << "init buffer ok ! " << "\n";
+			m_pWfsSpatializerList.push_back(s);
+			std::cout << "push back ok ! " << "\n";
 			*id = incrementalUniqueID;
 
 			incrementalUniqueID++;
@@ -174,7 +184,7 @@ namespace Spatializer
 	void At_SpatializationEngine::DestroyWfsSpatializer(int id) {
 
 #ifdef DEBUGLOG
-		//std::cout << "destroy spatializer with index " << id << "\n";
+		std::cout << "destroy spatializer with index " << id << "\n";
 #endif
 
 		for (int i = 0; i < m_pWfsSpatializerList.size(); i++) {
@@ -336,6 +346,19 @@ namespace Spatializer
 			ws->setHighPassGain(gain);
 		}
 	}
+	void At_SpatializationEngine::WFS_setLowPassBypass(int id, bool bypass) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->setLowPassBypass(bypass);
+		}
+	}
+	void At_SpatializationEngine::WFS_setHighPassBypass(int id, bool bypass) {
+		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
+		if (ws != NULL) {
+			ws->setHighPassBypass(bypass);
+		}
+	}
+
 
 	// Modif Rougerie 29/06/2022
 	void At_SpatializationEngine::WFS_setSpeakerMask(int id, float* activationSpeakerVolume, int outChannelCount) {
@@ -350,6 +373,7 @@ namespace Spatializer
 		
 		At_WfsSpatializer* ws = findSpatializerWithSpatID(id);
 		if (ws != NULL) {
+			cout << "find spatializer \n";
 			ws->process(inBuffer, outBuffer, bufferLength, offset, inChannelCount, outChannelCount);
 		}
 		/*

@@ -55,6 +55,12 @@ extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setLowPassGain(int id, flo
 extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setHighPassGain(int id, float gain) {
     At_SpatializationEngine::getInstance().WFS_setHighPassGain(id, gain);
 }
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setLowPassBypass(int id, bool bypass) {
+    At_SpatializationEngine::getInstance().WFS_setLowPassBypass(id, bypass);
+}
+extern "C" UNITY_AUDIODSP_EXPORT_API void AT_SPAT_WFS_setHighPassBypass(int id, bool bypass) {
+    At_SpatializationEngine::getInstance().WFS_setHighPassBypass(id, bypass);
+}
 
 
 

@@ -1,0 +1,38 @@
+﻿  At_SpatializationEngine.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_SpatializationEngine.cpp(75,18): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+  At_WfsSpatializer.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(25,25): warning C4305: 'argument' : troncation de 'double' à 'float'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(29,26): warning C4305: 'argument' : troncation de 'double' à 'float'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(41,25): warning C4305: 'argument' : troncation de 'double' à 'float'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(46,26): warning C4305: 'argument' : troncation de 'double' à 'float'
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(92,86): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(167,97): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(174,102): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(192,29): warning C4244: '=' : conversion de 'double' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(214,29): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(219,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(221,52): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(246,90): warning C4244: 'argument' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(467,45): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(471,37): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(472,47): warning C4244: 'initialisation' : conversion de 'float' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(601,23): warning C4553: '==' : résultat de l'expression non utilisé ; souhaitiez-vous utiliser '=' ?
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(639,26): warning C4101: 'wfsDelay' : variable locale non référencée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(639,15): warning C4101: 'wfsVolume' : variable locale non référencée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(604,15): warning C4101: 'direction' : variable locale non référencée
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(802,34): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\At_WfsSpatializer.cpp(805,35): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+  Biquad.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(77,13): warning C4244: 'initialisation' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(158,22): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(163,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(167,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(169,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(176,22): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(181,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(185,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\Biquad.cpp(187,44): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+  UnitTest.cpp
+E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\UnitTest\UnitTest.cpp(13,65): warning C4244: 'argument' : conversion de 'float' en 'int', perte possible de données
+  Génération de code en cours...
+  UnitTest.vcxproj -> E:\RECHERCHE\6DOFs_2022_2023\WFS\At_3DAudioEngine_HapticFeedback\_NativeCode_SPAT_WFS\VisualStudio\x64\Debug\UnitTest.exe

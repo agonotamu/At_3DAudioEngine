@@ -58,6 +58,9 @@ public class At_PlayerState
     public float highPassFc = 20.0f;
     public float highPassGain = 0.0f;
 
+    public bool lowPassBypass = true;
+    public bool highPassBypass = true;
+
 
 
 }

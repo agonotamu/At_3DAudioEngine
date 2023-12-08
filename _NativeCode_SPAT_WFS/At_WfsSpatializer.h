@@ -50,7 +50,8 @@ namespace Spatializer
     {
 
     public:
-        
+
+        At_WfsSpatializer();
         At_WfsSpatializer(int samplingRate); // constructor
         ~At_WfsSpatializer(); // destructor
 
@@ -69,6 +70,8 @@ namespace Spatializer
         void setHighPassFc(float fc);
         void setLowPassGain(float gain);
         void setHighPassGain(float gain);
+        void setLowPassBypass(bool bypass);
+        void setHighPassBypass(bool bypass);
 
         int setSpeakerMask(float* activationSpeakerVolume, int outChannelCount); // Modif Rougerie 29/06/2022
 
@@ -181,8 +184,10 @@ namespace Spatializer
 
         // Effect applied to the input mono source
         // 1) Filters 
-        Biquad* m_pLowPass;
-        Biquad* m_pHighPass;
+        Biquad m_pLowPass;
+        bool m_lowPassBypass;
+        Biquad m_pHighPass;
+        bool m_highPassBypass;
     };
 
 }

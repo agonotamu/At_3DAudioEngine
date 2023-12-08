@@ -65,6 +65,8 @@ namespace Spatializer
 		void WFS_setHighPassFc(int id, float fc);
 		void WFS_setLowPassGain(int id, float gain);
 		void WFS_setHighPassGain(int id, float gain);
+		void WFS_setLowPassBypass(int id, bool bypass);
+		void WFS_setHighPassBypass(int id, bool bypass);
 
 		void WFS_setSpeakerMask(int id, float* activationSpeakerVolume, int outChannelCount); // Modif Rougerie 29/06/2022
 		

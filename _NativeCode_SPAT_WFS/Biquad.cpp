@@ -34,6 +34,7 @@ void Biquad::setSampleRate(int sampleRate) {
 
 void Biquad::setType(int type) {
     if (type != this->type) {
+        std::cout << "set biquad type =" << type << "\n";
         this->type = type;
         calcBiquad();
     }
@@ -48,7 +49,7 @@ void Biquad::setQ(float Q) {
 
 void Biquad::setFc(float Fc) {
     if (Fc != this->Fc) {
-        std::cout << "low pass Riley receive - Fc =" << Fc << "\n";
+        
 
         this->Fc = Fc;
         calcBiquad();

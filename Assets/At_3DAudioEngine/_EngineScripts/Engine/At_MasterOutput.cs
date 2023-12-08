@@ -168,11 +168,23 @@ public class At_MasterOutput : MonoBehaviour
         subWooferTmpMonoBuffer = new float[subwooferOutputChannelCount,MAX_BUF_SIZE];
 
         // Initialize the spatializer and the ASIO output if "is starting engine on awake"
+        /*
         if (isStartingEngineOnAwake) {
             StartEngine();
         }
-
+        */
         
+        // initialize the spatializer
+        InitSpatializerEngine();
+        // initialize the ASIO output
+        InitAsio();
+        meters = new float[outputChannelCount];
+
+        // Modif Gonot - 14/03/2023 - Adding Bass Managment
+        if (isBassManaged && subwooferOutputChannelCount != 0)
+            subwooferMeters = new float[subwooferOutputChannelCount];
+
+
         foreach (At_Player p in players)
         {
             addPlayerToList(p);
@@ -220,6 +232,12 @@ public class At_MasterOutput : MonoBehaviour
         {
             highPassFilterLinkwitzRiley[i] = new BiquadDirectFormI(b0, b1, b2, a1, a2);
         }
+
+        // Start the Engine
+        if (isStartingEngineOnAwake)
+        {
+            StartEngine();
+        }
     }
 
     /************************************************************************
@@ -233,7 +251,9 @@ public class At_MasterOutput : MonoBehaviour
     {
         
         isEngineStarted = true;
-
+        // Start processing (i.e. calling the callback method)
+        At_AudioEngineUtils.asioOut.Play();
+        /*
         // initialize the spatializer
         InitSpatializerEngine();
 
@@ -245,6 +265,7 @@ public class At_MasterOutput : MonoBehaviour
         // Modif Gonot - 14/03/2023 - Adding Bass Managment
         if (isBassManaged && subwooferOutputChannelCount != 0)
             subwooferMeters = new float[subwooferOutputChannelCount];
+        */
     }
 
     /**
@@ -308,8 +329,7 @@ public class At_MasterOutput : MonoBehaviour
 
                     // Add a callback method to proccess the sample in the in/out buffer
                     At_AudioEngineUtils.asioOut.AudioAvailable += OnAsioOutAudioAvailable;
-                    // Start processing (i.e. calling the callback method)
-                    At_AudioEngineUtils.asioOut.Play();
+                    
                 }
 
             }
