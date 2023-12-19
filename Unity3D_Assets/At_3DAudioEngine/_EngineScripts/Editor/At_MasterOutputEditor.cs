@@ -501,6 +501,8 @@ public class At_MasterOutputEditor : Editor
 
 
             }
+
+
             GUILayout.Label("");
 
             string[] subChannelRouting = new string[outputState.outputChannelCount];
@@ -548,7 +550,7 @@ public class At_MasterOutputEditor : Editor
                 GUILayout.TextField((outputState.crossoverFilterFrequency).ToString("00.0"));
 
             }
-
+            /*
             using (new GUILayout.VerticalScope())
             {
                 GUILayout.Label(" ");
@@ -585,7 +587,7 @@ public class At_MasterOutputEditor : Editor
                     }
                 }
             }
-            
+             */
         }
 
         HorizontalLine(Color.grey);

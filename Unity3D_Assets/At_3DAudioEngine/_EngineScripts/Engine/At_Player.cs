@@ -101,6 +101,9 @@ public class At_Player : MonoBehaviour
     public float highPassFc;
     public float highPassGain;
 
+    public bool lowPassBypass;
+    public bool highPassBypass;
+
     //-----------------------------------------------------------------
     // data used at runtime
     // ----------------------------------------------------------------
@@ -347,6 +350,12 @@ public class At_Player : MonoBehaviour
                 timeReversal = playerState.timeReversal;
                 minDistance = playerState.minDistance;
                 channelRouting = playerState.channelRouting;
+
+                lowPassFc = playerState.lowPassFc;
+                highPassFc = playerState.highPassFc;
+                lowPassGain = playerState.lowPassGain;
+                highPassGain = playerState.highPassGain;
+
             }
             
         }
@@ -637,12 +646,14 @@ public class At_Player : MonoBehaviour
         }
         //Debug.Log("number of instance playing : " + playingCount);
 
-
+        
         AT_SPAT_WFS_setLowPassFc(spatID, lowPassFc);
         AT_SPAT_WFS_setHighPassFc(spatID, highPassFc);
         AT_SPAT_WFS_setLowPassGain(spatID, lowPassGain);
         AT_SPAT_WFS_setHighPassGain(spatID, highPassGain);
 
+        AT_SPAT_WFS_setLowPassBypass(spatID, lowPassBypass);
+        AT_SPAT_WFS_setHighPassBypass(spatID, highPassBypass);
     }
 
     public void DestroyOnNextFrame()
@@ -683,6 +694,8 @@ public class At_Player : MonoBehaviour
     public bool extractInputBuffer(int bufferSize)
     {
         
+        isStreaming = true;
+
         if (isAskedToPlay && aud != null && !isUnityAudioSource)
         {
             isPlaying = true;
@@ -898,7 +911,7 @@ int mod(int x, int m)
  * @param[in] channels : number of channels in the audio graph
  * 
  */
-                    private void OnAudioFilterRead(float[] data, int channels)
+    private void OnAudioFilterRead(float[] data, int channels)
     {
         /*
         if (objectName == "sabreHum")
@@ -1129,7 +1142,12 @@ int mod(int x, int m)
     private static extern void AT_SPAT_WFS_setLowPassGain(int id, float gain);
     [DllImport("AudioPlugin_AtSpatializer", CallingConvention = CallingConvention.Cdecl)]
     private static extern void AT_SPAT_WFS_setHighPassGain(int id, float gain);
-    
+
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern void AT_SPAT_WFS_setLowPassBypass(int id, bool bypass);
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern void AT_SPAT_WFS_setHighPassBypass(int id, bool bypass);
+
 
     #endregion
 

@@ -84,8 +84,10 @@ public class At_PlayerEditor : Editor
     SerializedProperty serialized_isLookAtListener;
 
     SerializedProperty serialized_lowPassFc;
+    SerializedProperty serialized_lowPassBypass;
     SerializedProperty serialized_lowPassGain;
     SerializedProperty serialized_highPassFc;
+    SerializedProperty serialized_highPassBypass;
     SerializedProperty serialized_highPassGain;
 
     //----------------------------------------------------
@@ -122,6 +124,8 @@ public class At_PlayerEditor : Editor
         serialized_highPassFc = serializedObject.FindProperty("highPassFc");
         serialized_highPassGain = serializedObject.FindProperty("highPassGain");
 
+        serialized_lowPassBypass = serializedObject.FindProperty("lowPassBypass");
+        serialized_highPassBypass = serializedObject.FindProperty("highPassBypass");
 
         previousIsEditor = Application.isEditor;
         previousIsPlaying = Application.isPlaying;
@@ -162,11 +166,19 @@ public class At_PlayerEditor : Editor
                 playerState.minDistance = serialized_minDistance.floatValue;
                 playerState.isUnityAudioSource = serialized_isUnityAudioSource.boolValue;
                 playerState.isLookAtListener = serialized_isLookAtListener.boolValue;
-
+                /*
                 playerState.lowPassFc = serialized_lowPassFc.floatValue;
                 playerState.lowPassGain = serialized_lowPassGain.floatValue;
                 playerState.highPassFc = serialized_highPassFc.floatValue;
                 playerState.lowPassGain = serialized_lowPassGain.floatValue;
+                */
+                playerState.lowPassFc = 20000.0f;
+                //playerState.lowPassGain = serialized_lowPassGain.floatValue;
+                playerState.highPassFc = 20.0f;
+                //playerState.lowPassGain = serialized_lowPassGain.floatValue;
+
+                playerState.lowPassBypass = true;
+                playerState.highPassBypass = false;
 
                 playerState.channelRouting = new int[serialized_channelRouting.arraySize];
                 
@@ -198,6 +210,10 @@ public class At_PlayerEditor : Editor
             player.lowPassGain = playerState.lowPassGain;
             player.highPassFc = playerState.highPassFc;
             player.lowPassGain = playerState.lowPassGain;
+
+            player.lowPassBypass = playerState.lowPassBypass;
+            player.highPassBypass = playerState.highPassBypass;
+
 
             // init the bargraphs for displaying meters
             if (!Application.isPlaying)
@@ -314,7 +330,7 @@ public class At_PlayerEditor : Editor
     //============================================================================================================================
     public override void OnInspectorGUI()
     {
-       
+       /*
         using (new GUILayout.HorizontalScope())
         {
             bool b = GUILayout.Toggle(playerState.isUnityAudioSource, "Unity 3D Audio Source");
@@ -328,7 +344,7 @@ public class At_PlayerEditor : Editor
             }
            
         }
-        
+        */
         if (!player.isDynamicInstance)
         {
             if (!playerState.isUnityAudioSource)
@@ -571,42 +587,81 @@ public class At_PlayerEditor : Editor
             }
 
             HorizontalLine(Color.grey);
-
-
+            /*
             using (new GUILayout.HorizontalScope())
+            {
+                bool b = GUILayout.Toggle(playerState.lowPassBypass, "Bypass");
+                if (b != playerState.lowPassBypass)
+                {
+                    shouldSave = true;
+                    playerState.lowPassBypass = b;
+
+                }
+            }
+            */
+            /*
+            if (playerState.lowPassBypass == false)
+            {
+            */
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("Low Pass Filter");
+
+                    float dist = GUILayout.HorizontalSlider(playerState.lowPassFc, 20f, 20000f);
+
+                    if (dist != playerState.lowPassFc)
+                    {
+                        playerState.lowPassFc = dist;
+                        shouldSave = true;
+
+                        //SceneView.RepaintAll();
+                    }
+                }
+                GUILayout.TextField((playerState.lowPassFc).ToString("0.00"));
+            /*
+            }
+            else
             {
                 GUILayout.Label("Low Pass Filter");
-
-                float dist = GUILayout.HorizontalSlider(playerState.lowPassFc, 20f, 20000f);
-
-                if (dist != playerState.lowPassFc)
-                {
-                    playerState.lowPassFc = dist;
-                    shouldSave = true;
-
-                    //SceneView.RepaintAll();
-                }
             }
-
-            GUILayout.TextField((playerState.lowPassFc).ToString("0.00"));
+            */
+            
 
             HorizontalLine(Color.grey);
-
+            /*
             using (new GUILayout.HorizontalScope())
             {
-                GUILayout.Label("High Pass Filter");
-                float dist = GUILayout.HorizontalSlider(playerState.highPassFc, 20f, 20000f);
-
-                if (dist != playerState.highPassFc)
+                bool b = GUILayout.Toggle(playerState.highPassBypass, "Bybpass");
+                if (b != playerState.highPassBypass)
                 {
-                    playerState.highPassFc = dist;
                     shouldSave = true;
+                    playerState.highPassBypass = b;
 
-                    //SceneView.RepaintAll();
                 }
             }
+            */
+            /*
+            if (playerState.highPassBypass == false)
+            {
+            */
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("High Pass Filter");
+                    float dist = GUILayout.HorizontalSlider(playerState.highPassFc, 20f, 20000f);
 
-            GUILayout.TextField((playerState.highPassFc).ToString("0.00"));
+                    if (dist != playerState.highPassFc)
+                    {
+                        playerState.highPassFc = dist;
+                        shouldSave = true;
+
+                        //SceneView.RepaintAll();
+                    }
+                }
+
+                GUILayout.TextField((playerState.highPassFc).ToString("0.00"));
+            /*
+            }
+            */
 
             if (playerState.is3D == false)
             {
@@ -684,6 +739,9 @@ public class At_PlayerEditor : Editor
             player.highPassFc = playerState.highPassFc;
             player.lowPassGain = playerState.lowPassGain;
 
+            player.lowPassBypass = playerState.lowPassBypass;
+            player.highPassBypass = playerState.highPassBypass;
+
             // serialize the parameters for use in Prefab
             serialized_gain.floatValue = playerState.gain;
             serialized_is3D.boolValue = playerState.is3D;
@@ -702,6 +760,9 @@ public class At_PlayerEditor : Editor
             serialized_lowPassGain.floatValue = playerState.lowPassGain;
             serialized_highPassFc.floatValue = playerState.highPassFc;
             serialized_lowPassGain.floatValue = playerState.lowPassGain;
+
+            serialized_lowPassBypass.boolValue = playerState.lowPassBypass;
+            serialized_highPassBypass.boolValue = playerState.highPassBypass;            
 
             serialized_channelRouting.ClearArray();
             for (int i = 0; i < playerState.channelRouting.Length; i++)

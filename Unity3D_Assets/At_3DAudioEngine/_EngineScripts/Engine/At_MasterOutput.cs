@@ -41,7 +41,7 @@ public class At_MasterOutput : MonoBehaviour
 {
 
     /// constants used for array initialization 
-    const int MAX_BUF_SIZE = 2048;    
+    const int MAX_BUF_SIZE = 2048;
     /// temporary mono buffer used for processing
     private float[] tmpMonoBuffer;
 
@@ -71,7 +71,7 @@ public class At_MasterOutput : MonoBehaviour
     // "persistant" data, saved in the json file - copy/saved of the At_OutputState class
     // ----------------------------------------------------------------
     /// string given the name of the audio device
-    public string audioDeviceName= "Voicemeeter Virtual ASIO";
+    public string audioDeviceName = "Voicemeeter Virtual ASIO";
     /// number of channel used for the output bus
     public int outputChannelCount;
 
@@ -119,13 +119,16 @@ public class At_MasterOutput : MonoBehaviour
     public bool isEngineStarted = false;
     /// Number of physical output of the audiodevice 
     int maxDeviceChannel;
-    
+
     /// rms value of the signal from each channel, used to display bargraph
     public float[] meters;
 
     // Modif Gonot - 14/03/2023 - Adding Bass Managment
     /// rms value of the signal from each channel, used to display bargraph
     public float[] subwooferMeters;
+
+    int[] umcDeviceChannelRouting = { 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19 };
+
 
     // Start is called before the first frame update
     void Awake()
@@ -168,11 +171,23 @@ public class At_MasterOutput : MonoBehaviour
         subWooferTmpMonoBuffer = new float[subwooferOutputChannelCount,MAX_BUF_SIZE];
 
         // Initialize the spatializer and the ASIO output if "is starting engine on awake"
+        /*
         if (isStartingEngineOnAwake) {
             StartEngine();
         }
-
+        */
         
+        // initialize the spatializer
+        InitSpatializerEngine();
+        // initialize the ASIO output
+        InitAsio();
+        meters = new float[outputChannelCount];
+
+        // Modif Gonot - 14/03/2023 - Adding Bass Managment
+        if (isBassManaged && subwooferOutputChannelCount != 0)
+            subwooferMeters = new float[subwooferOutputChannelCount];
+
+
         foreach (At_Player p in players)
         {
             addPlayerToList(p);
@@ -220,6 +235,12 @@ public class At_MasterOutput : MonoBehaviour
         {
             highPassFilterLinkwitzRiley[i] = new BiquadDirectFormI(b0, b1, b2, a1, a2);
         }
+
+        // Start the Engine
+        if (isStartingEngineOnAwake)
+        {
+            StartEngine();
+        }
     }
 
     /************************************************************************
@@ -233,7 +254,9 @@ public class At_MasterOutput : MonoBehaviour
     {
         
         isEngineStarted = true;
-
+        // Start processing (i.e. calling the callback method)
+        At_AudioEngineUtils.asioOut.Play();
+        /*
         // initialize the spatializer
         InitSpatializerEngine();
 
@@ -245,6 +268,7 @@ public class At_MasterOutput : MonoBehaviour
         // Modif Gonot - 14/03/2023 - Adding Bass Managment
         if (isBassManaged && subwooferOutputChannelCount != 0)
             subwooferMeters = new float[subwooferOutputChannelCount];
+        */
     }
 
     /**
@@ -308,8 +332,7 @@ public class At_MasterOutput : MonoBehaviour
 
                     // Add a callback method to proccess the sample in the in/out buffer
                     At_AudioEngineUtils.asioOut.AudioAvailable += OnAsioOutAudioAvailable;
-                    // Start processing (i.e. calling the callback method)
-                    At_AudioEngineUtils.asioOut.Play();
+                    
                 }
 
             }
@@ -447,7 +470,6 @@ public class At_MasterOutput : MonoBehaviour
     public void destroyPlayerNow(At_Player player)
     {  
         player.DestroyNow();
-
     }
 
     /************************************************************************
@@ -510,7 +532,7 @@ public class At_MasterOutput : MonoBehaviour
     private void Update()
     {
         UpdateVirtualMicPosition();
-        //AT_SPAT_WFS_setSubwooferCutoff(crossoverFilterFrequency);       
+        AT_SPAT_WFS_setSubwooferCutoff(crossoverFilterFrequency);       
     }
 
 
@@ -694,7 +716,8 @@ public class At_MasterOutput : MonoBehaviour
                     {
                         float subwooferVolume = Mathf.Pow(10.0f, subwooferGain / 20.0f);
                         // channels for subwoofer : 
-                        sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)]);
+                        //sample = subwooferVolume * AT_SPAT_WFS_getLowPasMixingBufferForChannel(sampleIndex, indexInputSubwoofer[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)]);
+                        sample = subwooferVolume * AT_SPAT_WFS_getSubWooferSample(sampleIndex);
                         subwooferMeters[channelIndex - (outputChannelCount + hapticListenerChannelsIndex.Length)] += Mathf.Pow(sample, 2f);
 
                     }
@@ -702,7 +725,13 @@ public class At_MasterOutput : MonoBehaviour
 
                     if (channelIndex < maxDeviceChannel)
                     {
-                        IntPtr buffer = e.OutputBuffers[channelIndex];
+                        int channel = channelIndex;
+                        if (audioDeviceName == "UMC ASIO Driver")
+                        {
+                            channel = umcDeviceChannelRouting[channelIndex];
+                        }
+
+                        IntPtr buffer = e.OutputBuffers[channel];
                         if (e.AsioSampleType == AsioSampleType.Int32LSB)
                             SetOutputSampleInt32LSB(buffer, sampleIndex, sample);
                         else if (e.AsioSampleType == AsioSampleType.Int16LSB)
@@ -920,6 +949,9 @@ public class At_MasterOutput : MonoBehaviour
     private static extern float AT_SPAT_WFS_getMixingBufferSampleForChannelAndZero(int indexSample, int indexChannel, bool isHighPassFiltered);
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern float AT_SPAT_WFS_getLowPasMixingBufferForChannel(int indexSample, int indexChannel);
+    [DllImport("AudioPlugin_AtSpatializer")]
+    private static extern float AT_SPAT_WFS_getSubWooferSample(int indexSample);
+
     [DllImport("AudioPlugin_AtSpatializer")]
     private static extern void AT_SPAT_WFS_initializeOutput(int sampleRate, int bufferLength, int outChannelCount, int subwooferOutputChannelCount, float subwooferCutoff);
 

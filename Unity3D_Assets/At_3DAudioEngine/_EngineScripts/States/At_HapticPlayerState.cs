@@ -33,8 +33,7 @@ public class At_HapticPlayerState
     public float minDistance = 1;
 
     public float lowPassFc = 20000.0f;
-    public float lowPassGain = 0.0f;
     public float highPassFc = 20.0f;
-    public float highPassGain = 0.0f;
+    public float makeupGain = 0.0f;
 
 }

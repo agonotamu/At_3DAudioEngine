@@ -50,9 +50,8 @@ public class At_HapticPlayer : MonoBehaviour
 
     // filter parameters
     public float lowPassFc = 20000.0f;
-    public float lowPassGain = 0.0f;
     public float highPassFc = 20.0f;
-    public float highPassGain = 0.0f;
+    public float makeupGain = 0.0f;
 
     //-----------------------------------------------------------------
     // data used at runtime
@@ -158,6 +157,7 @@ public class At_HapticPlayer : MonoBehaviour
         foreach (int hapticMixerId in haptic_MixerIdList)
         {
             float sendVolume = 1;
+            float makeupVolume = Mathf.Pow(10.0f, makeupGain / 20.0f);
             string listenerOutputGuid = haptic_MixerIdToListenerGuid_Dict[hapticMixerId];
             for (int i = 0; i < listenerOutputSendGuids.Length; i++)
             {
@@ -170,7 +170,7 @@ public class At_HapticPlayer : MonoBehaviour
 
 
             // BUG - TODO  : the source can know the number of channels of the mixer it is plugged in !!!!
-            HAPTIC_ENGINE_PROCESS(hapticMixerId, hapticPlayerId, atPlayerInput.inputFileBuffer, bufferSize, atPlayerInput.inputFileBufferReadOffset, atPlayerInput.numChannelsInAudioFile, sendVolume);
+            HAPTIC_ENGINE_PROCESS(hapticMixerId, hapticPlayerId, atPlayerInput.inputFileBuffer, bufferSize, atPlayerInput.inputFileBufferReadOffset, atPlayerInput.numChannelsInAudioFile, makeupVolume * sendVolume);
         }
 
     }
@@ -194,6 +194,11 @@ public class At_HapticPlayer : MonoBehaviour
             listenerOutputSendGuids = hapticPlayerState.listenerOutputSendGuids;
             attenuation = hapticPlayerState.attenuation;
             minDistance = hapticPlayerState.minDistance;
+
+            lowPassFc = hapticPlayerState.lowPassFc;
+            highPassFc = hapticPlayerState.highPassFc;
+            makeupGain = hapticPlayerState.makeupGain;
+
         }
 
     }
@@ -217,6 +222,9 @@ public class At_HapticPlayer : MonoBehaviour
             HAPTIC_ENGINE_SET_SOURCE_POSITION(hapticMixerId, hapticPlayerId, position);
             HAPTIC_ENGINE_SET_SOURCE_ATTENUATION(hapticMixerId, hapticPlayerId, attenuation);
             HAPTIC_ENGINE_SET_SOURCE_MIN_DISTANCE(hapticMixerId, hapticPlayerId, minDistance);
+            HAPTIC_ENGINE_SET_SOURCE_LOWPASS_FC(hapticMixerId, hapticPlayerId, lowPassFc);
+            HAPTIC_ENGINE_SET_SOURCE_HIGHPASS_FC(hapticMixerId, hapticPlayerId, highPassFc);
+
         }
 
         if (mustBeDestroyedNow)
@@ -283,7 +291,10 @@ public class At_HapticPlayer : MonoBehaviour
     private static extern void HAPTIC_ENGINE_SET_SOURCE_ATTENUATION(int mixerId, int sourceId, float attenuation);
     [DllImport("AudioPlugin_AtHaptic")]
     private static extern void HAPTIC_ENGINE_SET_SOURCE_MIN_DISTANCE(int mixerId, int sourceId, float minDistance);
-
+    [DllImport("AudioPlugin_AtHaptic")]
+    private static extern void HAPTIC_ENGINE_SET_SOURCE_LOWPASS_FC(int mixerId, int sourceId, float fc);
+    [DllImport("AudioPlugin_AtHaptic")]
+    private static extern void HAPTIC_ENGINE_SET_SOURCE_HIGHPASS_FC(int mixerId, int sourceId, float fc);
 
 
 }
